@@ -6,6 +6,11 @@ open questions — so you don't have to re-derive any of it from scratch.
 
 Read this *before* touching `build_data.py` or `index.html`.
 
+## Live site (2026-10-20)
+
+- https://drilium.github.io/game-script/ — repo `Drilium/game-script`, Pages source "GitHub Actions".
+- First refresh and publish runs succeeded 2026-10-20 (~1:10am ET). Data commits come from `nfl-data-bot`.
+
 ## Product vision and design rules (from Dre, keep these)
 
 - **What makes this app different:** comparison, and ease of access. Anyone

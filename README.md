@@ -1,5 +1,7 @@
 # Game Script — NFL analyzer prototype
 
+**Live:** https://drilium.github.io/game-script/ (GitHub Pages, published by the workflow below)
+
 A static site (`index.html`) that fetches real 2026 NFL data (`nfl_data.json`)
 at load time. Pages: This week (slate, prop research, stat leaders, best units, fantasy last), Stat leaders (every category, totals or per game, with next matchups), Teams and team
 pages, Players and player pages (offense and defense), Compare (player vs
