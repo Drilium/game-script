@@ -17,33 +17,33 @@
    (CVD-checked pair). Percentile circles use a 5-step red-to-green scale.
    ========================================================================== */
 :root{
-  --bg:#E4E2DC;--surface:#FFFFFF;--sunken:#F0EFEA;--ink:#111915;--ink2:#4B5751;--mute:#7B8680;
+  --bg:#C7C2B6;--surface:#FFFFFF;--sunken:#F0EFEA;--ink:#111915;--ink2:#3F4A45;--mute:#66706B;
   --rule:#E4E2DC;--rule2:#CAC6BD;--turf:#1C6B44;--turf-bg:#DCEDE3;
   --a:#2a78d6;--a-bg:#E4EEFB;--b:#eb6834;--b-bg:#FCEBE3;
   --yl:#F2CC00;--yl-edge:#8C7600;--good:#137A2C;--bad:#C2352E;--miss:#C3D3E4;
   --p0:#C2352E;--p1:#E8A195;--p2:#B4BDB8;--p3:#86C29D;--p4:#1E7D45;--p0i:#fff;--p1i:#3B1410;--p2i:#1E2622;--p3i:#0E2A19;--p4i:#fff;
-  --dotline:rgba(0,0,0,.22);--title:#4B3FB0;--logo-fx:none;
+  --dotline:rgba(0,0,0,.22);--title:#4B3FB0;--logo-fx:none;--edge:#A69F90;--lift:0 1px 0 rgba(0,0,0,.06),0 3px 10px rgba(52,40,16,.13);
   --font:"Archivo",system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
   --t-title:34px;--t-h2:19px;--t-h3:15px;--t-body:15px;--t-small:13px;--t-micro:11.5px;--t-fig:24px;
   color-scheme:light;
 }
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
-    --bg:#080A09;--surface:#1A1F1D;--sunken:#252B29;--ink:#E7EEEA;--ink2:#A5B3AC;--mute:#76857E;
+    --bg:#050606;--surface:#202725;--sunken:#2B3330;--ink:#E7EEEA;--ink2:#A5B3AC;--mute:#76857E;
     --rule:#2D3431;--rule2:#3D4643;--turf:#4FBF83;--turf-bg:#173526;
     --a:#3987e5;--a-bg:#16294A;--b:#d95926;--b-bg:#3A1F12;
     --yl:#F5D000;--yl-edge:#F5D000;--good:#4CC46E;--bad:#FF7A6E;--miss:#2D4157;
     --p0:#D9534A;--p1:#8C4A42;--p2:#4A5650;--p3:#3E7A55;--p4:#3FB46E;--p0i:#fff;--p1i:#fff;--p2i:#fff;--p3i:#fff;--p4i:#0D1311;
-    --dotline:rgba(255,255,255,.28);--title:#B1A9F7;--logo-fx:drop-shadow(0 0 .6px rgba(255,255,255,.9)) drop-shadow(0 0 .6px rgba(255,255,255,.6));color-scheme:dark;
+    --dotline:rgba(255,255,255,.28);--title:#B1A9F7;--edge:#46524D;--lift:0 1px 0 rgba(255,255,255,.04) inset,0 4px 14px rgba(0,0,0,.7);--logo-fx:drop-shadow(0 0 .6px rgba(255,255,255,.9)) drop-shadow(0 0 .6px rgba(255,255,255,.6));color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
-  --bg:#080A09;--surface:#1A1F1D;--sunken:#252B29;--ink:#E7EEEA;--ink2:#A5B3AC;--mute:#76857E;
+  --bg:#050606;--surface:#202725;--sunken:#2B3330;--ink:#E7EEEA;--ink2:#A5B3AC;--mute:#76857E;
   --rule:#2D3431;--rule2:#3D4643;--turf:#4FBF83;--turf-bg:#173526;
   --a:#3987e5;--a-bg:#16294A;--b:#d95926;--b-bg:#3A1F12;
   --yl:#F5D000;--yl-edge:#F5D000;--good:#4CC46E;--bad:#FF7A6E;--miss:#2D4157;
   --p0:#D9534A;--p1:#8C4A42;--p2:#4A5650;--p3:#3E7A55;--p4:#3FB46E;--p0i:#fff;--p1i:#fff;--p2i:#fff;--p3i:#fff;--p4i:#0D1311;
-  --dotline:rgba(255,255,255,.28);--title:#B1A9F7;--logo-fx:drop-shadow(0 0 .6px rgba(255,255,255,.9)) drop-shadow(0 0 .6px rgba(255,255,255,.6));color-scheme:dark;
+  --dotline:rgba(255,255,255,.28);--title:#B1A9F7;--edge:#46524D;--lift:0 1px 0 rgba(255,255,255,.04) inset,0 4px 14px rgba(0,0,0,.7);--logo-fx:drop-shadow(0 0 .6px rgba(255,255,255,.9)) drop-shadow(0 0 .6px rgba(255,255,255,.6));color-scheme:dark;
 }
 *,*::before,*::after{box-sizing:border-box}
 [hidden]{display:none!important}
@@ -77,6 +77,7 @@ button,input,select{font:inherit;color:inherit}
 .top .cbx-in::placeholder{color:#E9EFEB;opacity:.55}
 .ibtn{border:1px solid rgba(255,255,255,.2);background:none;color:#E9EFEB;padding:6px 11px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600}
 @media (min-width:900px){.nav{order:0;flex-basis:auto}}
+@media (min-width:900px) and (max-width:1340px){.nav a{padding:6px 8px;font-size:13.5px}}
 @media (max-width:640px){.top .ibtn{margin-left:auto;order:1}.top .cbx{order:2;flex-basis:100%;max-width:none}.nav{order:3}}
 
 main{max-width:1180px;margin:0 auto;padding:4px 16px 64px}
@@ -394,6 +395,16 @@ details.tview table{margin-top:8px;font-size:13.5px}
 .kp{padding:2px 14px}
 .kp li:last-child{border-bottom:0}
 .lines{padding:12px 16px}
+/* stronger separation between data boxes and the page */
+.scroll,.tugs,.viz,.ldr>div,.kp,.lines,.gterm,.panel,.gt,.tiles{border-color:var(--edge);box-shadow:var(--lift)}
+.note{border-left-color:var(--edge);box-shadow:var(--lift)}
+/* section bands: what the next block is for */
+.band{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px;margin:44px 0 0;padding:11px 16px;border-radius:10px;background:var(--ink);color:var(--bg);border-left:6px solid var(--yl)}
+.band .bt{font-weight:800;font-size:15px;letter-spacing:.02em;text-transform:uppercase}
+.band .bs{font-size:13.5px;opacity:.85}
+.band a{color:inherit;font-weight:700}
+.band.pro{border-left-color:#5B8DEF}.band.fan{border-left-color:#F08A4B}.band.ctx{border-left-color:var(--yl)}
+.band+h2{margin-top:18px}
 .tiles{border-radius:10px;box-shadow:0 1px 2px rgba(0,0,0,.06)}
 .gterm{padding:12px 16px;margin-top:8px}
 .split>div>h3,.dgrp>h3{margin-top:4px}
@@ -418,6 +429,7 @@ details.tview table{margin-top:8px;font-size:13.5px}
       <a href="#/" data-nav="week">This week</a>
       <a href="#/props" data-nav="props">Props</a>
       <a href="#/outlook" data-nav="outlook">Outlook</a>
+      <a href="#/fantasy" data-nav="fantasy">Fantasy</a>
       <a href="#/leaders" data-nav="leaders">Leaders</a>
       <a href="#/players" data-nav="players">Players</a>
       <a href="#/teams" data-nav="teams">Teams</a>
@@ -1120,7 +1132,9 @@ function vWeek(){
   }).join('')+'</div>';
   if(bye.length)h+='<p class="bye">On bye: '+bye.map(t=>tt(t)).join(', ')+'</p>';
 
-  h+=propResearch(5);
+  h+=band('pro','Player props','Single-stat projections and the matchups moving them. <a href="#/props">Props</a> \u00b7 <a href="#/outlook">Outlook</a>')+propResearch(5);
+  {const wk=propWeek();if(wk)h+=band('fan','Fantasy (PPR)','Projected points for week '+wk+', starter-level consistency, and what each defense allows. <a href="#/fantasy">Fantasy</a>')+'<h2>Fantasy outlook: week '+wk+'</h2><p class="lede">Projected PPR points, with how much the matchup moves him.</p>'+fantasyBrief(5);}
+  h+=band('ctx','Context for both','Season leaders and team efficiency.');
   {const sv=LD.mode,sp=LD.pos;LD.mode='tot';LD.pos='';
    const picks=[['passing','pyd'],['passing','ptd'],['rushing','ryd'],['rushing','rtd'],['receiving','rec'],['receiving','recyd'],['receiving','rectd'],['defense','sacks']];
    h+='<h2>Stat leaders</h2><p class="lede">Season totals through week '+LAST_WK+'. <a href="#/leaders">Every category, per game or totals, offense and defense</a>.</p><div class="ldr">'+
@@ -1131,9 +1145,6 @@ function vWeek(){
     return '<div><h3>'+label+'</h3><ol>'+list.map(t=>'<li><span>'+flag(t,'sm')+' <a href="#/team/'+t+'">'+esc(fullName(t))+'</a><small>'+record(t)+'</small></span><span class="v">'+fmtTM(m,tmVal(m,t))+'</span></li>').join('')+'</ol></div>';};
   h+='<h2>Best units</h2><p class="lede">EPA per play: how many points each play adds or costs on average, versus what a typical team would get in the same down, distance and field position. <a href="#/glossary/epa">More on EPA</a>.</p><div class="ldr">'+
     unit('o_epa','Offense, EPA per play')+unit('d_epa','Defense, EPA allowed per play')+unit('o_pepa','Passing offense, EPA per dropback')+unit('d_pepa','Pass defense, EPA allowed per dropback')+'</div>';
-  h+='<h2>Fantasy leaders</h2><p class="lede">PPR points per game this season, minimum two games and a real role. <a href="#/leaders/fantasy">Full fantasy list</a>.</p><div class="ldr">'+
-    OFF_POS.map(pos=>'<div><h3>'+pos+'</h3><ol>'+PLAYERS.filter(p=>p.p===pos&&qualifies(p)).sort((a,b)=>b.ss.fp-a.ss.fp).slice(0,5).map(p=>
-      '<li><span>'+plink(p)+'<small>'+flag(p.t,'sm')+' '+nick(p.t)+'</small></span><span class="v">'+fx(p.ss.fp,1)+'</span></li>').join('')+'</ol></div>').join('')+'</div>';
   return h;
 }
 
@@ -1331,7 +1342,7 @@ function gbHTML(p){
 }
 function rowVals(v){const o=Object.assign({},v);if(o.att)o.cmpp=o.cmp/o.att*100,o.ypa=o.pyd/o.att;if(o.car)o.ypc=o.ryd/o.car;if(o.tgt)o.ypt=o.recyd/o.tgt,o.catch=o.rec/o.tgt*100;return o;}
 const DEF_TABLE=['tkl','sacks','qbh','tfl','pd','int','ff'];
-function tableKeys(p){return isDef(p)?DEF_TABLE:(LIST_KEYS[p.p]||['fp']);}
+function tableKeys(p){return isDef(p)?DEF_TABLE:(LIST_KEYS[p.p]||['fp']).filter(k=>k!=='fp'||!LIST_KEYS[p.p]);}
 function seasonRows(p){const r=(p.sz||[]).map(x=>({s:x.s,g:x.g,t:x.t,v:rowVals(x)}));if(p.ss&&p.g)r.push({s:SEASON,g:p.g,t:p.t,v:p.ss});return r;}
 /* Combined line across every season we have: per-game stats weighted by games, season totals summed. */
 function spanAll(p){
@@ -1362,7 +1373,7 @@ function tileFor(p,k,v){
     (isNum(pc)?pctBar(pc)+(s.lo?'<p class="pt">Lower is better</p>':''):'<p class="pt">'+(DV_KEYS.indexOf(k)>=0&&!isNum(v)?'No plays yet':'Not enough of a role yet to rank')+'</p>')+'</div>';
 }
 function gameSection(p){
-  const wkeys=WEEK_KEYS[pk(p)]||WEEK_KEYS[p.p];if(!wkeys)return '';
+  const wkeys=(WEEK_KEYS[pk(p)]||WEEK_KEYS[p.p]||[]).filter(k=>k!=='fp');if(!wkeys.length)return '';
   if(!PV.key||wkeys.indexOf(PV.key)<0)PV.key=wkeys[0];
   const games=playerGames(p);if(!games.length)return '';
   const seasons=[...new Set(games.map(g=>g.s))].sort();
@@ -1384,9 +1395,12 @@ function vPlayer(p){
     '<div class="acts">'+(ng?'<a class="btn" href="'+(!def&&OFF_POS.indexOf(p.p)>=0?'#/compare/defense/'+p.id+'/'+opp:'#/game/'+ng.id)+'">Next: '+(ng.home===p.t?'vs ':'at ')+opp+', '+day(ng.date)+'</a>':'')+
     (!def&&opp&&OFF_POS.indexOf(p.p)>=0?'<a class="btn" href="#/compare/defense/'+p.id+'/'+opp+'">Against '+opp+' defenders</a>':'')+
     '<a class="btn solid" href="#/compare/players/'+p.id+'/'+(suggestRival(p)||'')+'">Compare</a></div></header>';
-  if(!def&&ng&&OFF_POS.indexOf(p.p)>=0&&p.ss){const ot=outlookTable(p,ng);if(ot)h+='<h2>Next game prop outlook</h2>'+ot;}
+  const offp=!def&&OFF_POS.indexOf(p.p)>=0;
+  if(offp)h+=band('pro','Player props','Each stat on its own: the next-game projection against this defense, and how often he clears a line.');
+  if(offp&&ng&&p.ss){const ot=outlookTable(p,ng);if(ot)h+='<h2>Next game prop outlook</h2>'+ot;}
   if(!def)h+=gameSection(p);
-  const keys=POS_KEYS[role];
+  if(offp)h+=band('ctx','Context for both','His season, how he wins, and the defenders and schedule ahead.');
+  const keys=(POS_KEYS[role]||[]).filter(k=>k!=='fp');
   if(p.ss&&keys){
     h+='<h2>This season</h2><p class="lede">'+(def?'Tackles per game; the rest are season totals or play-by-play counts.':'Per game.')+' The circle is his <a href="#/glossary/percentile">percentile</a> among '+n+' '+(ROLE_NAME[role]||role+'s')+' with a real role; the yellow line is the median.</p><dl class="tiles">'+keys.map(k=>tileFor(p,k)).join('')+'</dl>';
     if(def)h+='<p class="small mut" style="margin-top:8px">'+DEF_GLOSS+'</p>';
@@ -1404,6 +1418,7 @@ function vPlayer(p){
   if(!def&&OFF_POS.indexOf(p.p)>=0)h+=offNext(p,opp);
   if(def)h+=defNext(p,opp);
   h+=scheduleAhead(p);
+  if(offp)h+=fantasySection(p);
   h+='<p class="note">Coverage assignments (who covered whom, man or zone), slot vs. wide alignment and live injury status aren’t in free public data, so they aren’t shown.</p>';
   return h;
 }
@@ -1765,6 +1780,8 @@ const GLOSS=[
  ['leaders','Reading this site','Stat leaders: totals, per game and rates','Totals add up every game this season. Per game divides by games he played and needs at least half his team\u2019s games. Rates (completion rate, yards per attempt, carry or target, target share) need a full-time role: 14 pass attempts, 6.25 carries or 3.5 targets per team game. Tied players share a rank.','Totals reward availability; per game shows what to expect when he plays.','Calculated on this site from nflverse weekly player stats.',[]],
  ['lr','Receiving','Longest reception','His longest catch in a game. Averages show his typical longest catch per game.','Useful for longest-reception props; compare it with what the defense allows.','Calculated on this site from nflverse play-by-play.',['lr']],
 
+ ['fp-proj','Fantasy','Fantasy projection and starter-level weeks','Projected PPR points start from his fantasy average (this season blended with every game since 2024) and move by the same defense and betting-market adjustments the prop model applies to each scoring stat (yards, catches, touchdowns, interceptions). The range is the middle half of his games after the same adjustment. A starter-level week is the per-game average of the 12th-best QB or TE, or 24th-best RB or WR, this season.','Projection for the expected score, range for the floor and ceiling, starter weeks for how often he actually helps you.','Calculated on this site from nflverse weekly stats, play-by-play and closing lines.',[]],
+ ['fp-allowed','Fantasy','Fantasy points allowed','PPR points per game a defense has given up to every player at a position, across every game since 2024.','The quickest start/sit read: high means a friendly matchup for that position.','Calculated on this site from nflverse weekly player stats.',[]],
  ['fp','Fantasy','Fantasy points (PPR)','Points-per-reception scoring: 1 per catch, 0.1 per rushing or receiving yard, 0.04 per passing yard, 6 per rushing or receiving TD, 4 per passing TD, minus 2 per interception or lost fumble, plus 2-point conversions.','A quick all-in-one measure of production, weighted toward receptions.','nflverse fantasy_points_ppr.',['fp']],
 
  ['cpoe','Play charting and tracking','Completion % over expected','How much more (or less) often a QB completes passes than expected, given how hard each throw was (distance, separation, pressure).','Positive is accurate; it separates accuracy from easy throws.','Next Gen Stats via nflverse.',['cpoe']],
@@ -1864,7 +1881,7 @@ function needAllowed(){
 }
 /* a number that opens the games behind it */
 function alink(team,pos,k,html){return '<a class="dl" href="#/allowed/'+team+'/'+pos+'/'+k+'" title="See every game and player behind this number">'+html+'</a>';}
-const AL_SHORT={att:'att',cmp:'cmp',pyd:'pass yds',ptd:'pass TD',int:'INT',ryd:'rush yds',car:'car',lru:'long run',rtd:'rush TD',tgt:'tgt',rec:'rec',recyd:'rec yds',lr:'long',rectd:'TD'};
+const AL_SHORT={fp:'PPR pts',att:'att',cmp:'cmp',pyd:'pass yds',ptd:'pass TD',int:'INT',ryd:'rush yds',car:'car',lru:'long run',rtd:'rush TD',tgt:'tgt',rec:'rec',recyd:'rec yds',lr:'long',rectd:'TD'};
 function alVal(p,pos,k){const i=(ALW.keys[pos]||[]).indexOf(k==='x20'?'lr':k);return i<0?null:p[2+i];}
 function gameTotal(g,pos,k){
   if(k==='x20')return (g[5]&&g[5][pos])||0;
@@ -1875,15 +1892,16 @@ function gameTotal(g,pos,k){
 function alLine(p){const keys=ALW.keys[p[1]]||[];return keys.map((k,i)=>{const v=p[2+i];return v?v+' '+AL_SHORT[k]:'';}).filter(Boolean).join(', ');}
 function alName(pid){const p=BY[pid];return p?plink(p):'<span title="No longer on an active roster">'+esc(ALW.names[pid]||pid)+'</span>';}
 function wxTxt(w){if(!w)return '—';if(w[2]==='dome'||w[2]==='closed')return 'Indoors';if(!isNum(w[0]))return '—';return w[0]+'°F'+(isNum(w[1])?', wind '+w[1]+' mph':'');}
+function alStats(pos){return DA_ALL[pos].concat([['fp','Fantasy points (PPR)']]);}
 function vAllowed(team,pos,k){
   if(!TEAMS[team]||!DA_ALL[pos])return notFound('That page');
-  let meta=DA_ALL[pos].find(x=>x[0]===k);if(!meta){meta=DA_ALL[pos][0];k=meta[0];}
+  let meta=alStats(pos).find(x=>x[0]===k);if(!meta){meta=DA_ALL[pos][0];k=meta[0];}
   needAllowed();
   const lab=meta[1],dec=/td|int|x20/.test(k)?2:1,since=HIST[0]||SEASON;
   let h='<header class="ph"><div><h1>'+flag(team,'lg')+'<span>'+esc(fullName(team))+' defense</span></h1><p class="meta">'+esc(lab)+' allowed to '+pos+'s, game by game. Every player behind the number, since '+since+'.</p></div>'+
     '<div class="acts"><label class="sr" for="alT">Another defense</label><select id="alT" class="sel">'+TL.map(t=>'<option value="'+t+'"'+(t===team?' selected':'')+'>'+esc(fullName(t))+'</option>').join('')+'</select><a class="btn" href="#/team/'+team+'">Team page</a></div></header>';
-  h+='<div class="navrow"><div class="chips" role="group" aria-label="Position">'+OFF_POS.map(x=>{const kk=DA_ALL[x].some(y=>y[0]===k)?k:DA_ALL[x][0][0];return '<a href="#/allowed/'+team+'/'+x+'/'+kk+'"'+(x===pos?' aria-current="page"':'')+'>'+x+'s</a>';}).join('')+'</div>'+
-    '<div class="chips" role="group" aria-label="Stat">'+DA_ALL[pos].map(([kk,l])=>'<a href="#/allowed/'+team+'/'+pos+'/'+kk+'"'+(kk===k?' aria-current="page"':'')+'>'+esc(l)+'</a>').join('')+'</div></div>';
+  h+='<div class="navrow"><div class="chips" role="group" aria-label="Position">'+OFF_POS.map(x=>{const kk=alStats(x).some(y=>y[0]===k)?k:DA_ALL[x][0][0];return '<a href="#/allowed/'+team+'/'+x+'/'+kk+'"'+(x===pos?' aria-current="page"':'')+'>'+x+'s</a>';}).join('')+'</div>'+
+    '<div class="chips" role="group" aria-label="Stat">'+alStats(pos).map(([kk,l])=>'<a href="#/allowed/'+team+'/'+pos+'/'+kk+'"'+(kk===k?' aria-current="page"':'')+'>'+esc(l)+'</a>').join('')+'</div></div>';
   if(!ALW)return h+'<p class="empty">Loading every game…</p>';
   const seasons=ALW.seasons||[];if(AL.span!=='all'&&seasons.indexOf(+AL.span)<0)AL.span='all';
   h+='<div class="row" style="margin-top:14px"><div class="seg" role="group" aria-label="Games">'+['all'].concat(seasons).map(x=>'<button data-alspan="'+x+'" aria-pressed="'+(String(AL.span)===String(x))+'">'+(x==='all'?'Every game since '+since:x+(x===SEASON?' so far':''))+'</button>').join('')+'</div></div>';
@@ -2061,6 +2079,112 @@ function propResearch(n){
   return h;
 }
 
+/* ======================================================================
+   Fantasy (PPR). Kept apart from prop research on purpose: props ask
+   "will this one stat clear a line?", fantasy asks "how many total points,
+   how reliably, and how much opportunity?".
+   ====================================================================== */
+const FT={pos:'RB',wk:null};
+const FP_W={pyd:0.04,ptd:4,int:-2,ryd:0.1,rtd:6,rec:1,recyd:0.1,rectd:6};
+/* a "starter-level week": the per-game average of the 12th QB/TE or 24th RB/WR this season */
+const FP_CUT_N={QB:12,RB:24,WR:24,TE:12},FP_CUT_C={};
+function fpCut(pos){
+  if(pos in FP_CUT_C)return FP_CUT_C[pos];
+  const v=PLAYERS.filter(p=>p.p===pos&&qualifies(p)).map(p=>p.ss.fp).filter(isNum).sort((a,b)=>b-a);
+  const x=v[Math.min(v.length,FP_CUT_N[pos])-1];return FP_CUT_C[pos]=isNum(x)?Math.round(x*2)/2:null;
+}
+const FPP_C={};
+/* Projected PPR points: his blended fantasy average, moved by the same defense and
+   betting-market adjustments the prop model applies to each scoring stat. */
+function fpProj(p,g){
+  const ck=p.id+'|'+g.id;if(FPP_C[ck])return FPP_C[ck];
+  const pr=project(p,g),games=playerGames(p),cur=games.filter(x=>x.s===SEASON),w=Math.min(cur.length,6)/12;
+  const m=a=>a.reduce((s,x)=>s+x,0)/a.length;
+  const blend=k=>{const a=games.map(x=>x[k]).filter(isNum),c=cur.map(x=>x[k]).filter(isNum);if(!a.length)return null;return c.length?w*m(c)+(1-w)*m(a):m(a);};
+  let cb=0,cp=0;Object.keys(FP_W).forEach(k=>{const b=blend(k);if(!isNum(b))return;const x=pr.keys[k];cb+=FP_W[k]*b;cp+=FP_W[k]*(x?x.proj:b);});
+  const base=blend('fp'),f=cb>0?Math.min(1.25,Math.max(0.75,cp/cb)):1;
+  const all=games.map(x=>x.fp).filter(isNum),sc=all.map(v=>v*f).sort((a,b)=>a-b),q=x=>sc.length?sc[Math.round(x*(sc.length-1))]:null;
+  const cut=fpCut(p.p),hit=isNum(cut)?all.filter(v=>v>=cut).length:null;
+  return FPP_C[ck]={proj:isNum(base)?base*f:null,base:base,f:f,lo:q(.25),hi:q(.75),n:all.length,cut:cut,hit:hit,opp:pr.opp};
+}
+function fpAllowedCell(o,pos,short){
+  const v=DA[o]&&DA[o][pos]?DA[o][pos].fp:null;if(!isNum(v))return '—';
+  const r=daRank(o,pos,'fp');
+  return alink(o,pos,'fp',fx(v,1))+(r?' <span class="small">'+(short?'<span class="'+(r>24?'rk hi':r<=8?'rk lo':'rk')+'">'+ord(r)+'</span>':mup(r))+'</span>':'');
+}
+function opportunity(p){
+  const s=p.ss||{};
+  if(p.p==='QB')return fx(s.att,1)+' att, '+fx(s.car,1)+' car';
+  if(p.p==='RB')return fx((s.car||0)+(s.rec||0),1)+' touches, '+fx(s.tgt,1)+' tgt';
+  return fx(s.tgt,1)+' tgt, '+fmtStat('tshr',s.tshr)+' share';
+}
+function fantasyWeek(){
+  const wks=[...new Set(GAMES.filter(g=>!isFinal(g)).map(g=>g.wk))].sort((a,b)=>a-b);
+  if(!FT.wk||wks.indexOf(FT.wk)<0)FT.wk=propWeek();
+  return wks;
+}
+function fantasyRows(pos,wk){
+  const ps=pos==='FLEX'?['RB','WR','TE']:[pos];
+  return PLAYERS.filter(p=>ps.indexOf(p.p)>=0&&qualifies(p)).map(p=>{
+    const g=GAMES.find(x=>x.wk===wk&&!isFinal(x)&&(x.home===p.t||x.away===p.t));if(!g)return null;
+    const fp=fpProj(p,g);return isNum(fp.proj)?{p:p,g:g,fp:fp}:null;}).filter(Boolean).sort((a,b)=>b.fp.proj-a.fp.proj);
+}
+/* Short block for This week and the Props page footer */
+function fantasyBrief(n){
+  const wk=propWeek();if(!wk)return '';
+  return '<div class="ldr">'+OFF_POS.map(pos=>{const rs=fantasyRows(pos,wk).slice(0,n||5);
+    return '<div><h3>'+pos+'s, projected PPR</h3><ol>'+rs.map(r=>'<li><span>'+plink(r.p)+'<small>'+flag(r.p.t,'sm')+' '+(r.g.home===r.p.t?'vs ':'at ')+r.fp.opp+', avg '+fx(r.fp.base,1)+'</small></span><span class="v">'+fx(r.fp.proj,1)+' '+fct(r.fp.f,'fp')+'</span></li>').join('')+'</ol><a class="more" href="#/fantasy">Full week '+wk+' rankings</a></div>';}).join('')+'</div>';
+}
+function band(kind,title,sub){return '<div class="band '+kind+'"><span class="bt">'+title+'</span>'+(sub?'<span class="bs">'+sub+'</span>':'')+'</div>';}
+function vFantasy(){
+  const wks=fantasyWeek(),since=HIST[0]||SEASON;
+  let h='<section class="hero"><div><h1>Fantasy</h1><p class="sub">PPR scoring. Built for start/sit and waiver calls: projected points for any week left, how often each player gives you a starter-level week, his opportunity, and how every defense treats each position. Single-stat lines live on <a href="#/props">Props</a> and <a href="#/outlook">Outlook</a>.</p></div><div class="row"><a class="btn" href="#/leaders/fantasy">Season fantasy leaders</a></div></section>';
+  if(!wks.length)return h+'<p class="empty">No games left this season.</p>';
+  const pos=FT.pos,rows=fantasyRows(pos,FT.wk);
+  h+='<div class="row" style="margin-top:18px;align-items:flex-end"><label class="fld">Week<select id="ftWk" class="sel">'+wks.map(w=>{const d=GAMES.filter(g=>g.wk===w).map(g=>g.date).sort();return '<option value="'+w+'"'+(w===FT.wk?' selected':'')+'>Week '+w+' ('+shortDay(d[0])+(d.length>1?' to '+shortDay(d[d.length-1]):'')+')</option>';}).join('')+'</select></label>'+
+    '<div class="chips" role="group" aria-label="Position">'+['QB','RB','WR','TE','FLEX'].map(x=>'<button data-ftpos="'+x+'" aria-pressed="'+(x===pos)+'">'+x+'</button>').join('')+'</div></div>';
+  const cutTxt=(pos==='FLEX'?['RB','WR','TE']:[pos]).map(x=>x+' '+fx(fpCut(x),1)).join(', ');
+  h+='<h2>Week '+FT.wk+' rankings</h2><p class="lede">Projected PPR points start from his fantasy average (this season blended with every game since '+since+') and move with the defense he faces and the betting market’s team total, the same adjustments as the prop model. <b>Starter weeks</b> counts his games at or above a starter-level score ('+cutTxt+' points: the per-game average of the 12th QB and TE, 24th RB and WR this season). <a href="#/glossary/fp-proj">How it works</a>.</p>';
+  if(!rows.length)h+='<p class="empty">No qualifying players in this week’s games.</p>';
+  else h+='<div class="scroll tall"><table><thead><tr><th class="num">#</th><th>Player</th><th>Opponent</th><th class="num">Projected</th><th class="num">Typical range</th><th class="num">Matchup</th><th class="num">PPR/g '+SEASON+'</th><th class="num">Since '+since+'</th><th class="num">Starter weeks</th><th>Opportunity per game</th><th class="num">Opp allows to his position</th></tr></thead><tbody>'+
+    rows.map((r,i)=>{const p=r.p,f=r.fp;return '<tr><td class="num mut">'+(i+1)+'</td><td>'+plink(p)+' <span class="mut small">'+flag(p.t,'sm')+' '+p.t+(pos==='FLEX'?', '+p.p:'')+'</span></td><td>'+(r.g.home===p.t?'vs ':'at ')+tt(f.opp)+'<div class="mut small">'+shortKick(r.g)+'</div></td>'+
+      '<td class="num"><b>'+fx(f.proj,1)+'</b></td><td class="num">'+fx(f.lo,1)+'–'+fx(f.hi,1)+'</td><td class="num">'+fct(f.f,'fp')+'</td><td class="num">'+fx(p.ss.fp,1)+'</td><td class="num">'+fx(f.base,1)+'</td>'+
+      '<td class="num">'+(isNum(f.hit)?f.hit+' of '+f.n+' <span class="mut small">('+Math.round(f.hit/f.n*100)+'%)</span>':'—')+'</td><td class="small wrap">'+opportunity(p)+(isNum(p.sn)?', '+p.sn+'% snaps':'')+'</td><td class="num">'+fpAllowedCell(f.opp,p.p,true)+'</td></tr>';}).join('')+'</tbody></table></div>';
+  /* every defense, PPR points allowed by position */
+  const fpos=pos==='FLEX'?'WR':pos;
+  const teams=TL.filter(t=>DA[t]).sort((a,b)=>((DA[b][fpos]||{}).fp||0)-((DA[a][fpos]||{}).fp||0));
+  h+='<h2>Fantasy points allowed by position</h2><p class="lede">PPR points per game each defense has given up to every QB, RB, WR and TE it faced since '+since+'. Sorted by most allowed to '+fpos+'s (friendliest first). Green is a friendly matchup, red a tough one. Click a number to see every game and player behind it.</p>'+
+    '<div class="scroll"><table><thead><tr><th>Defense</th>'+OFF_POS.map(x=>'<th class="num">To '+x+'s</th>').join('')+'<th>Next game</th></tr></thead><tbody>'+
+    teams.map(t=>{const ng=nextGame(t);return '<tr><td>'+tt(t)+'</td>'+OFF_POS.map(x=>'<td class="num">'+fpAllowedCell(t,x,true)+'</td>').join('')+'<td class="small">'+(ng?(ng.home===t?'vs ':'at ')+oppOf(ng,t)+', week '+ng.wk:'—')+'</td></tr>';}).join('')+'</tbody></table></div>';
+  h+='<p class="note">Not included: fumbles lost and 2-point conversions move the actual totals but aren’t projected, and injury status isn’t in the free data yet. Projections are estimates from public data.</p>';
+  return h;
+}
+/* Fantasy section on a player page */
+function fantasySection(p){
+  if(OFF_POS.indexOf(p.p)<0||!p.ss)return '';
+  const since=HIST[0]||SEASON,games=playerGames(p).filter(x=>isNum(x.fp)),cut=fpCut(p.p);
+  const pool=PLAYERS.filter(q=>q.p===p.p&&qualifies(q)).sort((a,b)=>b.ss.fp-a.ss.fp),rk=pool.indexOf(p)+1;
+  const ng=nextGame(p.t),fp=ng?fpProj(p,ng):null,all=games.map(x=>x.fp),avgAll=all.length?all.reduce((a,b)=>a+b,0)/all.length:null;
+  const hit=isNum(cut)?all.filter(v=>v>=cut).length:null,best=games.reduce((a,b)=>!a||b.fp>a.fp?b:a,null),worst=games.reduce((a,b)=>!a||b.fp<a.fp?b:a,null);
+  const pc=qualifies(p)?statPct(p,'fp',p.ss.fp):null;
+  let h=band('fan','Fantasy (PPR)','Total points, how reliably he gets there, and the opportunity behind it. <a href="#/fantasy">Fantasy rankings</a>');
+  h+='<dl class="tiles" style="margin-top:14px">'+
+    '<div class="tile"><dt>'+glab('PPR points per game','fp')+'</dt><dd>'+fx(p.ss.fp,1)+'</dd>'+(isNum(pc)?pctBar(pc):'')+'<p class="pt">'+(rk?ord(rk)+' of '+pool.length+' '+p.p+'s this season':'Not enough of a role yet to rank')+'</p></div>'+
+    '<div class="tile"><dt>Since '+since+'</dt><dd>'+fx(avgAll,1)+'</dd><p class="pt">'+all.length+' games</p></div>'+
+    (fp&&isNum(fp.proj)?'<div class="tile"><dt>'+glab('Next game projection',null,'fp-proj')+'</dt><dd>'+fx(fp.proj,1)+'</dd><p class="pt">'+(ng.home===p.t?'vs ':'at ')+fp.opp+', range '+fx(fp.lo,1)+'–'+fx(fp.hi,1)+' '+fct(fp.f,'fp')+'</p></div>':'')+
+    (fp?(()=>{const v=DA[fp.opp]&&DA[fp.opp][p.p]?DA[fp.opp][p.p].fp:null,r=daRank(fp.opp,p.p,'fp');
+      return '<div class="tile"><dt>'+glab(fp.opp+' allows to '+p.p+'s',null,'fp-allowed')+'</dt><dd>'+(isNum(v)?alink(fp.opp,p.p,'fp',fx(v,1)):'—')+'</dd><p class="pt">'+(r?mup(r):'PPR points per game')+'</p></div>';})():'')+
+    (isNum(hit)?'<div class="tile"><dt>'+glab('Starter-level weeks',null,'fp-proj')+'</dt><dd>'+hit+' of '+all.length+'</dd><p class="pt">'+cut+'+ points, '+Math.round(hit/all.length*100)+'% of games</p></div>':'')+
+    '<div class="tile"><dt>Opportunity per game</dt><dd class="small" style="font-size:16px">'+opportunity(p)+'</dd><p class="pt">'+(isNum(p.sn)?p.sn+'% of snaps':'')+'</p></div>'+
+    (best?'<div class="tile"><dt>Best and worst game</dt><dd>'+fx(best.fp,1)+' / '+fx(worst.fp,1)+'</dd><p class="pt">'+best.s+' wk '+best.w+' vs '+best.opp+'; '+worst.s+' wk '+worst.w+' vs '+worst.opp+'</p></div>':'')+'</dl>';
+  if(games.length)h+='<h3 style="margin-top:22px">PPR points, every game since '+games[0].s+'</h3><p class="lede">The yellow line is a starter-level week for a '+p.p+' ('+cut+' points). Blue bars cleared it.</p>'+
+    gameBars(games.map(x=>({s:x.s,w:x.w,opp:x.opp,y:x.fp})),{line:cut,fmt:v=>fx(v,1),label:'PPR points by game'});
+  const rows=seasonRows(p);
+  if(rows.length)h+='<div class="scroll" style="margin-top:14px"><table><thead><tr><th>Season</th><th>Team</th><th class="num">Games</th><th class="num">PPR/g</th></tr></thead><tbody>'+
+    rows.map(r=>'<tr><td>'+r.s+(r.s===SEASON?' <span class="mut small">so far</span>':'')+'</td><td>'+(r.t?tt(r.t):'—')+'</td><td class="num">'+r.g+'</td><td class="num"><b>'+fx(r.v.fp,1)+'</b></td></tr>').join('')+'</tbody></table></div>';
+  return h;
+}
+
 function vProps(){
   const since=HIST[0]||SEASON;
   const rows=WATCH.map((e,i)=>({e,i,p:BY[e.id]})).filter(x=>x.p).map(x=>{
@@ -2109,6 +2233,7 @@ function render(keep){
   }
   else if(v==='props'){html=vProps();title='Props';}
   else if(v==='outlook'){html=vOutlook();title='Outlook';}
+  else if(v==='fantasy'){html=vFantasy();title='Fantasy';}
   else if(v==='leaders'){html=vLeaders(r[1],r[2]);title='Stat leaders';}
   else if(v==='glossary'){html=vGlossary(r[1]);title='Glossary';}
   else if(v==='allowed'){html=vAllowed(r[1],r[2],r[3]);title=(r[1]||'')+' defense vs '+(r[2]||'')+'s';nav='teams';}
@@ -2171,6 +2296,7 @@ document.addEventListener('click',e=>{
   if(t.dataset.top!==undefined){const rm=matchMedia('(prefers-reduced-motion: reduce)').matches;window.scrollTo({top:0,behavior:rm?'auto':'smooth'});const a=document.getElementById('app');if(a)a.focus({preventScroll:true});return;}
   if(t.dataset.wk!==undefined){const weeks=[...new Set(GAMES.map(g=>g.wk))].sort((a,b)=>a-b);const d=+t.dataset.wk;
     if(d===0)HW=NEXT_WK;else{const i=weeks.indexOf(HW)+d;if(i>=0&&i<weeks.length)HW=weeks[i];}render(true);return;}
+  if(t.dataset.ftpos){FT.pos=t.dataset.ftpos;render(true);return;}
   if(t.dataset.ldmode){LD.mode=t.dataset.ldmode;render(true);return;}
   if(t.dataset.ldpos!==undefined){LD.pos=t.dataset.ldpos;render(true);return;}
   if(t.dataset.pos!==undefined){PL.pos=t.dataset.pos;if(PL.pos&&plCols().indexOf(PL.sort)<0&&['n','g','sn'].indexOf(PL.sort)<0)PL.sort=plCols()[0];if(!PL.pos&&['n','g','sn'].concat(plCols()).indexOf(PL.sort)<0)PL.sort='scy';render(true);return;}
@@ -2222,6 +2348,7 @@ document.addEventListener('change',e=>{
   else if(id==='cStat'){CMP.stat=e.target.value;render(true);refocus();}
   else if(id==='alT'){const r=location.hash.split('/');location.hash='#/allowed/'+e.target.value+'/'+(r[3]||'WR')+'/'+(r[4]||'recyd');}
   else if(id==='olWk'){OL.wk=+e.target.value;render(true);refocus();}
+  else if(id==='ftWk'){FT.wk=+e.target.value;render(true);refocus();}
   else if(id==='cdT'){location.hash='#/compare/defense/'+(DUEL.of||'')+'/'+e.target.value;}
   else if(id==='ctA'||id==='ctB'){const a=document.getElementById('ctA').value,b=document.getElementById('ctB').value;location.hash='#/compare/teams/'+a+'/'+b;}
 });

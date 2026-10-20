@@ -562,6 +562,9 @@ ALLOWED_VALS = {
            ("receiving_tds", "rectd")],
 }
 ALLOWED_VALS["TE"] = ALLOWED_VALS["WR"]
+for _p in ("QB", "RB", "WR"):
+    ALLOWED_VALS[_p] = ALLOWED_VALS[_p] + [("fantasy_points_ppr", "fp")]
+ALLOWED_VALS["TE"] = ALLOWED_VALS["WR"]
 
 def build_allowed_log(all_season_rows, longs, d20g, game_rows, seasons):
     """
@@ -761,6 +764,8 @@ def build(season):
             def_games[opp].add((szn, wk))
             for full in row_spec["fields"]:
                 def_agg[(opp, row_pos)][full] += num(row.get(full))
+            if row_pos in ("QB", "RB", "WR", "TE"):
+                def_agg[(opp, row_pos)]["fantasy_points_ppr"] += num(row.get("fantasy_points_ppr"))
 
         # Per-player history is only shown for players on a current roster, with columns
         # matching their CURRENT position so the table lines up on their page.
@@ -811,6 +816,8 @@ def build(season):
         spec = POS_STATS[pos]
         row_out = {short: round(sums.get(full, 0) / g, 2) for full, short in spec["fields"].items()}
         row_out["g"] = len(def_games.get(team, ()))
+        if pos in ("QB", "RB", "WR", "TE"):
+            row_out["fp"] = round(sums.get("fantasy_points_ppr", 0) / g, 2)   # PPR points allowed per game
         defense_allowed.setdefault(team, {})[pos] = row_out
 
     games = []

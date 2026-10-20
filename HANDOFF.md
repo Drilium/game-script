@@ -25,6 +25,13 @@ Read this *before* touching `build_data.py` or `index.html`.
   `.viz`, `.tiles`, `.kp`, `.ldr>div`, `.lines`, `.gterm`).
 - **Whole picture:** every game since 2024 plus the next matchup's context,
   not "last 5 / last 8" windows.
+- **Props and fantasy are separate (2026-10-20, later):** prop research and
+  fantasy help both stay, but each lives in its own labeled section (dark
+  "Player props" / "Fantasy (PPR)" / "Context for both" bands on This week and
+  player pages, plus a dedicated Fantasy page). Props first, fantasy second.
+- **Contrast:** data boxes must stand well apart from the page (light: white
+  boxes, `--edge` border and `--lift` shadow on a #C7C2B6 page; dark: #202725
+  boxes on #050606).
 - **Props research first, fantasy second (2026-10-20):** player-prop research
   is the main focus. Fantasy stays, but it always comes after the prop data:
   last in stat lists, tiles, charts, the home page and the glossary.
@@ -409,6 +416,26 @@ readable when one game is an outlier.
   (weekly report status and practice participation), including 2026. The
   earlier note that injuries need a paid feed was wrong for the official
   report. Next step: show report status on player, matchup and outlook pages.
+
+## Fantasy page + props/fantasy separation + higher contrast (2026-10-20)
+
+- `#/fantasy` (`vFantasy`): week picker, QB/RB/WR/TE/FLEX. Projected PPR
+  points (`fpProj`: his blended PPR average scaled by the prop model's
+  defense + market adjustments applied to the scoring stats, factor capped
+  0.75-1.25), typical range, starter-level weeks (cut = per-game PPR of the
+  12th QB/TE, 24th RB/WR this season, `fpCut`), opportunity, and PPR points
+  the opponent allows to his position. Then a 32-team table of PPR points
+  allowed to QB/RB/WR/TE, each linked to the drill-down.
+- Data: `defense_allowed[team][pos].fp` (PPR allowed per game) and `fp` in
+  every allowed-log player line; drill-down accepts `#/allowed/TEAM/POS/fp`.
+- Player pages (offense): Player props band (outlook + hit-rate chart),
+  Context band (season, how he wins, defenders, schedule), Fantasy band
+  (`fantasySection`: PPR/g with percentile and position rank, since 2024,
+  next-game projection, opponent PPR allowed, starter weeks, opportunity,
+  best/worst game, PPR chart vs the starter line, PPR by season). Fantasy
+  points no longer appear in the prop tiles, game chart or season table.
+- This week: Player props band, Fantasy band (top projected PPR per
+  position), Context band (stat leaders, best units).
 
 ## Stat leaders + props-first order (2026-10-20)
 
