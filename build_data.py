@@ -92,7 +92,8 @@ def build_team_meta(team_abbrs):
         while len(pick) < 3:
             pick.append("#FFFFFF")
         out[t] = {"name": r["team_name"], "nick": r["team_nick"],
-                  "c": TEAM_COLOR_OVERRIDES.get(t, pick[:3])}
+                  "c": TEAM_COLOR_OVERRIDES.get(t, pick[:3]),
+                  "logo": r.get("team_logo_espn") or ""}
     for t in team_abbrs:
         if t not in out and t in DEFAULT_TEAM_COLORS:
             out[t] = {"name": t, "nick": t, "c": DEFAULT_TEAM_COLORS[t]}

@@ -22,7 +22,7 @@
   --a:#2a78d6;--a-bg:#E4EEFB;--b:#eb6834;--b-bg:#FCEBE3;
   --yl:#F2CC00;--yl-edge:#8C7600;--good:#137A2C;--bad:#C2352E;--miss:#C3D3E4;
   --p0:#C2352E;--p1:#E8A195;--p2:#B4BDB8;--p3:#86C29D;--p4:#1E7D45;--p0i:#fff;--p1i:#3B1410;--p2i:#1E2622;--p3i:#0E2A19;--p4i:#fff;
-  --dotline:rgba(0,0,0,.22);--title:#4B3FB0;
+  --dotline:rgba(0,0,0,.22);--title:#4B3FB0;--logo-fx:none;
   --font:"Archivo",system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
   --t-title:34px;--t-h2:19px;--t-h3:15px;--t-body:15px;--t-small:13px;--t-micro:11.5px;--t-fig:24px;
   color-scheme:light;
@@ -34,7 +34,7 @@
     --a:#3987e5;--a-bg:#16294A;--b:#d95926;--b-bg:#3A1F12;
     --yl:#F5D000;--yl-edge:#F5D000;--good:#4CC46E;--bad:#FF7A6E;--miss:#2D4157;
     --p0:#D9534A;--p1:#8C4A42;--p2:#4A5650;--p3:#3E7A55;--p4:#3FB46E;--p0i:#fff;--p1i:#fff;--p2i:#fff;--p3i:#fff;--p4i:#0D1311;
-    --dotline:rgba(255,255,255,.28);--title:#B1A9F7;color-scheme:dark;
+    --dotline:rgba(255,255,255,.28);--title:#B1A9F7;--logo-fx:drop-shadow(0 0 .6px rgba(255,255,255,.9)) drop-shadow(0 0 .6px rgba(255,255,255,.6));color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
@@ -43,7 +43,7 @@
   --a:#3987e5;--a-bg:#16294A;--b:#d95926;--b-bg:#3A1F12;
   --yl:#F5D000;--yl-edge:#F5D000;--good:#4CC46E;--bad:#FF7A6E;--miss:#2D4157;
   --p0:#D9534A;--p1:#8C4A42;--p2:#4A5650;--p3:#3E7A55;--p4:#3FB46E;--p0i:#fff;--p1i:#fff;--p2i:#fff;--p3i:#fff;--p4i:#0D1311;
-  --dotline:rgba(255,255,255,.28);--title:#B1A9F7;color-scheme:dark;
+  --dotline:rgba(255,255,255,.28);--title:#B1A9F7;--logo-fx:drop-shadow(0 0 .6px rgba(255,255,255,.9)) drop-shadow(0 0 .6px rgba(255,255,255,.6));color-scheme:dark;
 }
 *,*::before,*::after{box-sizing:border-box}
 [hidden]{display:none!important}
@@ -102,6 +102,15 @@ a.tt:hover{text-decoration:underline}
 .tf.mid b{width:13px;height:13px}.tf.mid b+b{margin-left:-4px}
 .tf.lg b{width:18px;height:18px;box-shadow:0 0 0 2px var(--bg),inset 0 0 0 1px var(--dotline)}.tf.lg b+b{margin-left:-6px}
 .tf.mid{margin-right:9px;vertical-align:1px}
+/* Team logos (nflverse's ESPN logo links); the three color circles show if a logo can't load */
+.tf.tl{vertical-align:-3px}
+.tf.tl img{display:block;width:18px;height:18px;object-fit:contain;filter:var(--logo-fx)}
+.tf.tl b,.tf.tl.nolg img{display:none}
+.tf.tl.nolg b{display:block}
+.tf.tl.sm img{width:15px;height:15px}
+.tf.tl.mid img{width:24px;height:24px}
+.tf.tl.lg img{width:40px;height:40px}
+.tf.tl.lg{vertical-align:-6px}
 
 /* ---------- Generic ---------- */
 .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
@@ -571,7 +580,10 @@ function ord(n){const s=['th','st','nd','rd'],v=n%100;return n+(s[(v-20)%10]||s[
 function nick(t){return TEAMS[t]?TEAMS[t][1]:t;}
 function fullName(t){return TEAMS[t]?TEAMS[t][0]+' '+TEAMS[t][1]:t;}
 function tcol(t){return (TC[t]&&TC[t][0])||(TEAMS[t]?TEAMS[t][2]:'#888');}
-function flag(t,cls){const c=TC[t]||[tcol(t),tcol(t),tcol(t)];return '<i class="tf'+(cls?' '+cls:'')+'" aria-hidden="true"><b style="background:'+c[0]+'"></b><b style="background:'+c[1]+'"></b><b style="background:'+c[2]+'"></b></i>';}
+const LOGO_ID={LA:'lar',WAS:'wsh'};let TLOGO={};
+function logoUrl(t){return TLOGO[t]||(TEAMS[t]?'https://a.espncdn.com/i/teamlogos/nfl/500/'+(LOGO_ID[t]||t.toLowerCase())+'.png':null);}
+function flag(t,cls){const c=TC[t]||[tcol(t),tcol(t),tcol(t)],u=logoUrl(t),dots='<b style="background:'+c[0]+'"></b><b style="background:'+c[1]+'"></b><b style="background:'+c[2]+'"></b>';
+  return '<i class="tf'+(u?' tl':'')+(cls?' '+cls:'')+'" aria-hidden="true">'+(u?'<img src="'+esc(u)+'" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.parentNode.classList.add(\'nolg\')">':'')+dots+'</i>';}
 function tt(t,link){
   const inner=flag(t)+esc(t);
   return link===false?'<span class="tt">'+inner+'</span>':'<a class="tt" href="#/team/'+t+'">'+inner+'</a>';
@@ -2236,7 +2248,7 @@ syncTheme();
 fetch('nfl_data.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.json();}).then(D=>{
   PLAYERS=D.players;GAMES=D.games;PAST=D.past_games||[];TS=D.team_stats||{};SCHEME=D.team_scheme||{};DA=D.defense_allowed||{};
   SEASON=D.season;GEN=D.generated;HIST=D.hist_seasons||[];
-  Object.keys(D.teams||{}).forEach(t=>{if(D.teams[t]&&D.teams[t].c)TC[t]=D.teams[t].c;});
+  Object.keys(D.teams||{}).forEach(t=>{if(D.teams[t]&&D.teams[t].c)TC[t]=D.teams[t].c;if(D.teams[t]&&D.teams[t].logo)TLOGO[t]=D.teams[t].logo;});
   PLAYERS.forEach(p=>{BY[p.id]=p;(BY_TEAM[p.t]=BY_TEAM[p.t]||[]).push(p);derive(p);});
   const fin=GAMES.filter(isFinal);LAST_WK=fin.length?Math.max(...fin.map(g=>g.wk)):0;
   const up=GAMES.filter(g=>!isFinal(g));NEXT_WK=up.length?Math.min(...up.map(g=>g.wk)):LAST_WK;HW=NEXT_WK;
