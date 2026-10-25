@@ -417,6 +417,30 @@ readable when one game is an outlier.
   earlier note that injuries need a paid feed was wrong for the official
   report. Next step: show report status on player, matchup and outlook pages.
 
+## Best props page + game script (2026-10-25)
+
+- `#/best` (`vBest`): the strongest over/under spots per game for the next
+  full week. For each qualifying QB/RB/WR/TE and main prop stats (`BP_KEYS`):
+  reference line = his median this season (4+ games, else since 2024) to the
+  nearest .5 (`halfLine`; whole-number medians lean toward the mean). Projection
+  = `project()` x `scriptFactor()`. His whole spread of games since 2024 is
+  centered on the projection (scaled by projection / career average) and
+  checked against the line; projection and that hit rate must agree. Signal
+  = distance from 50% with at most 16 games counted: Strong >= 2, Solid >= 1.4,
+  Lean >= 1. Minimum lines (`BP_MIN`) drop tiny roles. Top 10 and each game
+  show one pick per player; the full table shows all.
+- Game script (`build_script_model` in build_data.py, `data.script`): within
+  each team-season, pass rate vs how much more or less favored than usual,
+  every REG game since 2024. Slope about -0.25 pass-rate points per point of
+  spread (r about -0.13, n about 1,300). `gameScript()` turns this week's spread
+  into an expected pass rate; pass stats x exp/usual, rush stats x the
+  complement, capped at 10%.
+- `project()` is now role-aware (`roleChanged`: new team, or usage changed by
+  more than a third): this season's weight rises to full at 5 games.
+- This week's Player props band opens with the top 4 Best props.
+- Known limits: no real sportsbook lines (books already price matchups), no
+  injury status. Glossary entries `best-props`, `game-script`.
+
 ## Fantasy page + props/fantasy separation + higher contrast (2026-10-20)
 
 - `#/fantasy` (`vFantasy`): week picker, QB/RB/WR/TE/FLEX. Projected PPR

@@ -3,7 +3,7 @@
 **Live:** https://drilium.github.io/game-script/ (GitHub Pages, published by the workflow below)
 
 A static site (`index.html`) that fetches real 2026 NFL data (`nfl_data.json`)
-at load time. Pages: This week (slate, player props, fantasy, context), Fantasy (weekly PPR rankings, starter-level weeks, PPR allowed by defense), Stat leaders (every category, totals or per game, with next matchups), Teams and team
+at load time. Pages: This week (slate, player props, fantasy, context), Best props (strongest over/under spots per game with reasons and game script), Fantasy (weekly PPR rankings, starter-level weeks, PPR allowed by defense), Stat leaders (every category, totals or per game, with next matchups), Teams and team
 pages, Players and player pages (offense and defense), Compare (player vs
 player, player vs an opposing defense's individual defenders, and team vs
 team), a matchup page for every game, and Props.

@@ -614,6 +614,47 @@ def build_allowed_log(all_season_rows, longs, d20g, game_rows, seasons):
             "keys": {p: [k for _, k in v] for p, v in ALLOWED_VALS.items()}, "teams": out}
 
 
+
+def build_script_model(all_season_rows, game_rows, seasons, season):
+    """
+    Game script from the betting market: how a team's pass rate moves with the
+    pregame spread. Every regular-season game since the first history season.
+    Within each team-season, compare how much more or less a team was favored
+    than usual with how much more or less it passed than usual, so team
+    identity (some teams always pass more) does not leak into the slope.
+    Pass rate = dropbacks (attempts + sacks) / (dropbacks + carries).
+    """
+    tg = defaultdict(lambda: [0.0, 0.0])     # (season, week, team) -> [dropbacks, carries]
+    for szn, row in all_season_rows:
+        if row["season_type"] != "REG" or not row.get("team"):
+            continue
+        c = tg[(szn, int(row["week"]), row["team"])]
+        c[0] += num(row.get("attempts")) + num(row.get("sacks_suffered"))
+        c[1] += num(row.get("carries"))
+    fav = {}
+    for g in game_rows:
+        if g["game_type"] != "REG" or not g["spread_line"] or int(g["season"]) not in seasons:
+            continue
+        s, w, sp = int(g["season"]), int(g["week"]), float(g["spread_line"])
+        fav[(s, w, g["home_team"])] = sp       # nflverse spread_line > 0 = home favored
+        fav[(s, w, g["away_team"])] = -sp
+    by_ts = defaultdict(list)
+    for key, (db, car) in tg.items():
+        if key in fav and db + car >= 30:
+            by_ts[(key[0], key[2])].append((fav[key], db / (db + car)))
+    sxy = sxx = syy = 0.0; n = 0
+    teams = {}
+    for (szn, team), pts in by_ts.items():
+        mf = sum(p[0] for p in pts) / len(pts); mr = sum(p[1] for p in pts) / len(pts)
+        for f, r in pts:
+            x, y = f - mf, r - mr
+            sxy += x * y; sxx += x * x; syy += y * y; n += 1
+        if szn == season:
+            teams[team] = {"pr": round(mr, 4), "fav": round(mf, 2), "g": len(pts)}
+    slope = sxy / sxx if sxx else 0.0
+    r = sxy / (sxx * syy) ** .5 if sxx and syy else 0.0
+    return {"b": round(slope, 5), "r": round(r, 3), "n": n, "teams": teams}
+
 def build(season):
     print(f"Fetching roster_{season}.csv ...")
     roster_rows = fetch_csv(f"rosters/roster_{season}.csv")
@@ -870,6 +911,7 @@ def build(season):
             pos_group[row["player_id"]] = row["position_group"]
     h2h, dprof, longs, dlong, d20g = build_h2h(hist_seasons + [season], roster, pos_group)
     allowed_log = build_allowed_log(all_season_rows, longs, d20g, game_rows, hist_seasons + [season])
+    script = build_script_model(all_season_rows, game_rows, hist_seasons + [season], season)
     # attach longest reception / run to every game line we show
     for p in players:
         for line in p["hist"]:
@@ -894,7 +936,7 @@ def build(season):
     out = {"season": season, "hist_seasons": hist_seasons, "generated": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%MZ"),
            "players": players, "games": games, "past_games": past_games,
            "defense_allowed": defense_allowed, "team_scheme": scheme["team"],
-           "team_stats": team_stats, "teams": teams_meta}
+           "team_stats": team_stats, "teams": teams_meta, "script": script}
     return out, h2h, allowed_log
 
 if __name__ == "__main__":

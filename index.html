@@ -77,7 +77,7 @@ button,input,select{font:inherit;color:inherit}
 .top .cbx-in::placeholder{color:#E9EFEB;opacity:.55}
 .ibtn{border:1px solid rgba(255,255,255,.2);background:none;color:#E9EFEB;padding:6px 11px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600}
 @media (min-width:900px){.nav{order:0;flex-basis:auto}}
-@media (min-width:900px) and (max-width:1340px){.nav a{padding:6px 8px;font-size:13.5px}}
+@media (min-width:900px){.nav a{padding:6px 7px;font-size:13px}.top-in{gap:6px 12px}.top .cbx{min-width:150px}.brand{font-size:17px}}
 @media (max-width:640px){.top .ibtn{margin-left:auto;order:1}.top .cbx{order:2;flex-basis:100%;max-width:none}.nav{order:3}}
 
 main{max-width:1180px;margin:0 auto;padding:4px 16px 64px}
@@ -405,6 +405,33 @@ details.tview table{margin-top:8px;font-size:13.5px}
 .band a{color:inherit;font-weight:700}
 .band.pro{border-left-color:#5B8DEF}.band.fan{border-left-color:#F08A4B}.band.ctx{border-left-color:var(--yl)}
 .band+h2{margin-top:18px}
+/* Best props */
+.bpg{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:14px;margin-top:10px}
+.bpc{background:var(--surface);border:1px solid var(--edge);border-top:4px solid var(--a);border-radius:10px;box-shadow:var(--lift);padding:14px 16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.bpc.un{border-top-color:var(--b)}
+.bpc header{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:start}
+.bpc header a{font-weight:700;color:var(--ink);text-decoration:none}.bpc header a:hover{text-decoration:underline}
+.bpc header small{display:block;color:var(--ink2);font-size:12px;margin-top:2px}
+.bpr{display:inline-flex;width:24px;height:24px;border-radius:50%;background:var(--sunken);align-items:center;justify-content:center;font-weight:700;font-size:12px}
+.bpk{margin:0;font-size:19px;font-weight:800;letter-spacing:-.01em}
+.bpc.ov .bpk{color:var(--a)}.bpc.un .bpk{color:var(--b)}
+.bpn{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0}
+.bpn div{background:var(--sunken);border-radius:6px;padding:6px 8px}
+.bpn dt{font-size:11px;color:var(--ink2)}.bpn dd{margin:0;font-weight:700;font-variant-numeric:tabular-nums}
+.bpw{list-style:none;margin:0;padding:0;display:grid;gap:5px;font-size:12.5px;color:var(--ink2)}
+.bpw b{color:var(--ink);font-weight:650}.bpw .up{color:var(--good)}.bpw .dn{color:var(--bad)}
+.bpt{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;border:1px solid var(--rule2);white-space:nowrap}
+.bpt.strong{background:var(--ink);color:var(--bg);border-color:var(--ink)}.bpt.solid{background:var(--sunken);color:var(--ink)}.bpt.lean{color:var(--ink2)}
+.bpgames{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr));gap:14px;margin-top:10px}
+.bpgame{background:var(--surface);border:1px solid var(--edge);border-radius:10px;box-shadow:var(--lift);padding:12px 14px;min-width:0}
+.bpgame header{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 10px;align-items:baseline;border-bottom:1px solid var(--rule2);padding-bottom:8px}
+.bpgame header a{color:var(--ink);text-decoration:none}
+.bpsc{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--rule)}
+.bpgame ol{list-style:none;margin:6px 0 0;padding:0}
+.bpgame li{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid var(--rule);font-size:14px}
+.bpgame li:last-child{border-bottom:0}
+.bpgame li a{font-weight:600;color:var(--ink);text-decoration:none}
+.bpgame li small{display:block;color:var(--ink2);font-size:12px}
 .tiles{border-radius:10px;box-shadow:0 1px 2px rgba(0,0,0,.06)}
 .gterm{padding:12px 16px;margin-top:8px}
 .split>div>h3,.dgrp>h3{margin-top:4px}
@@ -427,6 +454,7 @@ details.tview table{margin-top:8px;font-size:13.5px}
       Game Script</a>
     <nav class="nav" aria-label="Main">
       <a href="#/" data-nav="week">This week</a>
+      <a href="#/best" data-nav="best">Best props</a>
       <a href="#/props" data-nav="props">Props</a>
       <a href="#/outlook" data-nav="outlook">Outlook</a>
       <a href="#/fantasy" data-nav="fantasy">Fantasy</a>
@@ -456,7 +484,7 @@ details.tview table{margin-top:8px;font-size:13.5px}
 /* ======================================================================
    Data + lookups
    ====================================================================== */
-let PLAYERS=[],BY={},BY_TEAM={},GAMES=[],PAST=[],TS={},SCHEME={},DA={},SEASON,GEN,HIST=[],LAST_WK=0,NEXT_WK=1;
+let D_SCRIPT=null,PLAYERS=[],BY={},BY_TEAM={},GAMES=[],PAST=[],TS={},SCHEME={},DA={},SEASON,GEN,HIST=[],LAST_WK=0,NEXT_WK=1;
 
 const TEAMS={ARI:['Arizona','Cardinals','#97233F'],ATL:['Atlanta','Falcons','#A71930'],BAL:['Baltimore','Ravens','#241773'],BUF:['Buffalo','Bills','#00338D'],CAR:['Carolina','Panthers','#0085CA'],CHI:['Chicago','Bears','#0B162A'],CIN:['Cincinnati','Bengals','#FB4F14'],CLE:['Cleveland','Browns','#311D00'],DAL:['Dallas','Cowboys','#003594'],DEN:['Denver','Broncos','#FB4F14'],DET:['Detroit','Lions','#0076B6'],GB:['Green Bay','Packers','#203731'],HOU:['Houston','Texans','#03202F'],IND:['Indianapolis','Colts','#002C5F'],JAX:['Jacksonville','Jaguars','#006778'],KC:['Kansas City','Chiefs','#E31837'],LA:['Los Angeles','Rams','#003594'],LAC:['Los Angeles','Chargers','#0080C6'],LV:['Las Vegas','Raiders','#A5ACAF'],MIA:['Miami','Dolphins','#008E97'],MIN:['Minnesota','Vikings','#4F2683'],NE:['New England','Patriots','#002244'],NO:['New Orleans','Saints','#D3BC8D'],NYG:['New York','Giants','#0B2265'],NYJ:['New York','Jets','#125740'],PHI:['Philadelphia','Eagles','#004C54'],PIT:['Pittsburgh','Steelers','#FFB612'],SEA:['Seattle','Seahawks','#002244'],SF:['San Francisco','49ers','#AA0000'],TB:['Tampa Bay','Buccaneers','#D50A0A'],TEN:['Tennessee','Titans','#4B92DB'],WAS:['Washington','Commanders','#5A1414']};
 const TL=Object.keys(TEAMS).sort();
@@ -1046,9 +1074,19 @@ const VOLUME={att:1,cmp:1,pyd:1,tgt:1,rec:1,recyd:1,car:1,ryd:1},TDK={ptd:1,rtd:
 const LG={},PROJ_C={};
 function lgAvg(pos,k){const ck=pos+'|'+k;if(ck in LG)return LG[ck];const v=TL.map(t=>DA[t]&&DA[t][pos]?DA[t][pos][k]:null).filter(isNum);return LG[ck]=v.length?v.reduce((a,b)=>a+b,0)/v.length:null;}
 function impliedPts(g,t){if(!isNum(g.total)||!isNum(g.spread))return null;return g.home===t?(g.total+g.spread)/2:(g.total-g.spread)/2;}
+/* A new team, or a usage change of more than a third, means this season says more about him than his past */
+const ROLE_C={};
+function roleChanged(p){
+  if(p.id in ROLE_C)return ROLE_C[p.id];
+  const prior=(p.sz||[]).filter(r=>r.s<SEASON).sort((a,b)=>b.s-a.s),last=prior[0];
+  if(!last||!p.ss||p.g<4)return ROLE_C[p.id]=false;
+  if(last.t&&last.t!==p.t)return ROLE_C[p.id]=true;
+  const use=r=>(r.tgt||0)+(r.car||0)+(r.att||0),g=prior.reduce((a,r)=>a+r.g,0),u=prior.reduce((a,r)=>a+use(r)*r.g,0)/(g||1),now=use(p.ss);
+  return ROLE_C[p.id]=u>0&&(now/u>1.35||now/u<0.65);
+}
 function project(p,g){
   const ck=p.id+'|'+g.id;if(PROJ_C[ck])return PROJ_C[ck];
-  const opp=oppOf(g,p.t),games=playerGames(p),cur=games.filter(x=>x.s===SEASON),w=Math.min(cur.length,6)/12;
+  const opp=oppOf(g,p.t),games=playerGames(p),cur=games.filter(x=>x.s===SEASON),w=roleChanged(p)?Math.min(cur.length,5)/5:Math.min(cur.length,6)/12;
   const ip=impliedPts(g,p.t),pf=TS[p.t]&&TS[p.t].pfpg,ratio=isNum(ip)&&pf?ip/pf:1;
   const out={opp:opp,g:g,ip:ip,pf:pf,keys:{}};
   (PROJ_KEYS[p.p]||[]).forEach(k=>{
@@ -1132,7 +1170,7 @@ function vWeek(){
   }).join('')+'</div>';
   if(bye.length)h+='<p class="bye">On bye: '+bye.map(t=>tt(t)).join(', ')+'</p>';
 
-  h+=band('pro','Player props','Single-stat projections and the matchups moving them. <a href="#/props">Props</a> \u00b7 <a href="#/outlook">Outlook</a>')+propResearch(5);
+  h+=band('pro','Player props','Single-stat projections and the matchups moving them. <a href="#/best">Best props</a> \u00b7 <a href="#/props">Props</a> \u00b7 <a href="#/outlook">Outlook</a>')+bpHome()+propResearch(5);
   {const wk=propWeek();if(wk)h+=band('fan','Fantasy (PPR)','Projected points for week '+wk+', starter-level consistency, and what each defense allows. <a href="#/fantasy">Fantasy</a>')+'<h2>Fantasy outlook: week '+wk+'</h2><p class="lede">Projected PPR points, with how much the matchup moves him.</p>'+fantasyBrief(5);}
   h+=band('ctx','Context for both','Season leaders and team efficiency.');
   {const sv=LD.mode,sp=LD.pos;LD.mode='tot';LD.pos='';
@@ -1780,6 +1818,8 @@ const GLOSS=[
  ['leaders','Reading this site','Stat leaders: totals, per game and rates','Totals add up every game this season. Per game divides by games he played and needs at least half his team\u2019s games. Rates (completion rate, yards per attempt, carry or target, target share) need a full-time role: 14 pass attempts, 6.25 carries or 3.5 targets per team game. Tied players share a rank.','Totals reward availability; per game shows what to expect when he plays.','Calculated on this site from nflverse weekly player stats.',[]],
  ['lr','Receiving','Longest reception','His longest catch in a game. Averages show his typical longest catch per game.','Useful for longest-reception props; compare it with what the defense allows.','Calculated on this site from nflverse play-by-play.',['lr']],
 
+ ['best-props','Matchups and projections','Best props','For every qualifying player\u2019s main prop stats: the reference line is his median (this season once he has 4 games, otherwise since 2024), set to the nearest .5, where books usually start. His projection comes from the Outlook model plus the game-script factor. His whole spread of games since 2024 (how much he swings week to week) is centered on that projection and checked against the line. A pick needs the projection and that adjusted hit rate to agree, and is ranked by how far the hit rate sits from a coin flip for that many games: Strong, Solid or Lean.','The reasons under each pick show what moved it. Books already price some of this, so always compare with the real line.','Calculated on this site from nflverse weekly stats, play-by-play and closing lines.',[]],
+ ['game-script','Matchups and projections','Game script','How a game is expected to unfold, read from the betting lines. Across every game since 2024, a team favored by more than its usual spread passed a little less and ran a little more; an underdog did the opposite. The site turns this week\u2019s spread into an expected pass rate for each team and nudges pass and run stats by the same ratio, capped at 10%.','Most useful for running backs on heavy favorites and receivers on big underdogs.','Fit on this site from nflverse weekly stats and closing lines.',[]],
  ['fp-proj','Fantasy','Fantasy projection and starter-level weeks','Projected PPR points start from his fantasy average (this season blended with every game since 2024) and move by the same defense and betting-market adjustments the prop model applies to each scoring stat (yards, catches, touchdowns, interceptions). The range is the middle half of his games after the same adjustment. A starter-level week is the per-game average of the 12th-best QB or TE, or 24th-best RB or WR, this season.','Projection for the expected score, range for the floor and ceiling, starter weeks for how often he actually helps you.','Calculated on this site from nflverse weekly stats, play-by-play and closing lines.',[]],
  ['fp-allowed','Fantasy','Fantasy points allowed','PPR points per game a defense has given up to every player at a position, across every game since 2024.','The quickest start/sit read: high means a friendly matchup for that position.','Calculated on this site from nflverse weekly player stats.',[]],
  ['fp','Fantasy','Fantasy points (PPR)','Points-per-reception scoring: 1 per catch, 0.1 per rushing or receiving yard, 0.04 per passing yard, 6 per rushing or receiving TD, 4 per passing TD, minus 2 per interception or lost fumble, plus 2-point conversions.','A quick all-in-one measure of production, weighted toward receptions.','nflverse fantasy_points_ppr.',['fp']],
@@ -2185,6 +2225,113 @@ function fantasySection(p){
   return h;
 }
 
+/* ======================================================================
+   Best props: the strongest over/under spots in each game.
+   For every qualifying player and main prop stat:
+   1. Reference line = his median this season (4+ games) else since the first
+      history season, to the nearest .5, which is where books usually start.
+   2. Projection = the Outlook model (defense + betting market, role-aware baseline),
+      times a game-script factor: how the spread moves his team's pass rate.
+   3. His whole spread of games, centered on that projection, is checked against the line.
+      Signal = how far that hit rate sits from a coin flip, counting at most 16 games.
+   ====================================================================== */
+const BP={wk:null,pos:'',side:'',stat:''};
+const BP_MIN={rec:1.5,tgt:2.5,recyd:14.5,ryd:14.5,car:4.5,cmp:9.5,att:14.5,pyd:99.5,ptd:.5,lr:9.5};
+const BP_KEYS={QB:['pyd','cmp','att','ptd','ryd'],RB:['ryd','car','rec','recyd'],WR:['rec','recyd','lr'],TE:['rec','recyd','lr']};
+const PASS_K={att:1,cmp:1,pyd:1,ptd:1,tgt:1,rec:1,recyd:1,lr:1},RUSH_K={car:1,ryd:1,lru:1,rtd:1};
+const SCRIPT_C={};
+/* expected pass rate for a team in a game, from its usual rate and how much more or less it is favored than usual */
+function gameScript(g,t){
+  const ck=g.id+'|'+t;if(SCRIPT_C[ck])return SCRIPT_C[ck];
+  const S=D_SCRIPT,tm=S&&S.teams?S.teams[t]:null;if(!tm||!isNum(g.spread))return SCRIPT_C[ck]=null;
+  const fav=g.home===t?g.spread:-g.spread,exp=Math.min(.8,Math.max(.3,tm.pr+S.b*(fav-tm.fav)));
+  return SCRIPT_C[ck]={fav:fav,usual:tm.fav,pr:tm.pr,exp:exp,pass:Math.min(1.1,Math.max(.9,exp/tm.pr)),rush:Math.min(1.1,Math.max(.9,(1-exp)/(1-tm.pr)))};
+}
+function scriptFactor(p,g,k){const s=gameScript(g,p.t);if(!s)return 1;return RUSH_K[k]?s.rush:PASS_K[k]?s.pass:1;}
+/* nearest .5 to his median; a whole-number median leans toward his average, as books shade lines */
+function halfLine(med,mean){const r=Math.round(med*2)/2;return Math.max(.5,r%1?r:r+(mean>r?.5:-.5));}
+function median(a){if(!a.length)return null;const s=a.slice().sort((x,y)=>x-y),h=s.length>>1;return s.length%2?s[h]:(s[h-1]+s[h])/2;}
+const BPC={};
+function propPick(p,g,k){
+  const ck=p.id+'|'+g.id+'|'+k;if(ck in BPC)return BPC[ck];
+  const pr=project(p,g),x=pr.keys[k];if(!x)return BPC[ck]=null;
+  const games=playerGames(p),vals=games.map(w=>weekVal(w,k)).filter(isNum),cur=games.filter(w=>w.s===SEASON).map(w=>weekVal(w,k)).filter(isNum);
+  if(vals.length<8)return BPC[ck]=null;
+  const ref=cur.length>=4?cur:vals,line=halfLine(median(ref),ref.reduce((a,b)=>a+b,0)/ref.length);
+  const sc=scriptFactor(p,g,k),f=x.f*sc,proj=x.proj*sc;
+  if(line<(BP_MIN[k]||.5))return BPC[ck]=null;           /* too small a role for a real prop */
+  /* his whole spread of games (how much he swings week to week), centered on this week's projection */
+  const n=vals.length,rA=x.aAll>0?proj/x.aAll:f;
+  const hits=vals.filter(v=>v*rA>line).length,adj=hits/n;
+  const raw=vals.filter(v=>v>line).length,curHits=cur.filter(v=>v>line).length;
+  const over=proj>line;
+  if(over!==(adj>.5))return BPC[ck]=null;               /* projection and hit rate must agree */
+  /* older games are not independent fresh evidence: count at most 16 */
+  const z=(adj-.5)*Math.sqrt(Math.min(n,16))/.5,score=Math.abs(z);
+  if(score<1)return BPC[ck]=null;
+  return BPC[ck]={p:p,g:g,k:k,o:pr.opp,x:x,line:line,lineFrom:cur.length>=4?'this season':'since '+(HIST[0]||SEASON),
+    proj:proj,f:f,sc:sc,hits:hits,n:n,raw:raw,cur:cur.length,curHits:curHits,over:over,adj:adj,z:z,score:score,
+    tier:score>=2?'Strong':score>=1.4?'Solid':'Lean',role:roleChanged(p)};
+}
+function bpWeekPicks(wk){
+  const out=[];
+  PLAYERS.filter(p=>OFF_POS.indexOf(p.p)>=0&&qualifies(p)).forEach(p=>{
+    const g=GAMES.find(x=>x.wk===wk&&!isFinal(x)&&(x.home===p.t||x.away===p.t));if(!g)return;
+    (BP_KEYS[p.p]||[]).forEach(k=>{const q=propPick(p,g,k);if(q)out.push(q);});
+  });
+  return out.sort((a,b)=>b.score-a.score||b.proj-a.proj);
+}
+function bpStat(k){return (ST[k]?ST[k].l:k).toLowerCase();}
+function bpPickTxt(q){return (q.over?'Over ':'Under ')+q.line+' '+bpStat(q.k);}
+function bpReasons(q){
+  const p=q.p,g=q.g,x=q.x,s=gameScript(g,p.t),out=[],pc=v=>{const d=Math.round((v-1)*100);return (d>0?'+':d<0?'−':'±')+Math.abs(d)+'%';};
+  if(isNum(x.da)&&x.rank)out.push({t:'Defense',v:pc(x.mf),h:(DA_ALL[p.p].some(y=>y[0]===q.k)?alink(q.o,p.p,q.k,q.o+' allows '+pfmt(q.k,x.da)):q.o+' allows '+pfmt(q.k,x.da))+' '+esc(bpStat(q.k))+' to '+p.p+'s, '+ord(x.rank)+' of 32 (league '+pfmt(q.k,x.lg)+')'});
+  if(s)out.push({t:'Game script',v:pc(q.sc),h:esc(nick(p.t))+' '+(s.fav>0?'favored by '+fx(s.fav,1):s.fav<0?'underdog by '+fx(-s.fav,1):'a pick’em')+' (usually '+(s.usual>=0?'favored by '+fx(s.usual,1):'underdog by '+fx(-s.usual,1))+'): expected pass rate '+fx(s.exp*100,1)+'% vs '+fx(s.pr*100,1)+'% usual'});
+  if(isNum(x.sf)&&x.sf!==1){const ip=impliedPts(g,p.t),pf=TS[p.t]&&TS[p.t].pfpg;out.push({t:'Betting market',v:pc(x.sf),h:'Implied '+fx(ip,1)+' points vs '+fx(pf,1)+' average'});}
+  out.push({t:'Form',v:'',h:'This season '+pfmt(q.k,x.aCur)+' per game, since '+(HIST[0]||SEASON)+' '+pfmt(q.k,x.aAll)+(q.role?'. New team or role this season, so this season counts for more':'')+'. This season he cleared '+q.line+' in '+q.curHits+' of '+q.cur+' games'});
+  return out;
+}
+function bpCard(q,i){
+  const p=q.p,r=bpReasons(q);
+  return '<article class="bpc'+(q.over?' ov':' un')+'"><header><span class="bpr">'+(i+1)+'</span><div>'+plink(p)+'<small>'+flag(p.t,'sm')+' '+p.p+', '+(q.g.home===p.t?'vs ':'at ')+q.o+' · '+esc(shortKick(q.g))+'</small></div><span class="bpt '+q.tier.toLowerCase()+'">'+q.tier+'</span></header>'+
+    '<p class="bpk">'+esc(bpPickTxt(q))+'</p>'+
+    '<dl class="bpn"><div><dt>Projection</dt><dd>'+pfmt(q.k,q.proj)+'</dd></div><div><dt>Adjusted hit rate</dt><dd>'+Math.round((q.over?q.adj:1-q.adj)*100)+'%</dd></div><div><dt>Games</dt><dd>'+(q.over?q.hits:q.n-q.hits)+' of '+q.n+'</dd></div></dl>'+
+    '<ul class="bpw">'+r.map(x=>'<li><b>'+x.t+(x.v?' <span class="'+(x.v.charAt(0)==='+'?'up':x.v.charAt(0)==='−'?'dn':'')+'">'+x.v+'</span>':'')+'</b> '+x.h+'</li>').join('')+'</ul>'+
+    '<p class="small"><a href="#/player/'+p.id+'">His game-by-game chart</a> · <a href="#/props">Check your book’s line</a></p></article>';
+}
+function vBest(){
+  const wks=[...new Set(GAMES.filter(g=>!isFinal(g)).map(g=>g.wk))].sort((a,b)=>a-b),since=HIST[0]||SEASON;
+  let h='<section class="hero"><div><h1>Best props</h1><p class="sub">The strongest over and under spots in every game, from each player’s full sample since '+since+', what his defense allows, the game script the spread implies, and the betting market’s team total. Every pick shows its reasons. <a href="#/glossary/best-props">How picks are made</a>.</p></div><div class="row"><a class="btn" href="#/props">Your watchlist</a><a class="btn" href="#/outlook">Outlook</a></div></section>';
+  if(!wks.length)return h+'<p class="empty">No games left this season.</p>';
+  if(!BP.wk||wks.indexOf(BP.wk)<0)BP.wk=propWeek()||wks[0];
+  const all=bpWeekPicks(BP.wk),stats=[...new Set(all.map(q=>q.k))];
+  const rows=all.filter(q=>(!BP.pos||q.p.p===BP.pos)&&(!BP.side||(BP.side==='over')===q.over)&&(!BP.stat||q.k===BP.stat));
+  h+='<div class="row" style="margin-top:18px;align-items:flex-end"><label class="fld">Week<select id="bpWk" class="sel">'+wks.map(w=>{const d=GAMES.filter(g=>g.wk===w).map(g=>g.date).sort();return '<option value="'+w+'"'+(w===BP.wk?' selected':'')+'>Week '+w+' ('+shortDay(d[0])+(d.length>1?' to '+shortDay(d[d.length-1]):'')+')</option>';}).join('')+'</select></label>'+
+    '<div class="chips" role="group" aria-label="Position">'+['','QB','RB','WR','TE'].map(x=>'<button data-bppos="'+x+'" aria-pressed="'+(BP.pos===x)+'">'+(x||'All')+'</button>').join('')+'</div>'+
+    '<div class="seg" role="group" aria-label="Side">'+[['','Both'],['over','Overs'],['under','Unders']].map(([v,l])=>'<button data-bpside="'+v+'" aria-pressed="'+(BP.side===v)+'">'+l+'</button>').join('')+'</div>'+
+    '<label class="fld">Stat<select id="bpStat" class="sel"><option value="">Every stat</option>'+stats.map(k=>'<option value="'+k+'"'+(k===BP.stat?' selected':'')+'>'+esc(ST[k].l)+'</option>').join('')+'</select></label></div>';
+  h+='<p class="count">'+rows.length+' spots with a real signal out of every qualifying player’s main props in week '+BP.wk+'. The reference line is his median this season (once he has 4 games, otherwise since '+since+'), set to the nearest .5, where books usually start. Sportsbooks already price some of this in, so compare with your book’s actual line.</p>';
+  if(!rows.length)return h+'<p class="empty">Nothing clears the bar with these filters.</p>';
+  const seen=new Set(),best=rows.filter(q=>!seen.has(q.p.id)&&seen.add(q.p.id));
+  h+='<h2>Top 10 this week</h2><p class="lede">One pick per player, his strongest; every other spot is in the full list below.</p><div class="bpg">'+best.slice(0,10).map(bpCard).join('')+'</div>';
+  /* game by game */
+  const gs=GAMES.filter(g=>g.wk===BP.wk&&!isFinal(g)).sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:(a.time||'')<(b.time||'')?-1:1);
+  h+='<h2>Game by game</h2><p class="lede">Each game’s script from the betting lines, then its strongest spots. A team favored by more than usual tends to run a little more; an underdog passes more.</p><div class="bpgames">'+gs.map(g=>{
+    const seenG=new Set(),top=rows.filter(q=>q.g.id===g.id&&!seenG.has(q.p.id)&&seenG.add(q.p.id)).slice(0,4),sa=gameScript(g,g.away),sh=gameScript(g,g.home),ia=impliedPts(g,g.away),ih=impliedPts(g,g.home);
+    const line=(t,s,ip)=>'<div class="bpsc"><span>'+tt(t)+'</span><span class="small">'+(isNum(ip)?'Implied '+fx(ip,1)+' pts':'')+(s?' · pass rate '+fx(s.exp*100,1)+'% <span class="mut">('+(s.exp>=s.pr?'+':'−')+fx(Math.abs(s.exp-s.pr)*100,1)+' vs usual)</span>':'')+'</span></div>';
+    return '<section class="bpgame"><header><a href="#/game/'+g.id+'"><b>'+g.away+' at '+g.home+'</b></a><span class="small mut">'+esc(kick(g))+(spreadTxt(g)?' · '+esc(spreadTxt(g))+(isNum(g.total)?', total '+g.total:''):'')+'</span></header>'+
+      line(g.away,sa,ia)+line(g.home,sh,ih)+
+      (top.length?'<ol>'+top.map(q=>'<li><span>'+plink(q.p)+' <span class="mut small">'+q.p.p+'</span><small>'+esc(bpPickTxt(q))+' · proj '+pfmt(q.k,q.proj)+'</small></span><span class="bpt '+q.tier.toLowerCase()+'">'+q.tier+'</span></li>').join('')+'</ol>':'<p class="small mut" style="margin:8px 0">No spot clears the bar in this game.</p>')+'</section>';}).join('')+'</div>';
+  /* everything */
+  h+='<h2>Every spot</h2><div class="scroll tall"><table><thead><tr><th class="num">#</th><th>Player</th><th>Game</th><th>Pick</th><th class="num">Projection</th><th class="num">Adj. hit rate</th><th class="num">Raw hit rate</th><th class="num">Defense</th><th class="num">Script</th><th class="num">Market</th><th>Signal</th></tr></thead><tbody>'+
+    rows.map((q,i)=>'<tr><td class="num mut">'+(i+1)+'</td><td>'+plink(q.p)+' <span class="mut small">'+flag(q.p.t,'sm')+' '+q.p.p+'</span></td><td class="small">'+(q.g.home===q.p.t?'vs ':'at ')+q.o+'</td><td><b>'+esc(bpPickTxt(q))+'</b></td><td class="num">'+pfmt(q.k,q.proj)+'</td><td class="num">'+Math.round((q.over?q.adj:1-q.adj)*100)+'%</td><td class="num">'+(q.over?q.raw:q.n-q.raw)+' of '+q.n+'</td><td class="num">'+fct(q.x.mf,q.k)+'</td><td class="num">'+fct(q.sc,q.k)+'</td><td class="num">'+fct(q.x.sf,q.k)+'</td><td><span class="bpt '+q.tier.toLowerCase()+'">'+q.tier+'</span></td></tr>').join('')+'</tbody></table></div>';
+  const S=D_SCRIPT;
+  h+='<p class="note">How the game-script effect was measured: across '+(S?S.n:0)+' team-games since '+since+', each extra point a team was favored (compared with its own usual spread) moved its pass rate by '+(S?fx(S.b*100,2):'0')+' percentage points. Small but real; it is capped at 10% either way. Injury status isn’t in the free data yet, so check that a player is active. These are estimates from public data, not betting advice.</p>';
+  return h;
+}
+
+function bpHome(){const wk=propWeek();if(!wk)return '';const s=new Set(),r=bpWeekPicks(wk).filter(q=>!s.has(q.p.id)&&s.add(q.p.id)).slice(0,4);if(!r.length)return '';
+  return '<h2>Best props: week '+wk+'</h2><p class="lede">The strongest over and under spots this week, each with its reasons. <a href="#/best">Every game\u2019s best spots</a>.</p><div class="bpg">'+r.map(bpCard).join('')+'</div>';}
 function vProps(){
   const since=HIST[0]||SEASON;
   const rows=WATCH.map((e,i)=>({e,i,p:BY[e.id]})).filter(x=>x.p).map(x=>{
@@ -2234,6 +2381,7 @@ function render(keep){
   else if(v==='props'){html=vProps();title='Props';}
   else if(v==='outlook'){html=vOutlook();title='Outlook';}
   else if(v==='fantasy'){html=vFantasy();title='Fantasy';}
+  else if(v==='best'){html=vBest();title='Best props';}
   else if(v==='leaders'){html=vLeaders(r[1],r[2]);title='Stat leaders';}
   else if(v==='glossary'){html=vGlossary(r[1]);title='Glossary';}
   else if(v==='allowed'){html=vAllowed(r[1],r[2],r[3]);title=(r[1]||'')+' defense vs '+(r[2]||'')+'s';nav='teams';}
@@ -2296,6 +2444,8 @@ document.addEventListener('click',e=>{
   if(t.dataset.top!==undefined){const rm=matchMedia('(prefers-reduced-motion: reduce)').matches;window.scrollTo({top:0,behavior:rm?'auto':'smooth'});const a=document.getElementById('app');if(a)a.focus({preventScroll:true});return;}
   if(t.dataset.wk!==undefined){const weeks=[...new Set(GAMES.map(g=>g.wk))].sort((a,b)=>a-b);const d=+t.dataset.wk;
     if(d===0)HW=NEXT_WK;else{const i=weeks.indexOf(HW)+d;if(i>=0&&i<weeks.length)HW=weeks[i];}render(true);return;}
+  if(t.dataset.bppos!==undefined){BP.pos=t.dataset.bppos;render(true);return;}
+  if(t.dataset.bpside!==undefined){BP.side=t.dataset.bpside;render(true);return;}
   if(t.dataset.ftpos){FT.pos=t.dataset.ftpos;render(true);return;}
   if(t.dataset.ldmode){LD.mode=t.dataset.ldmode;render(true);return;}
   if(t.dataset.ldpos!==undefined){LD.pos=t.dataset.ldpos;render(true);return;}
@@ -2349,6 +2499,8 @@ document.addEventListener('change',e=>{
   else if(id==='alT'){const r=location.hash.split('/');location.hash='#/allowed/'+e.target.value+'/'+(r[3]||'WR')+'/'+(r[4]||'recyd');}
   else if(id==='olWk'){OL.wk=+e.target.value;render(true);refocus();}
   else if(id==='ftWk'){FT.wk=+e.target.value;render(true);refocus();}
+  else if(id==='bpWk'){BP.wk=+e.target.value;render(true);refocus();}
+  else if(id==='bpStat'){BP.stat=e.target.value;render(true);refocus();}
   else if(id==='cdT'){location.hash='#/compare/defense/'+(DUEL.of||'')+'/'+e.target.value;}
   else if(id==='ctA'||id==='ctB'){const a=document.getElementById('ctA').value,b=document.getElementById('ctB').value;location.hash='#/compare/teams/'+a+'/'+b;}
 });
@@ -2374,7 +2526,7 @@ syncTheme();
    ====================================================================== */
 fetch('nfl_data.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.json();}).then(D=>{
   PLAYERS=D.players;GAMES=D.games;PAST=D.past_games||[];TS=D.team_stats||{};SCHEME=D.team_scheme||{};DA=D.defense_allowed||{};
-  SEASON=D.season;GEN=D.generated;HIST=D.hist_seasons||[];
+  SEASON=D.season;GEN=D.generated;D_SCRIPT=D.script||null;HIST=D.hist_seasons||[];
   Object.keys(D.teams||{}).forEach(t=>{if(D.teams[t]&&D.teams[t].c)TC[t]=D.teams[t].c;if(D.teams[t]&&D.teams[t].logo)TLOGO[t]=D.teams[t].logo;});
   PLAYERS.forEach(p=>{BY[p.id]=p;(BY_TEAM[p.t]=BY_TEAM[p.t]||[]).push(p);derive(p);});
   const fin=GAMES.filter(isFinal);LAST_WK=fin.length?Math.max(...fin.map(g=>g.wk)):0;
