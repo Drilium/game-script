@@ -983,6 +983,7 @@ if __name__ == "__main__":
         json.dump(allowed_log, f, separators=(",", ":"))
     print(f"Wrote nfl_allowed.json — {sum(len(v) for v in allowed_log['teams'].values())} defense-games, {len(allowed_log['names'])} players")
     if states:
+        states["generated"] = data["generated"]   # shows each refresh rebuilt the game-state file
         with open("nfl_script.json", "w") as f:
             json.dump(states, f, separators=(",", ":"))
         print(f"Wrote nfl_script.json — {len(states['players'])} players, {len(states['bank'])} team-games of game-state history")
