@@ -71,7 +71,7 @@ feed — see Roadmap below).
   play-by-play), reshapes it, and writes `nfl_data.json`.
 - **`.github/workflows/refresh-data.yml`** — GitHub Actions: runs after
   every game window (Fri, Sun x3, Mon x2, Tue x2 in UTC cron) plus manual
-  `workflow_dispatch`; reruns `build_data.py`, commits the three JSON files,
+  `workflow_dispatch`; reruns `build_data.py`, commits the four JSON files,
   then publishes to GitHub Pages (Pages source must be "GitHub Actions").
   Code pushes to `main` republish without rebuilding data. No server, no
   database, anywhere in this stack.
@@ -133,7 +133,10 @@ assets, CSV/CSV.GZ). No paid API is involved in anything currently built.
 This was researched thoroughly — don't re-research it, the answer won't
 have changed:
 - **Man/zone coverage shell, personnel groupings, alignment data** — not
-  published free anywhere live. PFF, Sports Info Solutions, and Pro
+  published free anywhere *live*. (Correction 2026-10-26: nflverse's
+  `pbp_participation` files do carry man/zone, coverage shell and routes
+  for completed seasons, 2024 and 2025 — now used. The current season
+  still isn't available.) PFF, Sports Info Solutions, and Pro
   Football Reference all have it, but **all three prohibit automated
   scraping in their terms of service** — don't build a scraper against
   them. A real subscription/API contract is the only compliant path.
@@ -486,6 +489,68 @@ readable when one game is an outlier.
   show pass/rush/rec yards instead of fantasy points; the Players list "All"
   view sorts by yards from scrimmage.
 
+## Game simulator + game-state data + injuries + coverage (2026-10-26)
+
+Built because Dre wants the model to read play-by-play the way a game is
+actually played: score state, penalties, where throws go, and lines that
+look impossible but are just what a team has to do to win.
+
+- **`build_script.py` (new)** — called from `build_data.py`, writes
+  **`nfl_script.json`** (~400 KB, lazy-loaded by the simulator, player and
+  team pages). From pbp 2024–2026 it builds:
+  - Score state for every snap, offense view, before the play: trailing 9+,
+    trailing 1–8, tied, leading 1–8, leading 9+.
+  - Team pass rate per state (shrunk toward the league and the team's own
+    2024–25 identity, prior strength 40), plays per game, targets and
+    carries per dropback/run, average depth of target.
+  - Every player's share of targets and carries per state. Denominators are
+    every game he played offensive snaps in (snap counts keyed by name +
+    team), not just games where he touched the ball. That fix took the sim
+    from ~0.77 to ~0.9–0.96 of season averages.
+  - Targets by field zone (short/deep × left/middle/right) for offenses and
+    for defenses, against the league.
+  - Penalties by team and season: offensive/defensive flags and yards,
+    flags drawn, most common types. Defensive pass interference is credited
+    to the targeted receiver (PI yards are not receiving yards).
+  - Coverage from **`pbp_participation_<season>.csv`** (nflverse release
+    `pbp_participation`): `defense_man_zone_type`, `defense_coverage_type`,
+    `route`. **This is free, but only for completed seasons (2024 and 2025
+    exist; 2026 isn't published).** It powers team man-coverage rate and
+    shells, and each receiver's yards per target against man vs zone.
+  - A "bank" of ~1,300 real team-games with final margin and share of plays
+    in each state.
+- **Simulator (`#/sim`, `#/sim/<gid>`, `#/sim/<gid>/<pid>`)** — 8,000 games
+  per matchup. Home margin = spread + 13.5·N(0,1); a real team-game with a
+  similar margin from the bank sets how many plays happen in each score
+  state; play count blends team pace, the bank game and the total. Each
+  state's dropbacks use the team's pass rate there; targets and carries go
+  to players by their share in that state. Every target or carry is a real
+  play from that player's history (thin samples mixed with a position
+  pool), scaled by the opponent's per-opportunity defense and the QB's
+  yards per attempt (both capped). Players' shares are normalized to what
+  the whole roster normally takes, so an injury redistributes volume
+  rather than losing it. The page shows how the game goes (margin buckets,
+  dropbacks, carries, passing yards with ranges), lets you sit/put in any
+  player and type any share, and gives the chance of any line plus a
+  histogram for any player and stat.
+- **Injuries:** `injuries/injuries_<season>.csv` (free nflverse). Latest
+  week's status per player goes in `nfl_data.json` as `inj`. Out/Doubtful
+  for that game's week sits him out automatically in the sim; Best props
+  skips Out/Doubtful players and badges Questionable ones; player headers
+  and game pages show the report.
+- **Player pages:** "How his role changes with the score" (target/carry
+  share by state), depth, field zones, red-zone looks, vs man/zone.
+- **Team pages:** "Play calling by game state", "Where passes beat their
+  defense", "Penalties", "Coverage".
+- **Best props:** each card now also shows the simulated chance.
+- Calibration check (week 8 slate): team targets, carries and attempts land
+  within ~3–8% of season rates; player yardage means ~0.92–0.96 of season
+  averages (some of that is intentional regression toward 2024–25 roles).
+  **Not backtested yet** — the next real improvement is replaying past weeks
+  and scoring the sim's probabilities.
+- Limits: no live odds (lines come from the schedule file), coverage stops
+  at 2025, in-game injuries and weather aren't modeled.
+
 ## Feature inventory (what's actually built and shipped)
 
 - Game-day view, full player pages (bio, season stats, per-week game log,
@@ -553,7 +618,10 @@ readable when one game is an outlier.
   ESPN's injury feed via Apify (~$0.10/1000 rows) is the cheap option;
   PFF Pro has a "coming soon" consumer API tier (~$199.99/yr) that may be
   worth checking on by the time this is picked up.
-- **Coverage-shell/personnel data** — see "NOT free" section above. Only
+- **Backtest the simulator** — replay weeks 1–7 with only prior data and
+  score its probabilities (Brier score / calibration buckets).
+- **Coverage-shell/personnel data** — past seasons now wired in (see the
+  simulator section); live current-season data still needs a vendor. Only
   real paths are a paid PFF/SIS contract, or a from-scratch ML project on
   Big Data Bowl historical data (understood going in that it can never be
   live for the current season).

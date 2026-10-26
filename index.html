@@ -432,6 +432,16 @@ details.tview table{margin-top:8px;font-size:13.5px}
 .bpgame li:last-child{border-bottom:0}
 .bpgame li a{font-weight:600;color:var(--ink);text-decoration:none}
 .bpgame li small{display:block;color:var(--ink2);font-size:12px}
+/* Simulator, injuries */
+.simteams{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,520px),1fr));gap:18px;margin-top:12px}
+.simteam h2{margin-top:6px}
+h1.simh{display:flex;align-items:center;flex-wrap:wrap;gap:.3em}h1.simh .at{font-size:.55em;font-weight:600;color:var(--mute)}
+.simteams{grid-template-columns:minmax(0,1fr)}
+.simsh{width:64px;padding:4px 6px;text-align:right}
+tr.mut td{color:var(--mute)}
+.injb{display:inline-block;font-size:11px;font-weight:700;padding:1px 7px;border-radius:999px;border:1px solid var(--edge);background:var(--sunken);color:var(--ink)}
+.injb.out{background:var(--bad);border-color:var(--bad);color:#fff}.injb.doubtful{background:var(--b);border-color:var(--b);color:#fff}.injb.questionable{background:var(--yl);border-color:var(--yl-edge);color:#111}
+td .up{color:var(--good)}td .dn{color:var(--bad)}
 .tiles{border-radius:10px;box-shadow:0 1px 2px rgba(0,0,0,.06)}
 .gterm{padding:12px 16px;margin-top:8px}
 .split>div>h3,.dgrp>h3{margin-top:4px}
@@ -455,6 +465,7 @@ details.tview table{margin-top:8px;font-size:13.5px}
     <nav class="nav" aria-label="Main">
       <a href="#/" data-nav="week">This week</a>
       <a href="#/best" data-nav="best">Best props</a>
+      <a href="#/sim" data-nav="sim">Simulator</a>
       <a href="#/props" data-nav="props">Props</a>
       <a href="#/outlook" data-nav="outlook">Outlook</a>
       <a href="#/fantasy" data-nav="fantasy">Fantasy</a>
@@ -1202,6 +1213,8 @@ function vGame(id){
     (isNum(g.ar)?'<div><dt>'+glab('Rest',null,'rest')+'</dt><dd>'+A+' '+g.ar+' days, '+H+' '+g.hr+' days</dd></div>':'')+(g.div?'<div><dt>Division game</dt><dd>Yes</dd></div>':'')+
     (!f&&(g.aqb||g.hqb)?'<div><dt>Listed starting QBs</dt><dd>'+esc((g.aqb||'?')+' and '+(g.hqb||'?'))+'</dd></div>':'')+'</dl>';
 
+  if(!f){const inj=[A,H].map(t=>(BY_TEAM[t]||[]).filter(p=>injFor(p,g)&&injFor(p,g).st).sort((a,b)=>OFF_POS.indexOf(b.p)-OFF_POS.indexOf(a.p))).map((ps,i)=>'<div><dt>'+[A,H][i]+' injury report</dt><dd>'+(ps.length?ps.map(p=>'<span class="injb '+p.inj.st.toLowerCase()+'">'+esc(p.inj.st)+'</span> '+plink(p)+' <span class="small mut">'+p.p+'</span>').join('<br>'):'Nobody listed')+'</dd></div>').join('');
+    h+='<dl class="lines" style="align-items:start">'+inj+'</dl><p style="margin-top:10px"><a class="btn solid" href="#/sim/'+g.id+'">Simulate this game: any player, any line</a></p>';}
   h+='<h2>Tale of the tape</h2><div class="row" style="justify-content:space-between"><p class="lede" style="margin:0">'+A+' on the left in blue, '+H+' on the right in orange. Bar length is league rank: a full bar is 1st of 32.</p><a class="btn" href="#/compare/teams/'+A+'/'+H+'">Full team comparison</a></div>'+
     tugKey('Small number under each value = league rank')+teamTugs(A,H,['winp','diff','o_epa','d_epa','ats','over'],false);
 
@@ -1297,6 +1310,7 @@ function vTeam(t){
   const tiles=group=>'<dl class="tiles">'+TM.filter(m=>m.g===group).map(m=>{const v=tmVal(m,t),r=tmRank(m,t);
     return '<div class="tile"><dt>'+glab(m.l,m.k)+'</dt><dd>'+fmtTM(m,v)+'</dd><p class="pt"><span class="'+(m.b&&r?rkCls(r):'rk')+'">'+(r?rankTxt(m,r)+' of 32':'Not ranked')+'</span></p></div>';}).join('')+'</dl>';
   h+='<h2>Offense</h2>'+tiles('Offense')+'<h2>Defense</h2>'+tiles('Defense')+'<h2>Style</h2><p class="lede">How they play rather than how well. Ranked from most to least.</p>'+tiles('Style');
+  needScript();h+=teamStateSection(t);
   h+='<h2>What this defense allows by position</h2><p class="lede">Every stat, per game, across every game since '+(HIST[0]||SEASON)+'. Rank 1 allows the least (for interceptions, 1st takes away the most). Click any number to see every game and player behind it.</p><div class="scroll"><table><thead><tr><th>Position</th><th>Stat</th><th class="num">Allowed per game</th><th class="num">Rank</th></tr></thead><tbody>'+
     OFF_POS.map(pos=>DA_ALL[pos].map(([k,l],i)=>{const v=DA[t]&&DA[t][pos]?DA[t][pos][k]:null,r=daRank(t,pos,k);
       return '<tr><td>'+(i?'':'<b>'+pos+'s</b>')+'</td><td>'+l+'</td><td class="num">'+alink(t,pos,k,fx(v,/td|int/.test(k)?2:1))+'</td><td class="num"><span class="'+(r?rkCls(r):'rk')+'">'+(r?ord(r):'\u2014')+'</span></td></tr>';}).join('')).join('')+'</tbody></table></div>';
@@ -1425,11 +1439,13 @@ function gameSection(p){
     games.slice().reverse().map(w=>'<tr><td>'+w.s+'</td><td>'+w.w+'</td><td>'+tt(w.opp)+'</td>'+wkeys.map(k=>'<td class="num">'+weekFmt(k)(weekVal(w,k))+'</td>').join('')+'</tr>').join('')+'</tbody></table></div></details>';
   return h;
 }
+function injBadge(p){const i=p.inj;if(!i||!i.st&&!i.pr)return '';if(i.wk<LAST_WK)return '';
+  return '<p class="meta small"><span class="injb '+(i.st||'note').toLowerCase()+'">'+esc(i.st||'On report')+'</span> Week '+i.wk+' injury report'+(i.i?': '+esc(i.i):'')+(i.pr?' \u00b7 '+esc(i.pr):'')+'</p>';}
 function vPlayer(p){
   const ng=nextGame(p.t),opp=ng?oppOf(ng,p.t):null,role=pk(p),def=isDef(p),n=poolSize(role);
   const years=p.x!==undefined?(p.x===0?'Rookie':ord(p.x+1)+' season'):'';
   let h='<header class="ph"><div><h1>'+esc(p.n)+'</h1><p class="meta">'+flag(p.t,'sm')+' '+esc(posLabel(p))+', <a href="#/team/'+p.t+'">'+esc(fullName(p.t))+'</a>'+(p.j?', #'+esc(p.j):'')+(years?', '+years:'')+(p.col?', '+esc(p.col):'')+'</p>'+
-    '<p class="meta small">'+p.g+' game'+(p.g===1?'':'s')+' this season'+(isNum(p.sn)?', on the field for '+p.sn+'% of snaps':'')+'</p></div>'+
+    injBadge(p)+'<p class="meta small">'+p.g+' game'+(p.g===1?'':'s')+' this season'+(isNum(p.sn)?', on the field for '+p.sn+'% of snaps':'')+'</p></div>'+
     '<div class="acts">'+(ng?'<a class="btn" href="'+(!def&&OFF_POS.indexOf(p.p)>=0?'#/compare/defense/'+p.id+'/'+opp:'#/game/'+ng.id)+'">Next: '+(ng.home===p.t?'vs ':'at ')+opp+', '+day(ng.date)+'</a>':'')+
     (!def&&opp&&OFF_POS.indexOf(p.p)>=0?'<a class="btn" href="#/compare/defense/'+p.id+'/'+opp+'">Against '+opp+' defenders</a>':'')+
     '<a class="btn solid" href="#/compare/players/'+p.id+'/'+(suggestRival(p)||'')+'">Compare</a></div></header>';
@@ -1437,6 +1453,7 @@ function vPlayer(p){
   if(offp)h+=band('pro','Player props','Each stat on its own: the next-game projection against this defense, and how often he clears a line.');
   if(offp&&ng&&p.ss){const ot=outlookTable(p,ng);if(ot)h+='<h2>Next game prop outlook</h2>'+ot;}
   if(!def)h+=gameSection(p);
+  if(offp){needScript();h+=stateTable(p);}
   if(offp)h+=band('ctx','Context for both','His season, how he wins, and the defenders and schedule ahead.');
   const keys=(POS_KEYS[role]||[]).filter(k=>k!=='fp');
   if(p.ss&&keys){
@@ -1820,6 +1837,9 @@ const GLOSS=[
 
  ['best-props','Matchups and projections','Best props','For every qualifying player\u2019s main prop stats: the reference line is his median (this season once he has 4 games, otherwise since 2024), set to the nearest .5, where books usually start. His projection comes from the Outlook model plus the game-script factor. His whole spread of games since 2024 (how much he swings week to week) is centered on that projection and checked against the line. A pick needs the projection and that adjusted hit rate to agree, and is ranked by how far the hit rate sits from a coin flip for that many games: Strong, Solid or Lean.','The reasons under each pick show what moved it. Books already price some of this, so always compare with the real line.','Calculated on this site from nflverse weekly stats, play-by-play and closing lines.',[]],
  ['game-script','Matchups and projections','Game script','How a game is expected to unfold, read from the betting lines. Across every game since 2024, a team favored by more than its usual spread passed a little less and ran a little more; an underdog did the opposite. The site turns this week\u2019s spread into an expected pass rate for each team and nudges pass and run stats by the same ratio, capped at 10%.','Most useful for running backs on heavy favorites and receivers on big underdogs.','Fit on this site from nflverse weekly stats and closing lines.',[]],
+ ['simulator','Matchups and projections','Game simulator','Plays a game out thousands of times. Each run draws a final margin from the spread (with real-game noise), borrows how a real game with a similar margin unfolded (how many plays were run trailing, tied or leading), applies each team\u2019s pass rate in each of those situations, hands every target and carry to a player by his share in that situation, and replays a real target or carry from his history, adjusted for this defense and this quarterback. The quarterback\u2019s line is the sum of his targets.','Read the chance of any line, the 1-in-5 ceiling, and which game script makes it happen. Change who plays or anyone\u2019s share to test a different game plan.','Built on this site from nflverse play-by-play since 2024 and closing lines.',[]],
+ ['score-state','Matchups and projections','Game state','The score from the offense\u2019s side before each snap: trailing by 9 or more, trailing by 1 to 8, tied, leading by 1 to 8, or leading by 9 or more. Teams pass much more when behind and run when ahead, and players\u2019 roles shift with it.','A receiver whose share grows when his team trails is a natural over when his team is an underdog.','Calculated on this site from nflverse play-by-play.',[]],
+ ['coverage','Team style and pressure','Man and zone coverage','Whether the defense matched receivers one-on-one (man) or covered areas (zone), and the shell (Cover 1, Cover 3 and so on), from play charting published in nflverse\u2019s play participation file. It is released after each season, so the latest full season is used.','Some receivers win much more against one than the other; see their split on the player page.','nflverse play participation (FTN charting).',[]],
  ['fp-proj','Fantasy','Fantasy projection and starter-level weeks','Projected PPR points start from his fantasy average (this season blended with every game since 2024) and move by the same defense and betting-market adjustments the prop model applies to each scoring stat (yards, catches, touchdowns, interceptions). The range is the middle half of his games after the same adjustment. A starter-level week is the per-game average of the 12th-best QB or TE, or 24th-best RB or WR, this season.','Projection for the expected score, range for the floor and ceiling, starter weeks for how often he actually helps you.','Calculated on this site from nflverse weekly stats, play-by-play and closing lines.',[]],
  ['fp-allowed','Fantasy','Fantasy points allowed','PPR points per game a defense has given up to every player at a position, across every game since 2024.','The quickest start/sit read: high means a friendly matchup for that position.','Calculated on this site from nflverse weekly player stats.',[]],
  ['fp','Fantasy','Fantasy points (PPR)','Points-per-reception scoring: 1 per catch, 0.1 per rushing or receiving yard, 0.04 per passing yard, 6 per rushing or receiving TD, 4 per passing TD, minus 2 per interception or lost fumble, plus 2-point conversions.','A quick all-in-one measure of production, weighted toward receptions.','nflverse fantasy_points_ppr.',['fp']],
@@ -2276,7 +2296,7 @@ function propPick(p,g,k){
 function bpWeekPicks(wk){
   const out=[];
   PLAYERS.filter(p=>OFF_POS.indexOf(p.p)>=0&&qualifies(p)).forEach(p=>{
-    const g=GAMES.find(x=>x.wk===wk&&!isFinal(x)&&(x.home===p.t||x.away===p.t));if(!g)return;
+    const g=GAMES.find(x=>x.wk===wk&&!isFinal(x)&&(x.home===p.t||x.away===p.t));if(!g||injOut(p,g))return;
     (BP_KEYS[p.p]||[]).forEach(k=>{const q=propPick(p,g,k);if(q)out.push(q);});
   });
   return out.sort((a,b)=>b.score-a.score||b.proj-a.proj);
@@ -2294,12 +2314,13 @@ function bpReasons(q){
 function bpCard(q,i){
   const p=q.p,r=bpReasons(q);
   return '<article class="bpc'+(q.over?' ov':' un')+'"><header><span class="bpr">'+(i+1)+'</span><div>'+plink(p)+'<small>'+flag(p.t,'sm')+' '+p.p+', '+(q.g.home===p.t?'vs ':'at ')+q.o+' · '+esc(shortKick(q.g))+'</small></div><span class="bpt '+q.tier.toLowerCase()+'">'+q.tier+'</span></header>'+
-    '<p class="bpk">'+esc(bpPickTxt(q))+'</p>'+
-    '<dl class="bpn"><div><dt>Projection</dt><dd>'+pfmt(q.k,q.proj)+'</dd></div><div><dt>Adjusted hit rate</dt><dd>'+Math.round((q.over?q.adj:1-q.adj)*100)+'%</dd></div><div><dt>Games</dt><dd>'+(q.over?q.hits:q.n-q.hits)+' of '+q.n+'</dd></div></dl>'+
+    '<p class="bpk">'+esc(bpPickTxt(q))+'</p>'+(injFor(p,q.g)&&injFor(p,q.g).st?'<p class="small"><span class="injb '+injFor(p,q.g).st.toLowerCase()+'">'+esc(injFor(p,q.g).st)+'</span> '+esc(injFor(p,q.g).i||'')+'</p>':'')+
+    '<dl class="bpn"><div><dt>Projection</dt><dd>'+pfmt(q.k,q.proj)+'</dd></div><div><dt>Adjusted hit rate</dt><dd>'+Math.round((q.over?q.adj:1-q.adj)*100)+'%</dd></div><div><dt>'+(isNum(bpSimP(q))?'<a href="#/sim/'+q.g.id+'/'+p.id+'">Simulated</a>':'Games')+'</dt><dd>'+(isNum(bpSimP(q))?pctTxt(bpSimP(q)):(q.over?q.hits:q.n-q.hits)+' of '+q.n)+'</dd></div></dl>'+
     '<ul class="bpw">'+r.map(x=>'<li><b>'+x.t+(x.v?' <span class="'+(x.v.charAt(0)==='+'?'up':x.v.charAt(0)==='−'?'dn':'')+'">'+x.v+'</span>':'')+'</b> '+x.h+'</li>').join('')+'</ul>'+
     '<p class="small"><a href="#/player/'+p.id+'">His game-by-game chart</a> · <a href="#/props">Check your book’s line</a></p></article>';
 }
 function vBest(){
+  needScript();
   const wks=[...new Set(GAMES.filter(g=>!isFinal(g)).map(g=>g.wk))].sort((a,b)=>a-b),since=HIST[0]||SEASON;
   let h='<section class="hero"><div><h1>Best props</h1><p class="sub">The strongest over and under spots in every game, from each player’s full sample since '+since+', what his defense allows, the game script the spread implies, and the betting market’s team total. Every pick shows its reasons. <a href="#/glossary/best-props">How picks are made</a>.</p></div><div class="row"><a class="btn" href="#/props">Your watchlist</a><a class="btn" href="#/outlook">Outlook</a></div></section>';
   if(!wks.length)return h+'<p class="empty">No games left this season.</p>';
@@ -2332,6 +2353,312 @@ function vBest(){
 
 function bpHome(){const wk=propWeek();if(!wk)return '';const s=new Set(),r=bpWeekPicks(wk).filter(q=>!s.has(q.p.id)&&s.add(q.p.id)).slice(0,4);if(!r.length)return '';
   return '<h2>Best props: week '+wk+'</h2><p class="lede">The strongest over and under spots this week, each with its reasons. <a href="#/best">Every game\u2019s best spots</a>.</p><div class="bpg">'+r.map(bpCard).join('')+'</div>';}
+/* ======================================================================
+   Game-state layer + game simulator (data: nfl_script.json, loaded on demand)
+
+   One simulated game:
+   1. Final margin = the spread plus normal noise (sd 13.5 points).
+   2. How the game unfolds: a real team-game since 2024 with a similar final
+      margin supplies the share of plays run while trailing big, trailing,
+      tied, leading and leading big.
+   3. Plays per state x the team's pass rate in that state -> dropbacks and
+      runs; dropbacks x targets per dropback -> targets.
+   4. Every target and carry goes to a player by his share in that state
+      (injured players removed, their share spread over the rest); each one
+      is a real play from his history (yards, catch or not), adjusted for this
+      defense and this quarterback. The QB's line is the sum of his targets.
+   ====================================================================== */
+let SS=null,SS_P=null,SS_BM=[];
+const SPOOL={t:{},c:{}},LG_TD={},SIMC={},SIMO={},SIMV={k:null,line:null};
+function needScript(){
+  if(SS||SS_P)return;
+  SS_P=fetch('nfl_script.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+    .then(j=>{SS=j;prepScript();}).catch(e=>{console.error(e);SS={teams:{},players:{},bank:[],league:{pr:[],loc:{}},states:[],cov_seasons:[]};}).then(()=>render(true));
+}
+function prepScript(){
+  const acc={};
+  Object.keys(SS.players).forEach(id=>{const x=SS.players[id],p=BY[id],pos=p?p.p:'WR';
+    if(!SPOOL.t[pos]){SPOOL.t[pos]=[];SPOOL.c[pos]=[];}
+    for(let i=0;i<Math.min(60,x.ty.length);i++)SPOOL.t[pos].push(x.ty[i]);
+    for(let i=0;i<Math.min(60,x.cy.length);i++)SPOOL.c[pos].push(x.cy[i]);
+    const a=acc[pos]=acc[pos]||[0,0,0,0];
+    const cr=x.ty.length?x.ty.filter(v=>v!==-99).length/x.ty.length:.65;
+    a[0]+=x.rtd[0];a[1]+=x.rtd[1]*cr;a[2]+=x.utd[0];a[3]+=x.utd[1];});
+  Object.keys(acc).forEach(pos=>{const a=acc[pos];LG_TD[pos]={c:a[1]?a[0]/a[1]:.06,u:a[3]?a[2]/a[3]:.03};});
+  SS_BM=SS.bank.map(b=>b[0]);
+}
+function rnd(){return Math.random();}
+function randn(){let u=0,v=0;while(!u)u=rnd();while(!v)v=rnd();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+function pick(a){return a[(rnd()*a.length)|0];}
+function lowerBound(a,x){let lo=0,hi=a.length;while(lo<hi){const m=(lo+hi)>>1;if(a[m]<x)lo=m+1;else hi=m;}return lo;}
+function pct(a,q){if(!a.length)return null;const s=Array.from(a).sort((x,y)=>x-y);return s[Math.min(s.length-1,Math.max(0,Math.round(q*(s.length-1))))];}
+function injFor(p,g){return p.inj&&g&&p.inj.wk===g.wk?p.inj:null;}
+function injOut(p,g){const i=injFor(p,g);return !!(i&&(i.st==='Out'||i.st==='Doubtful'));}
+/* how much of his team's targets/carries he gets: this season blended toward his share since 2024 */
+function baseShare(x,kind){
+  /* trust this season by how many team plays he has been around for, not by his own touches */
+  const s=x.sh,cur=kind==='t'?s.tb:s.cb,d=(kind==='t'?s.td:s.cd)||0,car=kind==='t'?s.ta:s.ca,w=d/(d+(kind==='t'?60:50));
+  return w*cur+(1-w)*(car||cur);
+}
+function stateRatio(x,kind,b){const s=x.sh,base=kind==='t'?s.tb:s.cb,arr=kind==='t'?s.t:s.c;if(!base||!arr)return 1;return Math.min(1.6,Math.max(.5,arr[b]/base));}
+function perOppFac(def,pos,num,den){
+  const d=DA[def]&&DA[def][pos];if(!d||!d[den])return 1;
+  const lgN=lgAvg(pos,num),lgD=lgAvg(pos,den);if(!lgN||!lgD)return 1;
+  return Math.min(1.2,Math.max(.8,1+.5*((d[num]/d[den])/(lgN/lgD)-1)));
+}
+/* the team's roster for a game, with who is playing and how the usage is split */
+function simRoster(t,g){
+  const o=SIMO[g.id]||{},outO=o.out||{},shO=o.sh||{};
+  const ps=(BY_TEAM[t]||[]).filter(p=>OFF_POS.indexOf(p.p)>=0&&SS.players[p.id]).map(p=>{
+    const x=SS.players[p.id],auto=injOut(p,g)||!(p.g>0);
+    return {p:p,x:x,inj:injFor(p,g),out:(p.id in outO)?outO[p.id]:auto,auto:auto};
+  });
+  ['t','c'].forEach(k=>{
+    const act=ps.filter(r=>!r.out),fixed=act.filter(r=>shO[r.p.id]&&isNum(shO[r.p.id][k]));
+    const free=act.filter(r=>!(shO[r.p.id]&&isNum(shO[r.p.id][k])));
+    const whole=ps.reduce((s,r)=>s+(r.p.p==='QB'&&k==='t'?0:baseShare(r.x,k)),0);
+    /* the whole roster's share (out players included) is what the active group splits, so an injury redistributes volume instead of losing it */
+    const target=Math.min(k==='t'?.98:.99,Math.max(k==='t'?.85:.9,whole)),fixedSum=fixed.reduce((a,r)=>a+shO[r.p.id][k],0);
+    const raw=free.map(r=>r.p.p==='QB'&&k==='t'?0:baseShare(r.x,k)),rawSum=raw.reduce((a,b)=>a+b,0);
+    const room=Math.max(0,target-fixedSum);
+    free.forEach((r,i)=>{r[k]=rawSum?raw[i]*room/rawSum:0;});
+    fixed.forEach(r=>{r[k]=shO[r.p.id][k];});
+    ps.filter(r=>r.out).forEach(r=>{r[k]=0;});
+  });
+  ps.sort((a,b)=>(a.out-b.out)||((b.t+b.c)-(a.t+a.c)));
+  return ps;
+}
+function simSide(t,opp,g){
+  const T=SS.teams[t]||{pr:SS.league.pr,plays:62,tpd:.86,apd:.9},R=simRoster(t,g).filter(r=>!r.out);
+  const qbs=R.filter(r=>r.p.p==='QB'&&r.x.qb).sort((a,b)=>((b.p.ss&&b.p.ss.att)||0)-((a.p.ss&&a.p.ss.att)||0)),qb=qbs[0]||null;
+  const poolA=[];Object.keys(SS.players).forEach(id=>{const q=SS.players[id].qb;if(q)for(let i=0;i<Math.min(80,q.ay.length);i++)poolA.push(q.ay[i]);});
+  const ypa=a=>a.length?a.reduce((s,v)=>s+(v===-99?0:v),0)/a.length:null,lgY=ypa(poolA)||6.5;
+  let qbFac=1;if(qb){const n=qb.x.qb.ay.length,y=ypa(qb.x.qb.ay);if(y)qbFac=Math.min(1.15,Math.max(.8,1+(y/lgY-1)*n/(n+200)));}
+  const recv=R.filter(r=>r.t>0).map(r=>{const pos=r.p.p,thin=Math.max(0,(60-r.x.ty.length)/60)*.5;
+    const comp=r.x.ty.length?r.x.ty.filter(v=>v!==-99).length/r.x.ty.length:.62,catches=r.x.rtd[1]*comp;
+    return {r:r,thin:thin,pool:SPOOL.t[pos]||SPOOL.t.WR,fac:perOppFac(opp,pos==='QB'?'RB':pos,'recyd','tgt')*qbFac,
+      tdc:(r.x.rtd[0]+8*(LG_TD[pos]||{c:.06}).c)/(catches+8)};});
+  const rush=R.filter(r=>r.c>0).map(r=>{const pos=r.p.p,thin=Math.max(0,(60-r.x.cy.length)/60)*.5;
+    return {r:r,thin:thin,pool:SPOOL.c[pos]||SPOOL.c.RB,fac:pos==='RB'?perOppFac(opp,'RB','ryd','car'):1,
+      tdu:(r.x.utd[0]+10*(LG_TD[pos]||{u:.03}).u)/(r.x.utd[1]+10)};});
+  const q=qb?qb.x.qb:null;
+  return {t:t,T:T,R:R,qb:qb,recv:recv,rush:rush,qbFac:qbFac,
+    int:q?(q.int[0]+3)/(q.int[1]+100):.025,sk:q?(q.sk[0]+4)/(q.sk[1]+60):.065,scr:q?(q.scr[0]+2)/(q.scr[1]+60):.04,sy:q&&q.sy.length?q.sy:[4,6,8,3,10,5,7,2,12,0]};
+}
+const SIM_N=8000;
+function simGame(g){
+  const key=g.id+'|'+JSON.stringify(SIMO[g.id]||{});if(SIMC[key])return SIMC[key];
+  const fav=isNum(g.spread)?g.spread:0,tot=isNum(g.total)?g.total:44;
+  const sides=[simSide(g.home,g.away,g),simSide(g.away,g.home,g)];
+  const N=SIM_N,res={n:N,mh:new Float32Array(N),p:{},team:{}};
+  const mk=()=>new Float32Array(N);
+  sides.forEach(S=>{
+    res.team[S.t]={db:mk(),att:mk(),car:mk(),pyd:mk()};
+    S.R.forEach(r=>{res.p[r.p.id]={tgt:mk(),rec:mk(),recyd:mk(),lr:mk(),rectd:mk(),car:mk(),ryd:mk(),lru:mk(),rtd:mk(),
+      att:mk(),cmp:mk(),pyd:mk(),ptd:mk(),int:mk()};});
+  });
+  const bank=SS.bank,BM=SS_BM;
+  for(let i=0;i<N;i++){
+    const mh=fav+13.5*randn();res.mh[i]=mh;
+    for(let j=0;j<2;j++){
+      const S=sides[j],m=j?-mh:mh,T=S.T,out=res.team[S.t];
+      let k=lowerBound(BM,m)+Math.round((rnd()-.5)*24);k=Math.max(0,Math.min(bank.length-1,k));
+      const row=bank[k];
+      let plays=Math.round(.6*T.plays+.4*row[6]+.25*(tot-44)+4*randn());plays=Math.max(42,Math.min(88,plays));
+      const tgtB=[0,0,0,0,0],carB=[0,0,0,0,0];let db=0;
+      for(let b=0;b<5;b++){const nb=plays*row[1+b];if(nb<=0)continue;const pr=T.pr[b];
+        let d=nb*pr+Math.sqrt(nb*pr*(1-pr))*randn();d=Math.max(0,Math.min(nb,d));db+=d;tgtB[b]=d*(T.tpd||.86);carB[b]=nb-d;}
+      const nT=Math.round(tgtB.reduce((a,b)=>a+b,0)),nC=Math.round(carB.reduce((a,b)=>a+b,0)*.97);
+      out.db[i]=db;out.car[i]=nC;
+      /* who gets each target: weights by score state */
+      const wT=S.recv.map(x=>{let s=0;for(let b=0;b<5;b++)s+=tgtB[b]*x.r.t*stateRatio(x.r.x,'t',b);return s;});
+      const sT=wT.reduce((a,b)=>a+b,0),tgtTot=tgtB.reduce((a,b)=>a+b,0)||1;
+      const cumT=[];let acc=0;for(let a=0;a<wT.length;a++){acc+=wT[a]/tgtTot;cumT.push(acc);}
+      let teamYds=0,teamCmp=0,teamTD=0;
+      for(let n=0;n<nT;n++){const u=rnd();let a=0;while(a<cumT.length&&u>cumT[a])a++;
+        let y;
+        if(a>=cumT.length){y=pick(SPOOL.t.WR);if(y!==-99){teamCmp++;teamYds+=Math.round(y>0?y*S.qbFac:y);}continue;}
+        const x=S.recv[a],P=res.p[x.r.p.id];P.tgt[i]++;
+        y=(x.thin&&rnd()<x.thin)?pick(x.pool):pick(x.r.x.ty);
+        if(y===-99)continue;
+        const yy=Math.round(y>0?y*x.fac:y);P.rec[i]++;P.recyd[i]+=yy;if(yy>P.lr[i])P.lr[i]=yy;teamCmp++;teamYds+=yy;
+        if(rnd()<x.tdc){P.rectd[i]++;teamTD++;}
+      }
+      /* carries */
+      const wC=S.rush.map(x=>{let s=0;for(let b=0;b<5;b++)s+=carB[b]*x.r.c*stateRatio(x.r.x,'c',b);return s;});
+      const carTot=carB.reduce((a,b)=>a+b,0)||1;const cumC=[];acc=0;for(let a=0;a<wC.length;a++){acc+=wC[a]/carTot;cumC.push(acc);}
+      for(let n=0;n<nC;n++){const u=rnd();let a=0;while(a<cumC.length&&u>cumC[a])a++;if(a>=cumC.length)continue;
+        const x=S.rush[a],P=res.p[x.r.p.id];P.car[i]++;
+        const y0=(x.thin&&rnd()<x.thin)?pick(x.pool):pick(x.r.x.cy),y=Math.round(y0>0?y0*x.fac:y0);
+        P.ryd[i]+=y;if(y>P.lru[i])P.lru[i]=y;if(rnd()<x.tdu)P.rtd[i]++;}
+      /* quarterback: his line is the sum of the targets, plus scrambles */
+      const att=Math.round(db*(T.apd||.9));out.att[i]=att;out.pyd[i]=teamYds;
+      if(S.qb){const P=res.p[S.qb.p.id];P.att[i]=att;P.cmp[i]=teamCmp;P.pyd[i]=teamYds;P.ptd[i]=teamTD;
+        let ints=0;for(let n=0;n<att;n++)if(rnd()<S.int)ints++;P.int[i]=ints;
+        let sc=0;for(let n=0;n<db;n++)if(rnd()<S.scr)sc++;for(let n=0;n<sc;n++){const y=pick(S.sy);P.ryd[i]+=y;if(y>P.lru[i])P.lru[i]=y;}
+        P.car[i]+=sc;}
+    }
+  }
+  return SIMC[key]=res;
+}
+const SIM_STATS={QB:['pyd','cmp','att','ptd','int','ryd'],RB:['ryd','car','lru','rtd','rec','recyd'],WR:['recyd','rec','tgt','lr','rectd'],TE:['recyd','rec','tgt','lr','rectd']};
+const SIM_L={pyd:'Passing yards',cmp:'Completions',att:'Pass attempts',ptd:'Passing TDs',int:'Interceptions',ryd:'Rushing yards',car:'Carries',lru:'Longest run',rtd:'Rushing TDs',rec:'Receptions',recyd:'Receiving yards',tgt:'Targets',lr:'Longest reception',rectd:'Receiving TDs'};
+function simRefLine(p,k){
+  const g=playerGames(p),cur=g.filter(w=>w.s===SEASON).map(w=>weekVal(w,k==='ryd'&&p.p==='QB'?'ryd':k)).filter(isNum),all=g.map(w=>weekVal(w,k)).filter(isNum);
+  const ref=cur.length>=4?cur:all;if(!ref.length)return .5;
+  if(/td$|^int$/.test(k))return .5;
+  return halfLine(median(ref),ref.reduce((a,b)=>a+b,0)/ref.length);
+}
+function overP(arr,line){let c=0;for(let i=0;i<arr.length;i++)if(arr[i]>line)c++;return c/arr.length;}
+function pctTxt(x){return isNum(x)?(x<.005?'<1%':x>.995?'>99%':Math.round(x*100)+'%'):'—';}
+function simBuckets(res,t,g){
+  const home=t===g.home,cuts=[[-1e9,-8.5,'Loses by 9+'],[-8.5,0,'Loses by 1-8'],[0,8.5,'Wins by 1-8'],[8.5,1e9,'Wins by 9+']];
+  return cuts.map(([lo,hi,l])=>{const idx=[];for(let i=0;i<res.n;i++){const m=home?res.mh[i]:-res.mh[i];if(m>lo&&m<=hi)idx.push(i);}return {l:l,idx:idx,f:idx.length/res.n};});
+}
+function histSvg(arr,line,label){
+  const lo=Math.floor(pct(arr,.005)),hi=Math.ceil(pct(arr,.995));if(!isNum(lo)||!isNum(hi))return '';
+  const span=Math.max(1,hi-lo),nb=Math.min(40,Math.max(8,span<=40?span+1:40)),w=span/nb,cnt=new Array(nb).fill(0);
+  for(let i=0;i<arr.length;i++){let b=Math.floor((arr[i]-lo)/w);b=Math.max(0,Math.min(nb-1,b));cnt[b]++;}
+  const mx=Math.max(...cnt),W=980,H=220,pl=40,pb=28,bw=(W-pl-10)/nb;
+  let s='<svg viewBox="0 0 '+W+' '+(H+pb)+'" role="img" aria-label="'+esc(label)+'" style="width:100%;height:auto">';
+  for(let b=0;b<nb;b++){const x0=lo+b*w,h=cnt[b]/mx*H,over=x0+w/2>line;
+    s+='<rect x="'+(pl+b*bw+1).toFixed(1)+'" y="'+(H-h).toFixed(1)+'" width="'+Math.max(1,bw-2).toFixed(1)+'" height="'+h.toFixed(1)+'" fill="'+(over?'var(--a)':'var(--miss)')+'" rx="2"><title>'+fmtN(Math.round(x0))+' to '+fmtN(Math.round(x0+w))+': '+Math.round(cnt[b]/arr.length*100)+'% of games</title></rect>';}
+  const lx=pl+(line-lo)/w*bw;
+  if(lx>=pl&&lx<=W)s+='<line x1="'+lx.toFixed(1)+'" x2="'+lx.toFixed(1)+'" y1="0" y2="'+H+'" stroke="var(--yl)" stroke-width="3"/><text x="'+(lx+6).toFixed(1)+'" y="14" font-size="13" font-weight="700" fill="var(--ink)">'+line+'</text>';
+  const ticks=[lo,Math.round(lo+span/4),Math.round(lo+span/2),Math.round(lo+3*span/4),hi];
+  ticks.forEach(v=>{const x=pl+(v-lo)/w*bw;s+='<text x="'+x.toFixed(1)+'" y="'+(H+20)+'" font-size="12" text-anchor="middle" fill="var(--ink2)">'+fmtN(v)+'</text>';});
+  return s+'</svg>';
+}
+function simGamePick(){
+  const wks=[...new Set(GAMES.filter(g=>!isFinal(g)).map(g=>g.wk))].sort((a,b)=>a-b);
+  const wk=SIMV.wk&&wks.indexOf(SIMV.wk)>=0?SIMV.wk:wks[0];
+  return {wks:wks,wk:wk,games:GAMES.filter(g=>g.wk===wk&&!isFinal(g)).sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:(a.time||'')<(b.time||'')?-1:1)};
+}
+function vSim(gid,pid){
+  needScript();
+  let h='<section class="hero"><div><h1>Game simulator</h1><p class="sub">Plays a game out '+SIM_N.toLocaleString()+' times from the betting lines, each team’s play calling when ahead or behind, every player’s share of targets and carries in each situation, and real plays from his history. Ask it about any line, including the ones that look impossible. <a href="#/glossary/simulator">How it works</a>.</p></div></section>';
+  const G=simGamePick();
+  if(!gid){
+    if(!G.wks.length)return h+'<p class="empty">No games left this season.</p>';
+    h+='<div class="row" style="margin-top:18px"><label class="fld">Week<select id="simWk" class="sel">'+G.wks.map(w=>'<option value="'+w+'"'+(w===G.wk?' selected':'')+'>Week '+w+'</option>').join('')+'</select></label></div>';
+    return h+'<div class="slate">'+G.games.map(g=>'<a class="gt" href="#/sim/'+g.id+'"><div class="gt-team">'+tt(g.away,false)+'</div><div class="gt-team">'+tt(g.home,false)+'</div><div class="gt-foot"><span>'+esc(kick(g))+'</span><span>'+(spreadTxt(g)?'<b>'+esc(spreadTxt(g))+'</b>'+(isNum(g.total)?', total <b>'+g.total+'</b>':''):'')+'</span></div></a>').join('')+'</div>';
+  }
+  const g=GAMES.find(x=>x.id===gid);if(!g)return notFound('That game');
+  if(!SS)return h+'<p class="empty">Loading play-by-play history…</p>';
+  if(!SS.teams[g.home]||!SS.teams[g.away])return h+'<p class="empty">No play-by-play history for these teams yet.</p>';
+  const res=simGame(g);
+  h=h.replace('<h1>Game simulator</h1>','<h1 class="simh">'+tt(g.away,false)+'<span class="at">at</span>'+tt(g.home,false)+'</h1>');
+  h+='<p class="meta" style="margin-top:8px">'+esc(kick(g))+(spreadTxt(g)?' · '+esc(spreadTxt(g)):'')+(isNum(g.total)?', total '+g.total:'')+' · <a href="#/game/'+g.id+'">Matchup page</a> · <a href="#/sim">Other games</a></p>';
+  /* how the game goes */
+  const hb=simBuckets(res,g.home,g);
+  h+=band('pro','How the game goes','Every simulated game starts from the spread, then plays out like a real game with a similar result.');
+  h+='<dl class="tiles" style="margin-top:14px">'+hb.map(b=>'<div class="tile"><dt>'+g.home+' '+b.l.toLowerCase()+'</dt><dd>'+pctTxt(b.f)+'</dd></div>').join('')+'</dl>';
+  h+='<div class="scroll" style="margin-top:12px"><table><thead><tr><th>Team</th><th class="num">Dropbacks</th><th class="num">Pass attempts</th><th class="num">Carries</th><th class="num">Passing yards</th></tr></thead><tbody>'+
+    [g.away,g.home].map(t=>{const T=res.team[t],r=a=>fx(pct(a,.5),0)+' <span class="mut small">('+fx(pct(a,.1),0)+'–'+fx(pct(a,.9),0)+')</span>';
+      return '<tr><td>'+tt(t)+'</td><td class="num">'+r(T.db)+'</td><td class="num">'+r(T.att)+'</td><td class="num">'+r(T.car)+'</td><td class="num">'+r(T.pyd)+'</td></tr>';}).join('')+
+    '</tbody></table></div><p class="small mut" style="margin-top:6px">Middle value, with the range of 8 games in 10 in brackets.</p>';
+  /* player detail */
+  if(pid&&res.p[pid]&&BY[pid])h+=simDetail(g,res,BY[pid]);
+  /* both rosters */
+  h+=band('ctx','Who plays and how much','Injury report designations are applied automatically. Change who plays, or anyone’s share of targets and carries, to test a different game plan.');
+  h+='<div class="simteams">'+[g.away,g.home].map(t=>simTeamPanel(g,t,res)).join('')+'</div>';
+  h+='<p class="note">The simulator uses real plays since '+(HIST[0]||SEASON)+', so a player who changed teams or roles carries some of his old profile. Coverage, weather and in-game injuries are not modeled. These are probabilities from public data, not betting advice.</p>';
+  return h;
+}
+function simTeamPanel(g,t,res){
+  const R=simRoster(t,g),o=SIMO[g.id]||{},sh=o.sh||{};
+  return '<section class="simteam"><h2>'+tt(t,false)+' <span class="small mut">'+esc(fullName(t))+'</span></h2><div class="scroll"><table><thead><tr><th>Player</th><th>Status</th><th class="num">Target share</th><th class="num">Carry share</th><th class="num">Main stat</th><th class="num">Ceiling (1 in 5)</th><th><span class="sr">Playing</span></th></tr></thead><tbody>'+
+    R.filter(r=>!r.out||r.auto||(o.out&&r.p.id in o.out)).map(r=>{const p=r.p,P=res.p[p.id],k=(SIM_STATS[p.p]||['recyd'])[0],inj=r.inj;
+      const st=inj&&inj.st?'<span class="injb '+inj.st.toLowerCase()+'">'+esc(inj.st)+'</span> <span class="small mut">'+esc(inj.i||'')+'</span>':(!(p.g>0)?'<span class="small mut">No games this season</span>':'');
+      const inp=(kind,v)=>'<input class="inp simsh" type="number" min="0" max="60" step="1" data-simsh="'+p.id+'" data-kind="'+kind+'" value="'+(r.out?'':Math.round(v*100))+'" aria-label="'+esc(p.n)+' '+(kind==='t'?'target':'carry')+' share percent"'+(r.out?' disabled':'')+'>%';
+      return '<tr'+(r.out?' class="mut"':'')+'><td>'+(r.out?esc(p.n):'<a href="#/sim/'+g.id+'/'+p.id+'">'+esc(p.n)+'</a>')+' <span class="mut small">'+p.p+'</span></td><td>'+st+'</td>'+
+        '<td class="num">'+(p.p==='QB'?'—':inp('t',r.t))+'</td><td class="num">'+inp('c',r.c)+'</td>'+
+        '<td class="num">'+(P?fmtN(pct(P[k],.5))+' <span class="small mut">'+esc(SIM_L[k].toLowerCase())+'</span>':'—')+'</td><td class="num">'+(P?fmtN(pct(P[k],.8)):'—')+'</td>'+
+        '<td><button class="btn" data-simout="'+p.id+'" data-gid="'+g.id+'">'+(r.out?'Put in':'Sit out')+'</button></td></tr>';}).join('')+
+    '</tbody></table></div>'+(sh&&Object.keys(sh).length||o.out&&Object.keys(o.out).length?'<button class="btn" data-simreset="'+g.id+'" style="margin-top:8px">Reset to the injury report</button>':'')+'</section>';
+}
+function simDetail(g,res,p){
+  const ks=SIM_STATS[p.p]||['recyd'];if(!SIMV.k||ks.indexOf(SIMV.k)<0||SIMV.pid!==p.id){SIMV.k=ks[0];SIMV.pid=p.id;SIMV.line=null;}
+  const k=SIMV.k,P=res.p[p.id],arr=P[k];if(!isNum(SIMV.line))SIMV.line=simRefLine(p,k);
+  const line=SIMV.line,po=overP(arr,line),T=p.t,bk=simBuckets(res,T,g),vol=p.p==='QB'?'att':/^(car|ryd|lru|rtd)$/.test(k)?'car':'tgt',volL={att:'pass attempts',car:'carries',tgt:'targets'}[vol];
+  let h=band('fan',esc(p.n)+': any line','Pick a stat and type any line. The bars are every simulated game.');
+  h+='<div class="navrow" style="margin-top:12px"><div class="chips" role="group" aria-label="Stat">'+ks.map(x=>'<button data-simk="'+x+'" aria-pressed="'+(x===k)+'">'+esc(SIM_L[x])+'</button>').join('')+'</div></div>';
+  h+='<div class="row" style="margin-top:10px;align-items:flex-end"><label class="fld">Line<input id="simLine" class="inp" type="number" step="0.5" min="0" value="'+line+'" style="width:110px"></label><a class="btn" href="#/player/'+p.id+'">Player page</a></div>';
+  h+='<dl class="tiles" style="margin-top:12px"><div class="tile"><dt>Over '+line+'</dt><dd>'+pctTxt(po)+'</dd><p class="pt">of '+res.n.toLocaleString()+' simulated games</p></div><div class="tile"><dt>Under '+line+'</dt><dd>'+pctTxt(1-po)+'</dd></div>'+
+    '<div class="tile"><dt>Middle outcome</dt><dd>'+fmtN(pct(arr,.5))+'</dd><p class="pt">8 in 10 between '+fmtN(pct(arr,.1))+' and '+fmtN(pct(arr,.9))+'</p></div>'+
+    '<div class="tile"><dt>Ceiling (1 in 5)</dt><dd>'+fmtN(pct(arr,.8))+'</dd><p class="pt">1 in 10: '+fmtN(pct(arr,.9))+'</p></div></dl>';
+  h+='<div class="viz">'+histSvg(arr,line,SIM_L[k]+' across simulated games')+'</div>';
+  /* by script */
+  h+='<h3 style="margin-top:18px">By game script</h3><div class="scroll"><table><thead><tr><th>'+T+'…</th><th class="num">How often</th><th class="num">Over '+line+'</th><th class="num">Middle '+esc(SIM_L[k].toLowerCase())+'</th><th class="num">Middle '+volL+'</th></tr></thead><tbody>'+
+    bk.map(b=>{const sub=b.idx.map(i=>arr[i]),v=b.idx.map(i=>P[vol][i]);return '<tr><td>'+b.l+'</td><td class="num">'+pctTxt(b.f)+'</td><td class="num"><b>'+pctTxt(sub.length?sub.filter(x=>x>line).length/sub.length:null)+'</b></td><td class="num">'+fmtN(pct(sub,.5))+'</td><td class="num">'+fmtN(pct(v,.5))+'</td></tr>';}).join('')+'</tbody></table></div>';
+  /* what has to happen */
+  const oi=[],ui=[];for(let i=0;i<res.n;i++)(arr[i]>line?oi:ui).push(i);
+  const mv=a=>pct(a.map(i=>P[vol][i]),.5),kk=Math.max(1,Math.round(mv(oi)||0));
+  const withK=[],lessK=[];for(let i=0;i<res.n;i++)(P[vol][i]>=kk?withK:lessK).push(arr[i]>line);
+  const rate=a=>a.length?a.filter(Boolean).length/a.length:null;
+  const tips=[];
+  if(oi.length&&ui.length)tips.push('When he goes over, he gets about <b>'+fmtN(mv(oi))+' '+volL+'</b>; when he stays under, about <b>'+fmtN(mv(ui))+'</b>.');
+  if(withK.length&&lessK.length)tips.push('With <b>'+kk+'+ '+volL+'</b> he clears it <b>'+pctTxt(rate(withK))+'</b> of the time; with fewer, <b>'+pctTxt(rate(lessK))+'</b>.');
+  if((k==='recyd'||k==='ryd'||k==='pyd')&&oi.length){const big=k==='ryd'?P.lru:P.lr;if(k!=='pyd'){const b20=oi.filter(i=>big[i]>=20).length/oi.length;tips.push('<b>'+pctTxt(b20)+'</b> of his overs include a single play of 20+ yards.');}}
+  const best=bk.filter(b=>b.idx.length>res.n*.05).map(b=>({b:b,r:b.idx.filter(i=>arr[i]>line).length/b.idx.length})).sort((a,b)=>b.r-a.r)[0];
+  if(best)tips.push('Most likely when '+T+' '+best.b.l.toLowerCase()+': <b>'+pctTxt(best.r)+'</b> (that happens in '+pctTxt(best.b.f)+' of games).');
+  h+='<h3 style="margin-top:18px">What has to happen</h3><ul class="bpw" style="font-size:14px;gap:8px">'+tips.map(t=>'<li>'+t+'</li>').join('')+'</ul>';
+  return h;
+}
+/* test hook: average simulated line for every player in a game */
+window.gsSimSummary=function(gid){const g=GAMES.find(x=>x.id===gid);if(!g||!SS)return null;const r=simGame(g);const m=a=>a.reduce((s,v)=>s+v,0)/a.length;
+  return Object.keys(r.p).map(id=>{const p=BY[id],P=r.p[id],o={n:p.n,t:p.t,pos:p.p};['tgt','rec','recyd','car','ryd','att','cmp','pyd'].forEach(k=>{o[k]=+m(P[k]).toFixed(1);});o.ss=p.ss;return o;});};
+/* simulated chance for a Best props pick (cached per game) */
+function bpSimP(q){if(!SS||!SS.teams[q.g.home]||!SS.teams[q.g.away])return null;const res=simGame(q.g),P=res.p[q.p.id];if(!P||!P[q.k])return null;const o=overP(P[q.k],q.line);return q.over?o:1-o;}
+
+/* ---------- situational views on player and team pages ---------- */
+function stateTable(p){
+  if(!SS)return '<p class="empty">Loading play-by-play…</p>';
+  const x=SS.players[p.id];if(!x)return '';
+  const st=SS.states,row=(l,arr,base)=>'<tr><td>'+l+'</td>'+arr.map(v=>'<td class="num">'+fx(v*100,1)+'%</td>').join('')+'<td class="num"><b>'+fx(base*100,1)+'%</b></td></tr>';
+  let h='<h2>How his role changes with the score</h2><p class="lede">His share of his team’s targets and carries this season in each game situation, from play-by-play. A role that grows when his team trails points to overs in games his team is expected to lose. <a href="#/glossary/score-state">More on game states</a>.</p>';
+  h+='<div class="scroll"><table><thead><tr><th>Share of team’s</th>'+st.map(s=>'<th class="num">'+esc(s)+'</th>').join('')+'<th class="num">Overall</th></tr></thead><tbody>'+
+    (x.sh.tb>0||p.p!=='QB'?row('Targets',x.sh.t,x.sh.tb):'')+(x.sh.cb>0?row('Carries',x.sh.c,x.sh.cb):'')+'</tbody></table></div>';
+  const bits=[];
+  if(isNum(x.adot))bits.push(['Average target depth',fx(x.adot,1)+' yards']);
+  if(isNum(x.deep))bits.push(['Deep targets (15+ air yards)',fx(x.deep*100,0)+'%']);
+  if(x.loc)bits.push(['Targets left / middle / right',x.loc.map(v=>Math.round(v*100)+'%').join(' / ')]);
+  if(x.rz&&(x.rz[0]||x.rz[1]))bits.push(['Red-zone targets / carries this season',x.rz[0]+' / '+x.rz[1]]);
+  if(x.vs){const f=v=>v[0]?fx(v[2]/v[0],1)+' yds per target, '+Math.round(v[1]/v[0]*100)+'% caught ('+v[0]+')':'—';bits.push(['Against man coverage ('+(SS.cov_seasons||[]).join('–')+')',f(x.vs.M)]);bits.push(['Against zone coverage',f(x.vs.Z)]);}
+  if(x.dpi)bits.push(['Pass interference drawn since '+(HIST[0]||SEASON),x.dpi[0]+' flags, '+x.dpi[1]+' yards']);
+  if(bits.length)h+='<dl class="lines" style="margin-top:12px">'+bits.map(b=>'<div><dt>'+b[0]+'</dt><dd>'+b[1]+'</dd></div>').join('')+'</dl>';
+  const ng=nextGame(p.t);if(ng)h+='<p style="margin-top:12px"><a class="btn solid" href="#/sim/'+ng.id+'/'+p.id+'">Simulate his next game and test any line</a></p>';
+  return h;
+}
+const LOC_Z=[['ls','Short left'],['ms','Short middle'],['rs','Short right'],['ld','Deep left'],['md','Deep middle'],['rd','Deep right']];
+function teamStateSection(t){
+  if(!SS)return '<p class="empty">Loading play-by-play…</p>';
+  const x=SS.teams[t];if(!x)return '';
+  let h='<h2>Play calling by game state</h2><p class="lede">How often they pass in each situation this season (blended toward their usual tendency early in the season), against the league. This is what the simulator uses.</p>';
+  h+='<div class="scroll"><table><thead><tr><th>Pass rate</th>'+SS.states.map(s=>'<th class="num">'+esc(s)+'</th>').join('')+'</tr></thead><tbody>'+
+    '<tr><td>'+esc(nick(t))+'</td>'+x.pr.map((v,i)=>{const d=v-SS.league.pr[i];return '<td class="num"><b>'+fx(v*100,1)+'%</b> <span class="small '+(Math.abs(d)>=.03?(d>0?'up':'dn'):'mut')+'">'+(d>=0?'+':'−')+fx(Math.abs(d)*100,1)+'</span></td>';}).join('')+'</tr>'+
+    '<tr><td class="mut">League</td>'+SS.league.pr.map(v=>'<td class="num mut">'+fx(v*100,1)+'%</td>').join('')+'</tr>'+
+    '<tr><td class="mut">Their plays this season</td>'+x.prc.map(v=>'<td class="num mut">'+v[0]+'</td>').join('')+'</tr></tbody></table></div>';
+  h+='<p class="small mut" style="margin-top:6px">'+fx(x.plays,1)+' offensive plays per game'+(isNum(x.adot)?', average throw '+fx(x.adot,1)+' yards downfield':'')+'.</p>';
+  /* throws by location and depth */
+  const L=x.loc_def[String(SEASON)]||{},A=x.loc_def.all||{},lg=SS.league.loc.all||{};
+  const ypt=v=>v&&v[0]?v[2]/v[0]:null;
+  h+='<h2>Where passes beat their defense</h2><p class="lede">Yards per target allowed by area of the field, this season and since '+(HIST[0]||SEASON)+', against the league. Short is under 15 air yards.</p>';
+  h+='<div class="scroll"><table><thead><tr><th>Area</th><th class="num">Targets this season</th><th class="num">Yds/target this season</th><th class="num">Since '+(HIST[0]||SEASON)+'</th><th class="num">League</th></tr></thead><tbody>'+
+    LOC_Z.map(([z,l])=>{const c=ypt(L[z]),a=ypt(A[z]),g=ypt(lg[z]),d=isNum(a)&&isNum(g)?a-g:null;
+      return '<tr><td>'+l+'</td><td class="num">'+((L[z]||[0])[0])+'</td><td class="num">'+fx(c,1)+'</td><td class="num"><b>'+fx(a,1)+'</b>'+(isNum(d)?' <span class="small '+(Math.abs(d)>=.5?(d>0?'dn':'up'):'mut')+'">'+(d>=0?'+':'−')+fx(Math.abs(d),1)+'</span>':'')+'</td><td class="num mut">'+fx(g,1)+'</td></tr>';}).join('')+'</tbody></table></div>';
+  /* penalties */
+  const pn=x.pen[String(SEASON)];
+  if(pn){const ty=a=>a.map(v=>esc(v[0])+' ('+v[1]+')').join(', ');
+    h+='<h2>Penalties</h2><dl class="tiles"><div class="tile"><dt>Offensive flags per game</dt><dd>'+fx(pn.off,1)+'</dd><p class="pt">'+fx(pn.offy,1)+' yards</p></div><div class="tile"><dt>Defensive flags per game</dt><dd>'+fx(pn.def,1)+'</dd><p class="pt">'+fx(pn.defy,1)+' yards</p></div><div class="tile"><dt>Flags drawn per game</dt><dd>'+fx(pn.drawn,1)+'</dd></div></dl>'+
+      '<p class="small mut" style="margin-top:6px">Most common on defense: '+ty(pn.top_def)+'. On offense: '+ty(pn.top_off)+'. Pass interference yards are not receiving yards, so a defense that commits a lot of it can hold receivers under while giving up field position.</p>';}
+  /* coverage */
+  const cs=(SS.cov_seasons||[]).slice().reverse().find(s=>x.cov[String(s)]);
+  if(cs){const c=x.cov[String(cs)];h+='<h2>Coverage</h2><p class="lede">From '+cs+' play charting (published after each season, so this season isn’t in it yet).</p><dl class="tiles"><div class="tile"><dt>Man coverage</dt><dd>'+fx(c.man*100,0)+'%</dd><p class="pt">of charted dropbacks</p></div>'+
+    Object.keys(c.shells).slice(0,4).map(k=>'<div class="tile"><dt>'+esc(k.replace('_',' ').replace('COVER','Cover').replace('2 MAN','2-Man'))+'</dt><dd>'+fx(c.shells[k]*100,0)+'%</dd></div>').join('')+'</dl>';}
+  return h;
+}
+
 function vProps(){
   const since=HIST[0]||SEASON;
   const rows=WATCH.map((e,i)=>({e,i,p:BY[e.id]})).filter(x=>x.p).map(x=>{
@@ -2382,6 +2709,7 @@ function render(keep){
   else if(v==='outlook'){html=vOutlook();title='Outlook';}
   else if(v==='fantasy'){html=vFantasy();title='Fantasy';}
   else if(v==='best'){html=vBest();title='Best props';}
+  else if(v==='sim'){html=vSim(r[1],r[2]);title='Game simulator';}
   else if(v==='leaders'){html=vLeaders(r[1],r[2]);title='Stat leaders';}
   else if(v==='glossary'){html=vGlossary(r[1]);title='Glossary';}
   else if(v==='allowed'){html=vAllowed(r[1],r[2],r[3]);title=(r[1]||'')+' defense vs '+(r[2]||'')+'s';nav='teams';}
@@ -2444,6 +2772,10 @@ document.addEventListener('click',e=>{
   if(t.dataset.top!==undefined){const rm=matchMedia('(prefers-reduced-motion: reduce)').matches;window.scrollTo({top:0,behavior:rm?'auto':'smooth'});const a=document.getElementById('app');if(a)a.focus({preventScroll:true});return;}
   if(t.dataset.wk!==undefined){const weeks=[...new Set(GAMES.map(g=>g.wk))].sort((a,b)=>a-b);const d=+t.dataset.wk;
     if(d===0)HW=NEXT_WK;else{const i=weeks.indexOf(HW)+d;if(i>=0&&i<weeks.length)HW=weeks[i];}render(true);return;}
+  if(t.dataset.simout){const o=SIMO[t.dataset.gid]=SIMO[t.dataset.gid]||{};o.out=o.out||{};const p=BY[t.dataset.simout],g=GAMES.find(x=>x.id===t.dataset.gid);
+    const cur=(p.id in o.out)?o.out[p.id]:(injOut(p,g)||!(p.g>0));o.out[p.id]=!cur;if(o.sh)delete o.sh[p.id];render(true);return;}
+  if(t.dataset.simreset){delete SIMO[t.dataset.simreset];render(true);return;}
+  if(t.dataset.simk){SIMV.k=t.dataset.simk;SIMV.line=null;render(true);return;}
   if(t.dataset.bppos!==undefined){BP.pos=t.dataset.bppos;render(true);return;}
   if(t.dataset.bpside!==undefined){BP.side=t.dataset.bpside;render(true);return;}
   if(t.dataset.ftpos){FT.pos=t.dataset.ftpos;render(true);return;}
@@ -2492,6 +2824,10 @@ document.addEventListener('click',e=>{
 });
 document.addEventListener('change',e=>{
   const id=e.target.id,refocus=()=>{const s=document.getElementById(id);if(s)s.focus();};
+  if(e.target.dataset&&e.target.dataset.simsh){const gid=(location.hash.split('/')[2]||''),o=SIMO[gid]=SIMO[gid]||{};o.sh=o.sh||{};const pid=e.target.dataset.simsh,k=e.target.dataset.kind,v=parseFloat(e.target.value);
+    o.sh[pid]=o.sh[pid]||{};if(isNum(v))o.sh[pid][k]=Math.max(0,Math.min(.6,v/100));else delete o.sh[pid][k];render(true);return;}
+  if(id==='simLine'){const v=parseFloat(e.target.value);if(isNum(v)){SIMV.line=v;}render(true);refocus();return;}
+  if(id==='simWk'){SIMV.wk=+e.target.value;render(true);refocus();return;}
   if(id==='plTeam'){PL.team=e.target.value;render(true);}
   else if(id==='pvStat'){PV.key=e.target.value;render(true);refocus();}
   else if(id==='pvSpan'){PV.span=e.target.value;render(true);refocus();}

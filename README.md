@@ -3,15 +3,18 @@
 **Live:** https://drilium.github.io/game-script/ (GitHub Pages, published by the workflow below)
 
 A static site (`index.html`) that fetches real 2026 NFL data (`nfl_data.json`)
-at load time. Pages: This week (slate, player props, fantasy, context), Best props (strongest over/under spots per game with reasons and game script), Fantasy (weekly PPR rankings, starter-level weeks, PPR allowed by defense), Stat leaders (every category, totals or per game, with next matchups), Teams and team
+at load time. Pages: This week (slate, player props, fantasy, context), Best props (strongest over/under spots per game with reasons and game script), Fantasy (weekly PPR rankings, starter-level weeks, PPR allowed by defense), Stat leaders (every category, totals or per game, with next matchups), Simulator (plays any game out 8,000 times from the betting lines, score-state play calling and real plays, so you can price any player line, sit players and change shares), Teams and team
 pages, Players and player pages (offense and defense), Compare (player vs
 player, player vs an opposing defense's individual defenders, and team vs
 team), a matchup page for every game, and Props.
 
-Three data files are produced: `nfl_data.json` (loaded on every page),
-`nfl_h2h.json` (player-vs-defender plays since 2024) and `nfl_allowed.json`
-(every game behind every "defense allows" number). The last two load only on
-views that need them. All three must be committed next to `index.html`. The data is pulled from nflverse's public datasets by
+Four data files are produced: `nfl_data.json` (loaded on every page),
+`nfl_h2h.json` (player-vs-defender plays since 2024), `nfl_allowed.json`
+(every game behind every "defense allows" number) and `nfl_script.json`
+(game-state play calling, player shares by score, field zones, penalties,
+coverage and the simulator's play history, built by `build_script.py`). The
+last three load only on views that need them. All four must be committed
+next to `index.html`. The data is pulled from nflverse's public datasets by
 `build_data.py` — rosters, weekly stats, snap counts, the full schedule with
 closing betting lines, multi-season opponent history, and real
 defense-allowed-by-position numbers.
@@ -19,7 +22,7 @@ defense-allowed-by-position numbers.
 ## One-time setup (about 10 minutes)
 
 1. **Create a GitHub repo** and push everything in this folder to it
-   (`index.html`, `nfl_data.json`, `nfl_h2h.json`, `nfl_allowed.json`, `build_data.py`, `netlify.toml`, and the
+   (`index.html`, `nfl_data.json`, `nfl_h2h.json`, `nfl_allowed.json`, `nfl_script.json`, `build_data.py`, `build_script.py`, `netlify.toml`, and the
    `.github/workflows/` folder — keep that folder structure as-is).
 
 2. **Connect the repo to Netlify**:
@@ -43,10 +46,11 @@ Friday 5am (after Thursday night), Sunday 1am (after Saturday games), Sunday
 Monday night) and Tuesday 9am (full weekly refresh). Each run:
 
 1. Runs `build_data.py`, which re-pulls rosters, stats, snap counts, the
-   schedule and three seasons of play-by-play from nflverse and rewrites
-   `nfl_data.json`, `nfl_h2h.json` and `nfl_allowed.json` (about 15 seconds).
+   schedule, injury reports, coverage charting and three seasons of
+   play-by-play from nflverse and rewrites `nfl_data.json`, `nfl_h2h.json`,
+   `nfl_allowed.json` and `nfl_script.json` (a minute or two).
 2. Commits the data to `main` if it changed.
-3. Publishes `index.html` plus the three data files to GitHub Pages.
+3. Publishes `index.html` plus the four data files to GitHub Pages.
 
 Any code push to `main` also republishes the site (no data rebuild).
 Scores usually appear in the evening runs; full player stats depend on when

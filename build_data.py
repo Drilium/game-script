@@ -199,7 +199,6 @@ def build_h2h(seasons, roster, pos_group):
                         if d == it: a[4] += 1
         except Exception as e:
             print(f"  (skipping {season} play-by-play: {e})")
-        _RAW.pop(path, None) if season != cur else None
     out = {}
     for o, ds in pairs.items():
         if o not in roster:
@@ -912,6 +911,35 @@ def build(season):
     h2h, dprof, longs, dlong, d20g = build_h2h(hist_seasons + [season], roster, pos_group)
     allowed_log = build_allowed_log(all_season_rows, longs, d20g, game_rows, hist_seasons + [season])
     script = build_script_model(all_season_rows, game_rows, hist_seasons + [season], season)
+    # Game-state layer (situational usage, outcome samples, location/depth, penalties, coverage)
+    try:
+        from build_script import build_script
+        snap_games = defaultdict(set)      # (name, team) -> games he played offensive snaps in
+        for row in snap_rows:
+            if num(row.get("offense_snaps")) > 0:
+                snap_games[(row["player"].strip(), row["team"].strip())].add(row["game_id"])
+        states = build_script(fetch_bytes, hist_seasons + [season], season, roster, pos_group,
+                              drop_raw=lambda p: _RAW.pop(p, None), snap_games=snap_games)
+    except Exception as e:
+        print(f"  (game-state layer skipped: {e})")
+        states = None
+    # Free weekly injury reports: each player's latest designation this season
+    try:
+        inj = {}
+        for row in fetch_csv(f"injuries/injuries_{season}.csv"):
+            if row.get("season_type") != "REG" or not row.get("gsis_id"):
+                continue
+            wk = int(row.get("week") or 0)
+            if row["gsis_id"] not in inj or wk >= inj[row["gsis_id"]]["wk"]:
+                inj[row["gsis_id"]] = {"wk": wk, "st": row.get("report_status") or "",
+                                       "i": row.get("report_primary_injury") or row.get("practice_primary_injury") or "",
+                                       "pr": row.get("practice_status") or ""}
+        for p in players:
+            if p["id"] in inj:
+                p["inj"] = inj[p["id"]]
+        print(f"  injury reports: {len(inj)} players")
+    except Exception as e:
+        print(f"  (injury reports unavailable: {e})")
     # attach longest reception / run to every game line we show
     for p in players:
         for line in p["hist"]:
@@ -937,11 +965,11 @@ def build(season):
            "players": players, "games": games, "past_games": past_games,
            "defense_allowed": defense_allowed, "team_scheme": scheme["team"],
            "team_stats": team_stats, "teams": teams_meta, "script": script}
-    return out, h2h, allowed_log
+    return out, h2h, allowed_log, states
 
 if __name__ == "__main__":
     season = int(sys.argv[1]) if len(sys.argv) > 1 else season_for_today()
-    data, h2h, allowed_log = build(season)
+    data, h2h, allowed_log, states = build(season)
     with open("nfl_data.json", "w") as f:
         json.dump(data, f, separators=(",", ":"))
     # Head-to-head plays live in their own file; the site loads it only when a
@@ -954,3 +982,7 @@ if __name__ == "__main__":
     with open("nfl_allowed.json", "w") as f:
         json.dump(allowed_log, f, separators=(",", ":"))
     print(f"Wrote nfl_allowed.json — {sum(len(v) for v in allowed_log['teams'].values())} defense-games, {len(allowed_log['names'])} players")
+    if states:
+        with open("nfl_script.json", "w") as f:
+            json.dump(states, f, separators=(",", ":"))
+        print(f"Wrote nfl_script.json — {len(states['players'])} players, {len(states['bank'])} team-games of game-state history")
