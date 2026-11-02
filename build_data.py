@@ -717,9 +717,13 @@ def build(season):
         weekly[pid].append(wk_entry)
 
     snaps_by_key = defaultdict(list)
+    snap_week = {}      # (name, team, week) -> share of snaps that game, used to spot early exits and part-time games
     for row in snap_rows:
         key = (row["player"].strip(), row["team"].strip())
-        snaps_by_key[key].append(num(row.get("offense_pct")) + num(row.get("defense_pct")))
+        share = num(row.get("offense_pct")) + num(row.get("defense_pct"))
+        snaps_by_key[key].append(share)
+        if row.get("week"):
+            snap_week[key + (int(row["week"]),)] = share
 
     players = []
     for pid, r in roster.items():
@@ -760,6 +764,9 @@ def build(season):
                     if "d_" + k in w:
                         line[k] = round(w["d_" + k], 1)
                 line["v"] = round(w.get(wk_field, w.get("tkl", 0)), 1)
+                sp = snap_week.get((r["n"], r["t"], w["w"]))
+                if sp is not None:
+                    line["sp"] = round(sp * 100)
                 wk_list.append(line)
             entry["wk"] = wk_list
         else:
@@ -889,6 +896,8 @@ def build(season):
             "hr": int(row["home_rest"]) if row["home_rest"] else None,
             "div": row["div_game"] == "1",
             "aqb": row["away_qb_name"] or None, "hqb": row["home_qb_name"] or None,
+            "temp": int(float(row["temp"])) if row.get("temp") else None,
+            "wind": int(float(row["wind"])) if row.get("wind") else None,
         })
     games.sort(key=lambda g: (g["wk"], g["date"]))
 

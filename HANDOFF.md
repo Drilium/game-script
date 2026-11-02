@@ -551,6 +551,52 @@ look impossible but are just what a team has to do to win.
 - Limits: no live odds (lines come from the schedule file), coverage stops
   at 2025, in-game injuries and weather aren't modeled.
 
+## Projections with schematic matchups + "last game: anything unusual?" (2026-11-02)
+
+- **Projections page** (`#/outlook`, alias `#/proj`, `#/outlook/<gid>` for one
+  game; nav label "Projections") now runs on the simulator instead of the
+  old average-based model. Games are simulated one per tick (`olWarm`) so
+  the page never freezes; progress text shows while it runs.
+- **Schematic matchup factors** (`covFx`, `zoneFx`, `funnelFx`,
+  `passFunnelFx`, `pressFx`, `rzFx`) are applied inside `simSide`, so the
+  simulator, projections and Best-props "Simulated" % all agree:
+  - Man/zone: defense's man rate (latest charted season, shrunk 25% to
+    league) × receiver's yds/target vs man and vs zone (shrunk with 40
+    targets). Cap ±8%.
+  - Field zones: his target map (left/middle/right × short/deep) against
+    the defense's yds/target allowed per zone since 2024, divided by the
+    same for a league-average target map so it's an interaction only. Half
+    weight, cap ±7%.
+  - Target funnel: share of WR/TE/RB targets the defense allows vs league
+    tilts each position's target share (renormalized; user-typed shares
+    untouched). Half weight, cap ±12%.
+  - Pass/run funnel: opponents' pass rate vs league shifts the team's pass
+    rate in every score state by 35% of the gap (max ±3.5 pts).
+  - Pass rush: defense pressure rate → QB yards per throw (−12% of the gap,
+    cap ±5%) and interceptions.
+  - Red zone: TD rate allowed on red-zone trips (shrunk with 15 trips) →
+    TD chances, cap ±15%.
+  - Defense vs position and QB quality as before. Each is an interaction
+    on top of overall defense quality to avoid double counting.
+- **Player pages:** "Next game projection" (sim average + middle-60% range
+  per stat, anytime TD %, and a "What moves the projection" table with a
+  plain-language reason for every factor) replaces the old outlook table.
+  Compare pages use the same section.
+- **Last game: anything unusual?** (`gameNotes`, `lastGameBox`): flags key
+  teammates who didn't play or played <55% of their usual snaps, his own
+  snap share (early exit / bigger role), QB change vs the season's most
+  common starter, blowouts of 17+, wind ≥15 mph or ≤25°F, and top-3 /
+  bottom-3 defenses vs his position. Usage spike/dip = targets (touches for
+  RBs, attempts for QBs) ≥1/3 above/below his other games and by 3+. Then
+  checks whether the reason carries into next week via the injury report.
+  The full game log gets "Snaps" and "What was different" columns for this
+  season, and the Projections table shows the last-game tags.
+- `build_data.py` now adds per-game snap share (`sp`) to each weekly line
+  and `temp`/`wind` to games (nflverse fills weather for about a third of
+  games).
+- Best props, Prop research and Fantasy still use the quicker
+  average-based `project()`; the glossary explains both.
+
 ## Feature inventory (what's actually built and shipped)
 
 - Game-day view, full player pages (bio, season stats, per-week game log,
