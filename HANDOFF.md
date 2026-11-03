@@ -597,6 +597,18 @@ look impossible but are just what a team has to do to win.
 - Best props, Prop research and Fantasy still use the quicker
   average-based `project()`; the glossary explains both.
 
+## Broadcast skin across the whole site (2026-11-03)
+
+Dre asked every page to match the StatTree-style screenshots. Dark
+"broadcast" is now the default theme (tokens on `:root`), light is the
+toggle (`:root[data-theme="light"]`, remembered in localStorage `gs_theme`).
+Accent green #3DDC84 (good ranks), red #FF6B6B (bad), heavy 900-weight
+uppercase page titles, h2 with a green left bar, h3 as green tracked
+micro-labels, uppercase tracked table headers and tile labels, dark raised
+cards, green pill chips, two-row header (brand + search, then section nav).
+The overrides live in the "Broadcast skin" block at the end of the
+stylesheet; the game preview / cheat sheet cards stay dark in both themes.
+
 ## Matchup board, daily change log, report card and self-learning (2026-11-03)
 
 Dre's brief: StatTree-level visuals, a weekly list of the best schematic

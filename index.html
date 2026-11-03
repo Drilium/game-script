@@ -6,7 +6,8 @@
 <title>Game Script</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&display=swap">
+<script>try{if(localStorage.getItem('gs_theme')==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}</script>
 <style>
 /* ==========================================================================
    Game Script: data-first design system
@@ -17,33 +18,29 @@
    (CVD-checked pair). Percentile circles use a 5-step red-to-green scale.
    ========================================================================== */
 :root{
-  --bg:#C7C2B6;--surface:#FFFFFF;--sunken:#F0EFEA;--ink:#111915;--ink2:#3F4A45;--mute:#66706B;
-  --rule:#E4E2DC;--rule2:#CAC6BD;--turf:#1C6B44;--turf-bg:#DCEDE3;
-  --a:#2a78d6;--a-bg:#E4EEFB;--b:#eb6834;--b-bg:#FCEBE3;
-  --yl:#F2CC00;--yl-edge:#8C7600;--good:#137A2C;--bad:#C2352E;--miss:#C3D3E4;
-  --p0:#C2352E;--p1:#E8A195;--p2:#B4BDB8;--p3:#86C29D;--p4:#1E7D45;--p0i:#fff;--p1i:#3B1410;--p2i:#1E2622;--p3i:#0E2A19;--p4i:#fff;
-  --dotline:rgba(0,0,0,.22);--title:#4B3FB0;--logo-fx:none;--edge:#A69F90;--lift:0 1px 0 rgba(0,0,0,.06),0 3px 10px rgba(52,40,16,.13);
+  /* Broadcast theme (default): near-black field, dark raised cards, green accent, heavy type */
+  --bg:#070A09;--surface:#111814;--sunken:#18211D;--ink:#EEF3EF;--ink2:#AEBAB3;--mute:#7F8B85;
+  --rule:#1D2723;--rule2:#2A3530;--turf:#3DDC84;--turf-bg:#11301F;
+  --a:#4D9BFF;--a-bg:#132640;--b:#FF7A3D;--b-bg:#3A1F12;
+  --yl:#F5D000;--yl-edge:#F5D000;--good:#3DDC84;--bad:#FF6B6B;--miss:#2A3D52;
+  --p0:#E0524A;--p1:#8C4A42;--p2:#46524C;--p3:#2F8A57;--p4:#3DDC84;--p0i:#fff;--p1i:#fff;--p2i:#fff;--p3i:#fff;--p4i:#06110B;
+  --dotline:rgba(255,255,255,.28);--title:#C9D4CE;--edge:#26312C;--lift:0 1px 0 rgba(255,255,255,.03) inset,0 8px 22px rgba(0,0,0,.55);
+  --logo-fx:drop-shadow(0 0 .6px rgba(255,255,255,.9)) drop-shadow(0 0 .6px rgba(255,255,255,.6));
+  --hdr:#040605;--card-hd:#0C120F;
   --font:"Archivo",system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-  --t-title:34px;--t-h2:19px;--t-h3:15px;--t-body:15px;--t-small:13px;--t-micro:11.5px;--t-fig:24px;
+  --t-title:36px;--t-h2:18px;--t-h3:12px;--t-body:15px;--t-small:13px;--t-micro:11.5px;--t-fig:26px;
+  color-scheme:dark;
+}
+:root[data-theme="light"]{
+  /* Same structure on paper: white cards, deep green accent */
+  --bg:#E8ECE9;--surface:#FFFFFF;--sunken:#F1F4F2;--ink:#0D1310;--ink2:#435049;--mute:#6A7770;
+  --rule:#E1E7E3;--rule2:#C9D2CD;--turf:#0B8445;--turf-bg:#DAF2E4;
+  --a:#2a78d6;--a-bg:#E4EEFB;--b:#E0611F;--b-bg:#FCEBE3;
+  --yl:#F2CC00;--yl-edge:#8C7600;--good:#0B8445;--bad:#D0342C;--miss:#C3D3E4;
+  --p0:#D0342C;--p1:#E8A195;--p2:#B4BDB8;--p3:#86C29D;--p4:#0B8445;--p0i:#fff;--p1i:#3B1410;--p2i:#1E2622;--p3i:#0E2A19;--p4i:#fff;
+  --dotline:rgba(0,0,0,.22);--title:#2B3832;--edge:#C3CCC7;--lift:0 1px 0 rgba(0,0,0,.05),0 4px 14px rgba(10,30,20,.12);--logo-fx:none;
+  --hdr:#070A09;--card-hd:#F4F7F5;
   color-scheme:light;
-}
-@media (prefers-color-scheme:dark){
-  :root:not([data-theme="light"]){
-    --bg:#050606;--surface:#202725;--sunken:#2B3330;--ink:#E7EEEA;--ink2:#A5B3AC;--mute:#76857E;
-    --rule:#2D3431;--rule2:#3D4643;--turf:#4FBF83;--turf-bg:#173526;
-    --a:#3987e5;--a-bg:#16294A;--b:#d95926;--b-bg:#3A1F12;
-    --yl:#F5D000;--yl-edge:#F5D000;--good:#4CC46E;--bad:#FF7A6E;--miss:#2D4157;
-    --p0:#D9534A;--p1:#8C4A42;--p2:#4A5650;--p3:#3E7A55;--p4:#3FB46E;--p0i:#fff;--p1i:#fff;--p2i:#fff;--p3i:#fff;--p4i:#0D1311;
-    --dotline:rgba(255,255,255,.28);--title:#B1A9F7;--edge:#46524D;--lift:0 1px 0 rgba(255,255,255,.04) inset,0 4px 14px rgba(0,0,0,.7);--logo-fx:drop-shadow(0 0 .6px rgba(255,255,255,.9)) drop-shadow(0 0 .6px rgba(255,255,255,.6));color-scheme:dark;
-  }
-}
-:root[data-theme="dark"]{
-  --bg:#050606;--surface:#202725;--sunken:#2B3330;--ink:#E7EEEA;--ink2:#A5B3AC;--mute:#76857E;
-  --rule:#2D3431;--rule2:#3D4643;--turf:#4FBF83;--turf-bg:#173526;
-  --a:#3987e5;--a-bg:#16294A;--b:#d95926;--b-bg:#3A1F12;
-  --yl:#F5D000;--yl-edge:#F5D000;--good:#4CC46E;--bad:#FF7A6E;--miss:#2D4157;
-  --p0:#D9534A;--p1:#8C4A42;--p2:#4A5650;--p3:#3E7A55;--p4:#3FB46E;--p0i:#fff;--p1i:#fff;--p2i:#fff;--p3i:#fff;--p4i:#0D1311;
-  --dotline:rgba(255,255,255,.28);--title:#B1A9F7;--edge:#46524D;--lift:0 1px 0 rgba(255,255,255,.04) inset,0 4px 14px rgba(0,0,0,.7);--logo-fx:drop-shadow(0 0 .6px rgba(255,255,255,.9)) drop-shadow(0 0 .6px rgba(255,255,255,.6));color-scheme:dark;
 }
 *,*::before,*::after{box-sizing:border-box}
 [hidden]{display:none!important}
@@ -546,6 +543,73 @@ td .up{color:var(--good)}td .dn{color:var(--bad)}
 .chips a[aria-current="page"]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
 .pl{display:inline-block;margin:1px 14px 1px 0;white-space:nowrap}
 .err{background:var(--b-bg);border-left:3px solid var(--bad);padding:12px 14px;margin-top:24px;border-radius:0 6px 6px 0}
+
+/* ==========================================================================
+   Broadcast skin (matches the game preview / cheat sheet cards): heavy
+   uppercase headings, tracked micro-labels, dark raised cards, green accent,
+   green = good / red = bad ranks. Loaded last so it wins.
+   ========================================================================== */
+body{font-feature-settings:"tnum" 1}
+.top{background:var(--hdr);border-bottom:1px solid #1A221E}
+.brand{font-weight:900;letter-spacing:.01em;text-transform:uppercase;font-size:18px}
+.nav a{font-size:12px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;opacity:.62;padding:6px 8px}
+/* two deliberate rows, like a broadcast header: brand + search, then the section nav */
+@media (min-width:900px){.nav{order:3;flex-basis:100%;border-top:1px solid #18201C;padding-top:2px;margin-top:2px}.nav a{font-size:12px;padding:8px 10px 9px}.top .cbx{min-width:260px;max-width:360px}.top-in{padding-bottom:0}}
+.ldr h3{color:var(--ink)}
+.nav a[aria-current="page"]{opacity:1;color:#fff;box-shadow:inset 0 -2px 0 #3DDC84}
+.top .cbx-in{background:#121A16;border:1px solid #232D28}
+h1,h2{font-weight:900}
+.hero,.ph{border-bottom:2px solid var(--rule2)}
+.hero h1,.ph h1{font-size:var(--t-title);text-transform:uppercase;letter-spacing:-.005em;line-height:1.02}
+.hero .sub,.ph .meta{color:var(--ink2)}
+h2{text-transform:uppercase;letter-spacing:.03em;font-size:var(--t-h2);border-left:3px solid var(--turf);padding-left:9px;line-height:1.2}
+h3{text-transform:uppercase;letter-spacing:.12em;font-size:var(--t-h3);font-weight:900;color:var(--turf)}
+h3 a{color:inherit}
+.gp h2,.gptitle h2,h1.simh{border:0;padding-left:0}
+.lede{color:var(--ink2)}
+a{color:var(--turf)}
+th{text-transform:uppercase;letter-spacing:.09em;font-size:10.5px;font-weight:800;color:var(--mute);border-bottom:1px solid var(--rule2)}
+th[aria-sort]{color:var(--turf)}
+td{border-bottom:1px solid var(--rule)}
+td a{font-weight:800;color:var(--ink)}
+tbody tr:hover td{background:rgba(61,220,132,.04)}
+.scroll,.tugs,.viz,.ldr>div,.kp,.lines,.gterm,.panel,.gt,.tiles{background:var(--surface);border:1px solid var(--edge);border-radius:12px;box-shadow:var(--lift)}
+.scroll.tall th{background:var(--surface)}
+.tiles{gap:0}
+.tile{background:var(--surface);box-shadow:1px 0 0 0 var(--rule),0 1px 0 0 var(--rule)}
+.tile dt,.tile dt a,.lines dt,.lines dt a{text-transform:uppercase;letter-spacing:.11em;font-size:10.5px;font-weight:800;color:var(--mute);text-decoration-color:var(--rule2)}
+.tile dt a:hover,.lines dt a:hover{color:var(--turf)}
+.tile dd{font-weight:900;letter-spacing:-.01em}
+.lines dd{font-weight:900}
+.tile .pt,.tile .pt span{font-size:11px;font-weight:700}
+.rk{font-weight:800}.rk.hi{color:var(--good)}.rk.lo{color:var(--bad)}
+.band{background:var(--card-hd);color:var(--ink);border:1px solid var(--edge);border-left:4px solid var(--turf);box-shadow:var(--lift)}
+.band .bt{color:var(--turf);font-weight:900;letter-spacing:.14em;font-size:13px}
+.band .bs{color:var(--ink2);opacity:1}
+.band a{color:var(--ink)}
+.band.pro{border-left-color:var(--turf)}.band.fan{border-left-color:#FF9A3D}.band.fan .bt{color:#FF9A3D}.band.ctx{border-left-color:#4D9BFF}.band.ctx .bt{color:#4D9BFF}
+.btn{background:transparent;border:1px solid var(--rule2);color:var(--ink);font-weight:800;text-transform:uppercase;letter-spacing:.06em;font-size:12px;border-radius:8px}
+.btn:hover{border-color:var(--turf);color:var(--turf)}
+.btn.solid{background:var(--turf);border-color:var(--turf);color:#06110B}
+.btn.solid:hover{color:#06110B;filter:brightness(1.08)}
+.chips button,.chips a{background:transparent;border:1px solid var(--rule2);color:var(--ink2);text-transform:uppercase;letter-spacing:.08em;font-size:11px;font-weight:800;padding:5px 12px}
+.chips button[aria-pressed="true"],.chips a.chipa[aria-selected="true"]{background:var(--turf);border-color:var(--turf);color:#06110B}
+select.sel,input.inp{background:var(--surface);border:1px solid var(--rule2);border-radius:8px;color:var(--ink);font-weight:700}
+label.fld,div.fld{text-transform:uppercase;letter-spacing:.1em;font-size:10.5px;font-weight:800;color:var(--mute)}
+.fld .sel,.fld .inp{text-transform:none;letter-spacing:0;font-size:14px}
+.note{background:var(--surface);border-left:3px solid var(--turf);color:var(--ink2)}
+.count{color:var(--mute)}
+details.tview>summary{font-weight:800;text-transform:uppercase;letter-spacing:.08em;font-size:11.5px;color:var(--ink2)}
+.injb{text-transform:uppercase;letter-spacing:.06em;font-weight:900}
+.bcard,.bm,.lgbox,.blog li,.blist.rep li{background:var(--surface);border-color:var(--edge);box-shadow:var(--lift)}
+.bn,.bm b{font-weight:900}
+.bnums dt{color:var(--mute);font-size:10px;letter-spacing:.1em}.bnums dd{font-weight:900}
+.bst{letter-spacing:.1em}
+.gtag{background:var(--sunken);font-weight:800}
+.pill,.lsrc{letter-spacing:.1em}
+.gt{background:var(--surface)}
+.bside{border:1px solid #2A3530}
+.gt-team .ab,.gt-team b{font-weight:900}
 </style>
 </head>
 <body>
@@ -3458,7 +3522,7 @@ document.addEventListener('click',e=>{
   if(t.dataset.swap==='players'){picked(CMP.pb,'players');location.hash='#/compare/players/'+CMP.pb+'/'+CMP.pa;return;}
   if(t.dataset.swap==='teams'){location.hash='#/compare/teams/'+CMP.tb+'/'+CMP.ta;return;}
   if(t.id==='glBack'&&GL_ORIGIN){location.hash=GL_ORIGIN;return;}
-  if(t.id==='theme'){document.documentElement.setAttribute('data-theme',isDark()?'light':'dark');syncTheme();return;}
+  if(t.id==='theme'){const nt=isDark()?'light':'dark';document.documentElement.setAttribute('data-theme',nt);try{localStorage.setItem('gs_theme',nt);}catch(e){}syncTheme();return;}
   if(t.id==='propAdd'){
     const msg=document.getElementById('propMsg'),stat=document.getElementById('propStat'),line=parseFloat(document.getElementById('propLine').value);
     if(!PROP_PID){msg.textContent='Pick a player from the list first.';return;}
@@ -3502,7 +3566,7 @@ document.addEventListener('input',e=>{
 
 /* ---------- Theme ---------- */
 const tb=document.getElementById('theme');
-function isDark(){const t=document.documentElement.getAttribute('data-theme');return t?t==='dark':matchMedia('(prefers-color-scheme: dark)').matches;}
+function isDark(){return document.documentElement.getAttribute('data-theme')!=='light';}
 function syncTheme(){const d=isDark();tb.setAttribute('aria-pressed',String(d));tb.textContent=d?'Light':'Dark';tb.setAttribute('aria-label',d?'Switch to light mode':'Switch to dark mode');}
 syncTheme();
 
