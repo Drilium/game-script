@@ -3,7 +3,7 @@
 **Live:** https://drilium.github.io/game-script/ (GitHub Pages, published by the workflow below)
 
 A static site (`index.html`) that fetches real 2026 NFL data (`nfl_data.json`)
-at load time. Pages: This week (slate, player props, fantasy, context), Best props (strongest over/under spots per game with reasons and game script), Fantasy (weekly PPR rankings, starter-level weeks, PPR allowed by defense), Stat leaders (every category, totals or per game, with next matchups), Projections (every player's next game from the simulator, with schematic matchups such as man/zone fit, field zones, target funnels, pass rush and red zone explained per player, plus a check on whether his last game had an outlier reason like a teammate sitting), Simulator (plays any game out 8,000 times from the betting lines, score-state play calling and real plays, so you can price any player line, sit players and change shares), Teams and team
+at load time. Pages: This week (slate, player props, fantasy, context), Best props (strongest over/under spots per game with reasons and game script), Fantasy (weekly PPR rankings, starter-level weeks, PPR allowed by defense), Stat leaders (every category, totals or per game, with next matchups), Matchup board (the week's best schematic matchups and the props they should move, rebuilt daily with every add and removal logged with its reason, a weekly archive, and a report card that grades each week and retunes the model), Projections (every player's next game from the simulator, with schematic matchups such as man/zone fit, field zones, target funnels, pass rush and red zone explained per player, plus a check on whether his last game had an outlier reason like a teammate sitting), Simulator (plays any game out 8,000 times from the betting lines, score-state play calling and real plays, so you can price any player line, sit players and change shares), Teams and team
 pages, Players and player pages (offense and defense), Compare (player vs
 player, player vs an opposing defense's individual defenders, and team vs
 team), a matchup page for every game, and Props.
@@ -48,7 +48,7 @@ Monday night) and Tuesday 9am (full weekly refresh). Each run:
 1. Runs `build_data.py`, which re-pulls rosters, stats, snap counts, the
    schedule, injury reports, coverage charting and three seasons of
    play-by-play from nflverse and rewrites `nfl_data.json`, `nfl_h2h.json`,
-   `nfl_allowed.json` and `nfl_script.json` (a minute or two).
+   `nfl_allowed.json`, `nfl_script.json`, and the stateful `nfl_board.json` / `nfl_learn.json` (board, change log, grading and learned model) (a minute or two).
 2. Commits the data to `main` if it changed.
 3. Publishes `index.html` plus the four data files to GitHub Pages.
 
@@ -73,6 +73,15 @@ it is more than a few days old during the season, check the
 Actions tab for a failed run — the most common cause is nflverse not having
 published a file yet (rare, but the script skips that season gracefully
 rather than crashing).
+
+## Optional: real sportsbook lines (free)
+
+Without a key, the board uses estimated lines. To use real lines:
+1. Get a free key at the-odds-api.com (500 credits a month; the board uses
+   about 56 per pull and pulls at most twice a week).
+2. In the repo: **Settings -> Secrets and variables -> Actions -> New
+   repository secret**, name `ODDS_API_KEY`, paste the key.
+The next run picks it up. Weather forecasts (Open-Meteo) need no key.
 
 ## Local development
 

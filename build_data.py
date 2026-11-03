@@ -996,3 +996,11 @@ if __name__ == "__main__":
         with open("nfl_script.json", "w") as f:
             json.dump(states, f, separators=(",", ":"))
         print(f"Wrote nfl_script.json — {len(states['players'])} players, {len(states['bank'])} team-games of game-state history")
+    # The weekly matchup board, its change log and the report card that retunes the model.
+    try:
+        import os, traceback
+        from build_board import build_board
+        build_board(data, states, allowed_log, odds_key=os.environ.get("ODDS_API_KEY") or None)
+    except Exception as e:
+        import traceback; traceback.print_exc()
+        print(f"Matchup board skipped: {e}")

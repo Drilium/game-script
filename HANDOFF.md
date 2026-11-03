@@ -597,6 +597,71 @@ look impossible but are just what a team has to do to win.
 - Best props, Prop research and Fantasy still use the quicker
   average-based `project()`; the glossary explains both.
 
+## Matchup board, daily change log, report card and self-learning (2026-11-03)
+
+Dre's brief: StatTree-level visuals, a weekly list of the best schematic
+matchups (matchup, weather, injuries) updated daily with an archive of why
+each player was added or removed, the props each player should move, and a
+system that grades last week (right, wrong, near misses, sneaky looks) and
+learns from it before the next week. Every section carries its reasoning.
+
+- **`build_board.py`** (called at the end of `build_data.py`; stdlib only)
+  writes **`nfl_board.json`** (published; loaded by the Board page, the home
+  teaser and game-page conditions) and **`nfl_learn.json`** (committed, not
+  published: each week's full candidate set frozen at kickoff, the training
+  data). Both are *stateful*: each run reads the committed copy and diffs.
+  - Props: QB pass yds / pass TDs / rush yds, RB rush yds / rec / rec yds,
+    WR+TE rec / rec yds. Qualify: 2+ games this season with his current
+    team, 5+ since 2024, real role; QB starts only (10+ attempts).
+  - Projection = matchup-neutral baseline (this season blended with every
+    game since 2024, QB games with 10+ attempts) x exp(sum of learned
+    weight x log factor, capped at +/-0.3) x exp(learned bias per prop).
+  - Factors (each an interaction vs league): defense vs position (from the
+    nfl_allowed game log, so backtests are point-in-time), game script
+    (implied points relative to the week's league-wide ratio, plus the
+    spread's pass-rate shift), pass/run funnel, target funnel, man/zone
+    fit, field zones, pass rush, red zone (TDs only; def-vs-pos dropped for
+    TDs to avoid triple counting), weather (Open-Meteo forecast for
+    outdoor games within 7 days; no key needed), teammates out (only the
+    part of his sample where they played together), QB change, his own
+    Questionable tag.
+  - Lines: The Odds API when the `ODDS_API_KEY` repo secret is set (free
+    tier, 500 credits/month; 4 markets x ~14 games, at most 2 pulls a week).
+    Otherwise an **estimated line = his matchup-neutral expectation** (median
+    of his games rescaled to the debiased baseline). Edges are measured
+    against what that side wins *with no matchup* plus the house cut, so the
+    board measures the matchup, not rounding or hot starts. Early versions
+    that used his raw median as the line produced fake 70-80% backtests;
+    don't go back to that.
+  - Board = top 30 by edge x sample confidence, edge >= 3%, chance >= 52%,
+    max 5 per game, 2 per player. Each run logs adds/removes/updates with
+    reasons (injury report, factor that changed most, line move, bumped by
+    stronger plays). Picks lock at kickoff; started games keep their last
+    pre-kickoff candidates (that's what gets graded).
+  - Live week = earliest week with unplayed games, skipping to the next
+    week once only Monday night (or nothing) is left.
+  - Grading (when every game is final and stats are in): hit / miss / near
+    miss / push / DNP for board picks and removed picks; sneaky looks
+    (below the cut, cleared by 25%+); blind spots (confident lean, badly
+    wrong); a diagnosis for each (volume vs efficiency, snaps, blowout, QB
+    change, teammates, wind). "Expected hits" = sum of break-evens.
+  - Learning: Bayesian ridge on log((actual+c)/(baseline+c)) over every
+    graded candidate: factor weights (prior 1, tau 0.35), bias per prop
+    (prior 0, tau 0.08), calibration slope per prop (prior 0.85); older
+    weeks decay 0.9/week. Lessons = the six biggest changes, in words.
+  - Weeks 3-7 were backfilled as labeled backtests. Result: 78 hits vs 77.5
+    expected over 150 picks, i.e. no proven edge yet. The report card says
+    so; the real test is live weeks from week 9 on.
+- **Front end:** `#/board[/wk[/picks|log|report]]` (nav "Board"; Best props
+  left the nav but its page and home section remain), home-page teaser,
+  game pages open with a **Game preview** card (lines, implied totals,
+  forecast, head-to-head team ranks, QB/RB/pass-catcher tables with line,
+  hit rate and opponent rank) and a **Matchup cheat sheet** (schedule-
+  adjusted script funnel, allowed-per-game cells with HARD/SOFT tags and
+  what each offense gets). Glossary: `board`, `report-card`.
+- **Schedule:** the workflow now also runs daily ~9-10am ET and Wed-Sat
+  ~5-6pm ET (after practice reports).
+
 ## Feature inventory (what's actually built and shipped)
 
 - Game-day view, full player pages (bio, season stats, per-week game log,

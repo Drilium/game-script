@@ -435,6 +435,91 @@ details.tview table{margin-top:8px;font-size:13.5px}
 /* Simulator, injuries */
 .simteams{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,520px),1fr));gap:18px;margin-top:12px}
 .simteam h2{margin-top:6px}
+/* ---------- matchup board ---------- */
+.chips a.chipa[aria-selected="true"]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.bgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,460px),1fr));gap:14px;margin-top:12px}
+.bcard{background:var(--surface);border:1px solid var(--edge);border-radius:12px;padding:14px 16px;box-shadow:var(--lift)}
+.bcard.rem{opacity:.78;border-style:dashed}
+.bcard header{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}.bn{font-weight:800;font-size:16px;color:var(--ink)}
+.bst{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:6px;white-space:nowrap;background:var(--turf-bg);color:var(--turf)}
+.bst.locked{background:var(--sunken);color:var(--ink2)}.bst.removed{background:rgba(194,53,46,.14);color:var(--bad)}
+.bprop{display:flex;align-items:center;gap:14px;margin-top:10px;flex-wrap:wrap}
+.bside{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;min-width:86px;padding:6px 10px;border-radius:10px;background:#0f1512;color:#fff}
+.bside small{font-size:10px;font-weight:900;letter-spacing:.14em}.bside.over small{color:#3ddc84}.bside.under small{color:#ff9a3d}.bside b{font-size:22px;font-weight:900;line-height:1.1}.bside span{font-size:10.5px;color:#9aa7a0}
+.bnums{display:flex;gap:14px;margin:0;flex-wrap:wrap}.bnums div{display:flex;flex-direction:column}.bnums dt{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);font-weight:700}.bnums dd{margin:0;font-size:17px;font-weight:800}.bnums dd.g{color:var(--good)}
+.lsrc{font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;border-radius:6px;padding:2px 7px;border:1px solid var(--rule2);color:var(--ink2)}.lsrc.book{background:var(--turf-bg);color:var(--turf);border-color:transparent}
+.bhead{margin:10px 0 4px;font-weight:700}
+.bwhy{list-style:none;margin:6px 0 0;padding:0}.bwhy li{margin:6px 0;line-height:1.45}
+.eff{display:inline-block;min-width:44px;text-align:center;font-size:12px;font-weight:800;border-radius:6px;padding:1px 6px}.eff.up{background:var(--turf-bg);color:var(--turf)}.eff.dn{background:rgba(194,53,46,.14);color:var(--bad)}
+.bmeta{margin:10px 0 0;border-top:1px solid var(--rule);padding-top:8px}
+.blog{list-style:none;padding:0;margin:6px 0 0}.blog li{background:var(--surface);border:1px solid var(--rule2);border-radius:10px;padding:8px 12px;margin:6px 0;line-height:1.5}
+.blog .bk{display:inline-block;min-width:88px;font-weight:800;font-size:12px;text-transform:uppercase;letter-spacing:.05em}.blog li.add .bk{color:var(--good)}.blog li.remove .bk{color:var(--bad)}.blog li.update .bk{color:var(--a)}
+.blist{padding-left:18px}.blist li{margin:6px 0;line-height:1.5}.blist.rep{list-style:none;padding:0}.blist.rep li{background:var(--surface);border:1px solid var(--rule2);border-radius:10px;padding:8px 12px}
+.res{display:inline-block;min-width:74px;text-align:center;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.05em;border-radius:6px;padding:1px 6px;margin-right:6px}
+.res.hit{background:var(--turf-bg);color:var(--turf)}.res.miss{background:rgba(194,53,46,.14);color:var(--bad)}.res.near{background:rgba(214,158,46,.2);color:var(--ink)}.res.push,.res.void{background:var(--sunken);color:var(--ink2)}.res.sneaky{background:var(--a-bg);color:var(--a)}
+.tiles.bt .tile dd{font-size:24px}
+.wbar{position:relative;display:inline-block;width:160px;height:8px;background:var(--sunken);border-radius:4px;vertical-align:middle}.wbar i{position:absolute;left:0;top:0;bottom:0;background:var(--a);border-radius:4px}.wbar u{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--ink)}
+td .up{color:var(--good);font-weight:800}td .dn{color:var(--bad);font-weight:800}
+.bmini{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:10px;margin-top:10px}
+.bm{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--edge);border-radius:12px;padding:10px 12px;box-shadow:var(--lift);text-decoration:none;color:var(--ink)}
+.bm>span:nth-child(2){flex:1;min-width:0}.bm small{display:block;font-size:12px}.bm em{font-style:normal;font-weight:900;font-size:17px}.bm .bside{min-width:70px;padding:4px 8px}.bm .bside b{font-size:18px}
+/* ---------- broadcast-style game preview and cheat sheet ---------- */
+.gp{background:#0f1512;color:#e8efe9;border-radius:14px;padding:18px 20px;margin:18px 0;border:1px solid #2a3530;box-shadow:var(--lift);font-variant-numeric:tabular-nums}
+.gp a{color:#fff}.gp .g{color:#3ddc84}.gp .b{color:#ff6b6b}.gp .o{color:#ff9a3d}.gp .scroll{border:0;background:transparent;box-shadow:none}
+.gp .tf b{box-shadow:0 0 0 1.5px #0f1512}.gp .tf.xs img{width:13px;height:13px}.gp .tf.xs b{width:7px;height:7px}.gp .tf.tl.lg img{width:34px;height:34px}
+.gphd{display:flex;justify-content:space-between;gap:10px;font-size:11px;letter-spacing:.14em;color:#3ddc84;font-weight:800;border-bottom:2px solid #2a3530;padding-bottom:8px}.gphd span+span{color:#9aa7a0}
+.gptitle{display:flex;align-items:center;gap:10px;margin:14px 0 12px;flex-wrap:wrap}
+.gptitle h2{margin:0;font-size:30px;font-weight:900;letter-spacing:-.01em;color:#fff;border:0;padding:0}.gptitle h2 i{font-size:.5em;font-style:normal;color:#9aa7a0;margin:0 3px}
+.gpven{margin-left:auto;text-align:right;font-size:11px;letter-spacing:.1em;color:#9aa7a0;font-weight:700;line-height:1.5}
+.gpstrip{display:grid;grid-template-columns:repeat(5,1fr);border:1px solid #2a3530;border-radius:8px;overflow:hidden;background:#131b17}
+.gpstrip>div{padding:8px 12px;border-right:1px solid #2a3530}.gpstrip>div:last-child{border-right:0}
+.gpstrip small{display:block;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#9aa7a0;font-weight:700}
+.gpstrip b{display:block;font-size:21px;font-weight:900;color:#fff;line-height:1.2}.gpstrip span{font-size:10.5px;color:#7f8b85}
+.gpteams{display:grid;grid-template-columns:1fr auto 1fr;align-items:end;margin:18px auto 0;gap:8px;max-width:760px}
+.gpside{display:flex;flex-direction:column;align-items:flex-start;gap:1px}.gpside.r{align-items:flex-end;text-align:right}
+.gpside small{font-size:10px;letter-spacing:.12em;color:#9aa7a0}.gpside b{font-size:19px;font-weight:900;color:#fff;line-height:1.1}.gpside span{font-size:10.5px;letter-spacing:.06em;color:#9aa7a0}.gpside em{font-style:normal}
+.gph2h small{font-size:10px;letter-spacing:.14em;color:#9aa7a0;font-weight:800}
+table.gph{width:100%;max-width:760px;margin:6px auto 0;border-collapse:collapse;background:transparent}
+.gph td{padding:5px 8px;border:0;border-bottom:1px solid #1d2622;white-space:nowrap;background:transparent;color:#e8efe9}
+.gph tr.sec td{text-align:center;color:#3ddc84;font-size:10px;letter-spacing:.16em;font-weight:900;text-transform:uppercase;border-bottom:1px solid #2a3530;padding-top:12px}
+.gph td.v{font-size:18px;font-weight:800;color:#fff;text-align:right;width:20%}.gph td.v+td.lab+td.v{text-align:left}
+.gph td.lab{text-align:center;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#c3ccc7;font-weight:700}
+.gph td.rk{font-size:12px;font-weight:800;color:#c3ccc7;width:46px}.gph td.rk.r{text-align:right}
+.gpt{margin-top:22px}.gptt{display:flex;align-items:center;gap:8px;border-left:3px solid #3ddc84;padding-left:8px;margin-bottom:4px;flex-wrap:wrap}
+.gptt b{font-size:17px;font-weight:900;color:#fff;letter-spacing:.03em}.gptt span{margin-left:auto;font-size:10.5px;letter-spacing:.08em;color:#9aa7a0;text-transform:uppercase}
+table.gpp{width:100%;border-collapse:collapse;min-width:660px;background:transparent}
+.gpp th{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#9aa7a0;text-align:right;padding:12px 8px 4px;border:0;border-bottom:1px solid #2a3530;font-weight:800;background:transparent;position:static}
+.gpp th.sec{text-align:left;color:#3ddc84}
+.gpp td{padding:7px 8px;border:0;border-bottom:1px solid #1d2622;color:#e8efe9;background:transparent;vertical-align:middle}
+.gpp td.n{text-align:right;font-weight:650}.gpp td.m{color:#9aa7a0}.gpp td.n i{font-style:normal;color:#7f8b85;margin-right:1px}
+.gpp td.pn a{font-weight:800;color:#fff;text-decoration:none}.gpp td.pn a:hover{text-decoration:underline}.gpp .role{font-size:10px;color:#7f8b85;font-weight:700}
+.gpp td.hit{font-weight:900;font-size:15px;line-height:1.05}.gpp td.hit small{display:block;font-size:10px;color:#7f8b85;font-weight:600}.gpp td.od{font-weight:900}
+.gpft{margin-top:16px;border-top:1px solid #2a3530;padding-top:8px;font-size:11px;color:#9aa7a0;line-height:1.5}
+.cssec{margin-top:18px;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:#9aa7a0;display:flex;align-items:center;gap:8px;flex-wrap:wrap}.cssec b{color:#3ddc84;font-weight:900;font-size:13px}
+.cshd{margin-left:auto;display:grid;grid-template-columns:repeat(3,152px);gap:8px}.cshd em{font-style:normal;text-align:center}
+.fnrow{display:grid;grid-template-columns:140px 1fr;gap:12px;align-items:center;background:#151d19;border:1px solid #2a3530;border-radius:10px;padding:10px 12px;margin-top:8px}
+.fnt{display:flex;align-items:center;gap:6px}.fnt span{font-size:11px;color:#9aa7a0}.fnt b{font-weight:900;color:#fff}
+.fnm{font-size:12.5px;color:#c3ccc7}.pill{font-style:normal;font-size:10px;letter-spacing:.1em;text-transform:uppercase;border:1px solid #5a6862;border-radius:999px;padding:2px 8px;color:#e8efe9;margin-right:6px;font-weight:800;white-space:nowrap}
+.fnbars{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px}
+.fnl{display:flex;justify-content:space-between;gap:6px;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:#9aa7a0}.fnl b{font-weight:900}
+.fbar{height:6px;background:#26302b;border-radius:4px;margin-top:4px;overflow:hidden}.fbar i{display:block;height:100%;border-radius:4px}.fbar i.g{background:#3ddc84}.fbar i.o{background:#ff7a3d}
+.csrow{display:grid;grid-template-columns:minmax(170px,1fr) auto;gap:10px;align-items:center;background:#151d19;border:1px solid #2a3530;border-radius:10px;padding:8px 12px;margin-top:8px}
+.csp{display:flex;gap:8px;align-items:center;min-width:0}.csp a{font-weight:900;color:#fff;text-decoration:none;font-size:15px}.csp small{display:block;color:#9aa7a0;font-size:11px}
+.cscells{display:grid;grid-template-columns:repeat(3,152px);gap:8px}
+.csc{border:1px solid #2a3530;border-radius:8px;padding:6px 8px;text-align:center;background:#111814}
+.csc.hard{border-color:#b4532a;background:rgba(255,122,61,.09)}.csc.soft{border-color:#2f8a57;background:rgba(61,220,132,.09)}
+.csv{display:flex;align-items:center;justify-content:center;gap:5px;flex-wrap:wrap}.csv b{font-size:19px;font-weight:900;color:#fff}.csv em{font-style:normal;font-size:11px;border:1px solid #5a6862;border-radius:999px;padding:0 5px;color:#c3ccc7;font-weight:700}
+.csc.hard .csv em{border-color:#ff7a3d;color:#ff9a3d}.csc.soft .csv em{border-color:#3ddc84;color:#3ddc84}
+.csv i{font-style:normal;font-size:9.5px;font-weight:900;letter-spacing:.08em}.csc.hard .csv i{color:#ff9a3d}.csc.soft .csv i{color:#3ddc84}
+.csc>span{display:block;font-size:10.5px;color:#9aa7a0;margin-top:2px}.csc u{text-decoration:none;font-weight:800}
+@media (max-width:760px){
+  .gp{padding:14px 12px;border-radius:12px;margin-left:-4px;margin-right:-4px}
+  .gptitle h2{font-size:22px}.gpven{margin-left:0;text-align:left;width:100%}
+  .gpstrip{grid-template-columns:repeat(3,1fr)}.gpstrip>div{border-bottom:1px solid #2a3530}.gpstrip b{font-size:17px}
+  .gph td{padding:5px 4px}.gph td.v{font-size:15px}.gph td.lab{font-size:9.5px;letter-spacing:.06em;white-space:normal}.gph td.rk{width:34px;font-size:11px}
+  .cshd{display:none}.csrow{grid-template-columns:1fr}.cscells{grid-template-columns:repeat(3,1fr);gap:6px}.csc{padding:5px 4px}.csv b{font-size:16px}
+  .fnrow{grid-template-columns:1fr}.fnbars{gap:10px}
+}
 table.pjf td{vertical-align:top}table.pjf td.small{min-width:260px;max-width:62ch;white-space:normal}
 .gtag{display:inline-block;font-size:.78rem;font-weight:600;padding:1px 7px;border-radius:999px;background:var(--chip,rgba(127,127,127,.16));color:var(--ink);white-space:nowrap;margin:1px 0}
 .gtag.mate{background:rgba(214,158,46,.22)}.gtag.snap{background:rgba(220,80,60,.18)}.gtag.qb{background:rgba(120,90,200,.2)}.gtag.script{background:rgba(60,130,200,.18)}.gtag.wx{background:rgba(80,160,170,.2)}.gtag.opp{background:rgba(127,127,127,.16)}
@@ -471,7 +556,7 @@ td .up{color:var(--good)}td .dn{color:var(--bad)}
       Game Script</a>
     <nav class="nav" aria-label="Main">
       <a href="#/" data-nav="week">This week</a>
-      <a href="#/best" data-nav="best">Best props</a>
+      <a href="#/board" data-nav="board">Board</a>
       <a href="#/sim" data-nav="sim">Simulator</a>
       <a href="#/props" data-nav="props">Props</a>
       <a href="#/outlook" data-nav="outlook">Projections</a>
@@ -1188,7 +1273,7 @@ function vWeek(){
   }).join('')+'</div>';
   if(bye.length)h+='<p class="bye">On bye: '+bye.map(t=>tt(t)).join(', ')+'</p>';
 
-  h+=band('pro','Player props','Single-stat projections and the matchups moving them. <a href="#/best">Best props</a> \u00b7 <a href="#/props">Props</a> \u00b7 <a href="#/outlook">Projections</a>')+bpHome()+propResearch(5);
+  h+=band('pro','Player props','Single-stat projections and the matchups moving them. <a href="#/board">Matchup board</a> \u00b7 <a href="#/best">Best props</a> \u00b7 <a href="#/props">Props</a> \u00b7 <a href="#/outlook">Projections</a>')+bdHome()+bpHome()+propResearch(5);
   {const wk=propWeek();if(wk)h+=band('fan','Fantasy (PPR)','Projected points for week '+wk+', starter-level consistency, and what each defense allows. <a href="#/fantasy">Fantasy</a>')+'<h2>Fantasy outlook: week '+wk+'</h2><p class="lede">Projected PPR points, with how much the matchup moves him.</p>'+fantasyBrief(5);}
   h+=band('ctx','Context for both','Season leaders and team efficiency.');
   {const sv=LD.mode,sp=LD.pos;LD.mode='tot';LD.pos='';
@@ -1212,8 +1297,9 @@ function vGame(id){
     '<a class="side" href="#/team/'+A+'"><span class="tmrow">'+flag(A,'lg')+esc(fullName(A))+'</span><span class="ab">'+A+'</span><span class="rec">'+record(A)+'</span></a>'+
     '<div class="mid">Week '+g.wk+'<br>'+(f?'<span class="score">'+g.as+'–'+g.hs+'</span>Final':'<span class="score">at</span>'+kick(g))+'</div>'+
     '<a class="side r" href="#/team/'+H+'"><span class="tmrow">'+flag(H,'lg')+esc(fullName(H))+'</span><span class="ab">'+H+'</span><span class="rec">'+record(H)+'</span></a></section>';
+  h+=gpCard(g)+csCard(g);
   const sp=spreadTxt(g);
-  h+='<dl class="lines">'+(sp?'<div><dt>'+glab(f?'Closing spread':'Spread',null,'spread')+'</dt><dd>'+esc(sp)+'</dd></div>':'')+(isNum(g.total)?'<div><dt>'+glab(f?'Closing total':'Total',null,'total')+'</dt><dd>'+g.total+'</dd></div>':'')+
+  h+='<h2>Game details</h2><dl class="lines">'+(sp?'<div><dt>'+glab(f?'Closing spread':'Spread',null,'spread')+'</dt><dd>'+esc(sp)+'</dd></div>':'')+(isNum(g.total)?'<div><dt>'+glab(f?'Closing total':'Total',null,'total')+'</dt><dd>'+g.total+'</dd></div>':'')+
     (isNum(g.aml)?'<div><dt>'+glab('Moneyline',null,'moneyline')+'</dt><dd>'+A+' '+(g.aml>0?'+':'')+g.aml+', '+H+' '+(g.hml>0?'+':'')+g.hml+'</dd></div>':'')+
     (!sp&&!isNum(g.total)?'<div><dt>Lines</dt><dd>Not posted yet</dd></div>':'')+'</dl>';
   h+='<dl class="lines lines-sm"><div><dt>'+glab('Kickoff',null,'kickoff')+'</dt><dd>'+esc(kick(g))+'</dd></div>'+(g.stad?'<div><dt>Where</dt><dd>'+esc(venueTxt(g))+'</dd></div>':'')+
@@ -1932,6 +2018,8 @@ const GLOSS=[
  ['credited','Matchups and projections','Credited plays (head to head)','A play between an offensive player and a defender counts when the defender made the tackle, broke up the pass, intercepted it, or sacked or hit the QB on a play involving that player.','It shows real history between two players since 2024. It isn’t a coverage grade.','Calculated on this site from nflverse play-by-play.',[]],
  ['one-on-one','Matchups and projections','Likely one-on-one','A pairing by playing time and role: a team’s receivers ranked by targets against the other team’s corners ranked by snaps, the top tight end against the top safety, the lead back against the busiest linebacker, and the QB against the top pass rusher.','A sensible guess at who will meet most often, not a confirmed assignment. Slot and wide alignment and coverage aren’t in free data.','Rule set on this site.',[]],
  ['projection','Matchups and projections','Projection','On player pages and the Projections page: his next game played out 8,000 times by the simulator, using the betting lines, his team\u2019s play calling in each score situation, his share of the work (handed out again when teammates are out), his real plays since 2024 and the schematic matchups with this defense. The projection is the average of those games; the range is the middle 60%. Best props, Prop research and Fantasy use a quicker average-based estimate: his per-game average (this season blended with every game since 2024), adjusted for what this defense allows at his position and the betting market\u2019s team total.','A starting point for your own judgment, not a betting pick. Read the factor table on his page to see what is pushing it up or down.','Calculated on this site.',[]],
+ ['board','Matchups and projections','Matchup board','Each week\u2019s best schematic matchups and the props they should move. Every qualifying player\u2019s passing yards, passing TDs, rushing yards, receptions and receiving yards are scored on the matchup factors (defense against his position, man/zone fit, field zones, target and pass/run funnels, pass rush, red zone), game script, the weather forecast and injuries. The board keeps the 30 biggest edges, at most five per game and two per player. It is rebuilt every day and after every game window; each add, removal and update is logged with its reason, and picks lock at kickoff.','Chance is how often the model expects the pick to win; \u201cline alone\u201d is what that side wins with no matchup at all, plus the house cut. Edge is the gap. Without a sportsbook key the line is estimated as his matchup-neutral expectation, so the board measures the matchup itself rather than a hot start. When a free The Odds API key is added as ODDS_API_KEY, real lines and prices replace the estimates.','nflverse play-by-play, charting, schedules and injury reports; Open-Meteo forecasts; optional The Odds API lines.',[]],
+ ['report-card','Matchups and projections','Report card and self-learning','After every game is final, the board is graded: hits, misses, near misses (lost by a catch, a few yards or half a TD), pushes and players who didn\u2019t play, plus the picks removed during the week, \u201csneaky looks\u201d it ranked below the cut that cleared big, and \u201cblind spots\u201d where a confident lean went badly the other way. Each one gets a diagnosis from the box score: volume or efficiency, snaps, blowout, quarterback change, teammates, wind. Then the model re-fits on every graded week: a weight for each matchup factor, a bias for each prop type and a confidence slope, each pulled toward its starting value so one odd week can\u2019t swing it.','Judge it against \u201cexpected\u201d, the hits its lines alone would produce. Beating that over many weeks is the only proof of an edge; the weeks before the board existed are backtests and say so.','Calculated on this site.',[]],
  ['schematic','Matchups and projections','Schematic matchups','How this defense plays, against how this player wins. Man or zone: how often they played man last season, against his yards per target versus man and zone. Where he\u2019s thrown to: his targets by area of the field (short or deep; left, middle or right) against the yards they give up in each area. Who gets targeted: the share of throws they let go to his position. Pass or run funnel: how often offenses throw against them. Pass rush and red zone: pressure rate and touchdown rate on red-zone trips. Each one is compared with the league and only part of the gap is applied.','Each factor is a matchup effect on top of the defense\u2019s overall quality, so they don\u2019t double count. Most move a projection a few percent; together they can move it 10% or more.','nflverse play-by-play 2024 to now, participation charting for coverage (completed seasons only), FTN charting for pressure and box counts.',[]],
  ['last-game','Matchups and projections','Last game: anything unusual?','Checks whether his last game had a reason to look different: key teammates who didn\u2019t play or played few snaps, his own snap share, a quarterback change, a blowout of 17+ points, wind or cold, and a top-3 or bottom-3 defense against his position. Usage spike or dip means his targets (or touches, or attempts) were at least a third above or below his other games and by 3 or more.','If the reason carries into the next game (the teammate is listed Out again), the bigger or smaller role may continue; if not, treat the game as a one-off. The full game log on his page tags every game this season the same way.','nflverse weekly stats, snap counts, schedules (starting QBs, weather) and injury reports.',[]],
  ['matchup-factor','Matchups and projections','Matchup (%)','How much the defense and the betting lines move a projection up or down from his baseline.','Green means a friendlier spot than usual, red a tougher one.','Calculated on this site.',[]],
@@ -2897,6 +2985,276 @@ function lastGameBox(p,ng){
 }
 function INJ_WK(){if(GN_C.injwk===undefined){let m=0;PLAYERS.forEach(p=>{if(p.inj&&p.inj.wk>m)m=p.inj.wk;});GN_C.injwk=m;}return GN_C.injwk;}
 
+/* ======================================================================
+   Game preview + matchup cheat sheet: broadcast-style cards for every game.
+   ====================================================================== */
+let BD=null,BD_P=null;
+function needBoard(){
+  if(BD||BD_P)return;
+  BD_P=fetch('nfl_board.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+    .then(j=>{BD=j;}).catch(e=>{console.error(e);BD={weeks:{},history:[],model:null};}).then(()=>render(true));
+}
+function bdWeek(wk){return BD&&BD.weeks?BD.weeks[String(wk)]||null:null;}
+function gameWx(g){const w=bdWeek(g.wk);return w&&w.weather?w.weather[g.id]||null:null;}
+function bookLine(pid,k,wk){const w=bdWeek(wk);return w&&w.lines?w.lines[pid+'|'+k]||null:null;}
+/* team metrics for the head-to-head */
+const GPM={
+  ppg:{l:'PPG',f:t=>TS[t]&&TS[t].pfpg,hi:1,d:1},
+  ypg:{l:'Yards/G',f:t=>TS[t]&&TS[t].off.ypg,hi:1,d:1},
+  pypg:{l:'Pass yds/G',f:t=>TS[t]&&TS[t].off.pypg,hi:1,d:1},
+  rypg:{l:'Rush yds/G',f:t=>TS[t]&&TS[t].off.rypg,hi:1,d:1},
+  ypp:{l:'Yards/play',f:t=>TS[t]&&TS[t].off.ppg_plays?TS[t].off.ypg/TS[t].off.ppg_plays:null,hi:1,d:1},
+  rz:{l:'Red zone TD%',f:t=>SCHEME[t]&&SCHEME[t].off?SCHEME[t].off.rz_td_pct:null,hi:1,d:1,pct:1},
+  oppg:{l:'Opp PPG',f:t=>TS[t]&&TS[t].papg,hi:0,d:1},
+  oypg:{l:'Opp yards/G',f:t=>TS[t]&&TS[t].def.ypg,hi:0,d:1},
+  opypg:{l:'Opp pass/G',f:t=>TS[t]&&TS[t].def.pypg,hi:0,d:1},
+  orypg:{l:'Opp rush/G',f:t=>TS[t]&&TS[t].def.rypg,hi:0,d:1},
+  sack:{l:'Sack rate',f:t=>{const d=TS[t]&&TS[t].def;if(!d||!d.ppg_plays||!d.pass_rate)return null;return d.skpg/(d.ppg_plays*d.pass_rate/100)*100;},hi:1,d:1,pct:1},
+  orz:{l:'Opp RZ TD%',f:t=>SCHEME[t]&&SCHEME[t].def?SCHEME[t].def.rz_td_pct_allowed:null,hi:0,d:1,pct:1}
+};
+const GPR={};
+function gpRank(k,t){
+  if(!GPR[k]){const m=GPM[k],v=TL.map(x=>[x,m.f(x)]).filter(x=>isNum(x[1])),o={};v.forEach(([x,val])=>{o[x]=1+v.filter(y=>m.hi?y[1]>val:y[1]<val).length;});GPR[k]=o;}
+  return GPR[k][t]||null;
+}
+function rkC(r){return !r?'':r<=10?'g':r>=23?'b':'';}
+function gpH2H(A,H){
+  const row=k=>{const m=GPM[k],a=m.f(A),h=m.f(H),ra=gpRank(k,A),rh=gpRank(k,H),fv=v=>isNum(v)?v.toFixed(m.d)+(m.pct?'%':''):'—';
+    return '<tr><td class="rk '+rkC(ra)+'">'+(ra?ord(ra):'')+'</td><td class="v">'+fv(a)+'</td><td class="lab">'+m.l+'</td><td class="v">'+fv(h)+'</td><td class="rk r '+rkC(rh)+'">'+(rh?ord(rh):'')+'</td></tr>';};
+  return '<table class="gph"><tbody><tr class="sec"><td colspan="5">Offense</td></tr>'+['ppg','ypg','pypg','rypg','ypp','rz'].map(row).join('')+
+    '<tr class="sec"><td colspan="5">Defense</td></tr>'+['oppg','oypg','opypg','orypg','sack','orz'].map(row).join('')+'</tbody></table>';
+}
+/* a player's line for a stat: sportsbook when we have it, otherwise his median (this season once he has 4 games) */
+function gpLine(p,k,wk){
+  const b=bookLine(p.id,k,wk);if(b&&isNum(b.line))return {v:b.line,book:true};
+  const gs=playerGames(p),cur=gs.filter(x=>x.s===SEASON).map(x=>weekVal(x,k)).filter(isNum),all=gs.map(x=>weekVal(x,k)).filter(isNum);
+  if(!all.length)return null;
+  /* like a book would: this season counts more as it grows (up to half), the rest is every game since 2024 */
+  const w=Math.min(cur.length,6)/12,md=cur.length?w*median(cur)+(1-w)*median(all):median(all),mn=all.reduce((a,b)=>a+b,0)/all.length;
+  return {v:halfLine(md,mn),book:false};
+}
+function gpHit(p,k,line){
+  const v=playerGames(p).map(x=>weekVal(x,k)).filter(isNum);if(!v.length||!line)return null;
+  const o=v.filter(x=>x>line.v).length;return {o:o,n:v.length,r:o/v.length};
+}
+function gpOdef(opp,pos,k){const r=daRank(opp,pos,k);return r;}
+function odefC(r){return !r?'':r<=8?'b':r>=25?'g':'';}
+function gpTeamPlayers(t,opp,g){
+  const ps=(BY_TEAM[t]||[]).filter(p=>OFF_POS.indexOf(p.p)>=0&&p.ss&&p.g>0);
+  const out=ps.filter(p=>injOut(p,g));
+  const act=ps.filter(p=>!injOut(p,g));
+  const qb=act.filter(p=>p.p==='QB').sort((a,b)=>(b.ss.att||0)-(a.ss.att||0))[0];
+  const rbs=act.filter(p=>p.p==='RB'&&(p.ss.car||0)>=3).sort((a,b)=>(b.ss.car||0)-(a.ss.car||0)).slice(0,2);
+  const pc=act.filter(p=>(p.p==='WR'||p.p==='TE'||p.p==='RB')&&(p.ss.tgt||0)>=2.5).sort((a,b)=>(b.ss.tgt||0)-(a.ss.tgt||0)).slice(0,5);
+  const rk=(p,r)=>'<span class="role">'+p.p+r+'</span>';
+  const roleN={};const role=p=>{roleN[p.p]=(roleN[p.p]||0)+1;return roleN[p.p];};
+  const tot=(p,k)=>{const v=playerGames(p).filter(x=>x.s===SEASON).map(x=>weekVal(x,k)).filter(isNum);return v.reduce((a,b)=>a+b,0);};
+  const lineCells=(p,k,pos)=>{const L=gpLine(p,k,g.wk),h=gpHit(p,k,L),r=gpOdef(opp,pos,k);
+    return '<td class="n">'+(L?(L.book?'':'<i title="Estimated line: his median">~</i>')+L.v:'—')+'</td><td class="n hit '+(h?(h.r>=.6?'g':h.r<.45?'b':''):'')+'">'+(h?Math.round(h.r*100)+'%<small>'+h.o+'/'+h.n+'</small>':'—')+'</td><td class="n od '+odefC(r)+'">'+(r?ord(r):'—')+'</td>';};
+  const name=(p,tag)=>'<td class="pn"><a href="#/player/'+p.id+'">'+esc(p.n)+'</a> '+tag+(p.inj&&p.inj.wk===g.wk&&p.inj.st?' <span class="injb '+p.inj.st.toLowerCase()+'">'+esc(p.inj.st[0])+'</span>':'')+'</td>';
+  let h='<div class="gpt"><div class="gptt">'+flag(t,'sm')+'<b>'+esc(nick(t)).toUpperCase()+'</b><span>'+(out.length?'Out: '+out.map(p=>esc(lastName(p.n))+' ('+p.p+')').join(', '):'')+'</span></div><div class="scroll"><table class="gpp">';
+  if(qb){const gp=playerGames(qb).filter(x=>x.s===SEASON).length,ss=qb.ss;roleN.QB=0;
+    h+='<thead><tr><th class="sec">Quarterback</th><th>GP</th><th>Att/G</th><th>Yds/G</th><th>TD/G</th><th>Int/G</th><th>Cmp%</th><th>Line</th><th>Hit rate</th><th>Odef</th></tr></thead><tbody><tr>'+name(qb,rk(qb,role(qb)))+
+      '<td class="n m">'+gp+'</td><td class="n">'+fx(ss.att,1)+'</td><td class="n">'+fx(ss.pyd,1)+'</td><td class="n">'+fx(ss.ptd,2)+'</td><td class="n">'+fx(ss.int,2)+'</td><td class="n">'+(ss.att?fx(ss.cmp/ss.att*100,1):'—')+'</td>'+lineCells(qb,'pyd','QB')+'</tr></tbody>';}
+  if(rbs.length){roleN.RB=0;h+='<thead><tr><th class="sec">Running game</th><th>GP</th><th>Att/G</th><th>Yds/G</th><th>YPC</th><th>TD</th><th></th><th>Line</th><th>Hit rate</th><th>Odef</th></tr></thead><tbody>'+
+    rbs.map(p=>{const gp=playerGames(p).filter(x=>x.s===SEASON).length,ss=p.ss;return '<tr>'+name(p,rk(p,role(p)))+'<td class="n m">'+gp+'</td><td class="n">'+fx(ss.car,1)+'</td><td class="n">'+fx(ss.ryd,1)+'</td><td class="n">'+(ss.car?fx(ss.ryd/ss.car,2):'—')+'</td><td class="n">'+fmtN(tot(p,'rtd'))+'</td><td></td>'+lineCells(p,'ryd','RB')+'</tr>';}).join('')+'</tbody>';}
+  if(pc.length){const roles={};h+='<thead><tr><th class="sec">Pass catchers</th><th>GP</th><th>Tgt/G</th><th>Tgt%</th><th>Rec/G</th><th>Yds/G</th><th>TD</th><th>Line</th><th>Hit rate</th><th>Odef</th></tr></thead><tbody>'+
+    pc.map(p=>{const gp=playerGames(p).filter(x=>x.s===SEASON).length,ss=p.ss;roles[p.p]=(roles[p.p]||0)+1;
+      return '<tr>'+name(p,rk(p,roles[p.p]))+'<td class="n m">'+gp+'</td><td class="n">'+fx(ss.tgt,2)+'</td><td class="n">'+(isNum(ss.tshr)?Math.round(ss.tshr*100)+'%':'—')+'</td><td class="n">'+fx(ss.rec,2)+'</td><td class="n">'+fx(ss.recyd,1)+'</td><td class="n">'+fmtN(tot(p,'rectd'))+'</td>'+lineCells(p,'recyd',p.p)+'</tr>';}).join('')+'</tbody>';}
+  return h+'</table></div></div>';
+}
+function gpCard(g){
+  needBoard();
+  const A=g.away,H=g.home,f=isFinal(g),wx=gameWx(g),ipA=impliedPts(g,A),ipH=impliedPts(g,H);
+  const fav=isNum(g.spread)?(g.spread>0?nick(H)+' −'+Math.abs(g.spread):g.spread<0?nick(A)+' −'+Math.abs(g.spread):'Pick’em'):'—';
+  const cond=g.roof==='dome'||g.roof==='closed'?{v:'Indoors',s:g.roof==='dome'?'dome':'roof closed'}:wx?{v:wx.temp+'°F',s:wx.wind+' mph wind'+(wx.pp>=40?' · '+wx.pp+'% precip':'')}:(f&&isNum(g.temp))?{v:g.temp+'°F',s:(isNum(g.wind)?g.wind+' mph wind':'')}:{v:'—',s:BD?'forecast within 7 days':'loading'};
+  const side=(t,home)=>{const s=TS[t]||{},pr=(D_SCRIPT&&D_SCRIPT.teams&&D_SCRIPT.teams[t])||null;
+    return '<div class="gpside'+(home?' r':'')+'"><small>'+esc(TEAMS[t]?TEAMS[t][0]:t).toUpperCase()+'</small><b>'+esc(nick(t)).toUpperCase()+'</b><span>'+(home?'HOME':'AWAY')+(isNum(s.off&&s.off.ppg_plays)?' · '+s.off.ppg_plays.toFixed(0)+' PLAYS/G':'')+'</span><span class="rec"><em>'+record(t)+'</em> <em class="'+((s.ats_w||0)>=(s.ats_l||0)?'g':'b')+'">'+(s.ats_w||0)+'-'+(s.ats_l||0)+(s.ats_p?'-'+s.ats_p:'')+' ATS</em> '+(s.ov||0)+'-'+(s.un||0)+' O/U</span></div>';};
+  let h='<section class="gp" aria-label="Game preview"><div class="gphd"><span>GAME SCRIPT · GAME PREVIEW</span><span>WEEK '+g.wk+' · '+esc(shortKick(g)).toUpperCase()+'</span></div>'+
+    '<div class="gptitle">'+flag(A,'lg')+'<h2>'+esc(nick(A)).toUpperCase()+' <i>'+(g.loc==='Neutral'?'VS':'AT')+'</i> '+esc(nick(H)).toUpperCase()+'</h2>'+flag(H,'lg')+'<span class="gpven">'+esc((g.stad||'').toUpperCase())+(isNum(g.ar)?'<br>'+g.ar+' / '+g.hr+' REST DAYS':'')+'</span></div>'+
+    '<div class="gpstrip"><div><small>Spread</small><b>'+fav+'</b><span>'+(isNum(g.aml)?A+' '+(g.aml>0?'+':'')+g.aml+' · '+H+' '+(g.hml>0?'+':'')+g.hml:'')+'</span></div><div><small>Total</small><b>'+(isNum(g.total)?g.total:'—')+'</b><span>'+(f?'closing':'current')+'</span></div>'+
+    '<div><small>'+A+' implied</small><b>'+(isNum(ipA)?ipA.toFixed(1):'—')+'</b><span>away</span></div><div><small>'+H+' implied</small><b>'+(isNum(ipH)?ipH.toFixed(1):'—')+'</b><span>home</span></div><div><small>Conditions</small><b>'+cond.v+'</b><span>'+cond.s+'</span></div></div>'+
+    '<div class="gpteams">'+side(A,false)+'<div class="gph2h"><small>HEAD TO HEAD</small></div>'+side(H,true)+'</div>'+gpH2H(A,H)+
+    gpTeamPlayers(A,H,g)+gpTeamPlayers(H,A,g)+
+    '<div class="gpft"><span><b class="g">Green</b> ranks top 10 · <b class="b">red</b> bottom 10. Hit rate = cleared this line, every game since '+(HIST[0]||SEASON)+'. Odef = what '+'the opponent allows at his position for that stat (1st = allows the least: <b class="b">hard</b>; 25th+ <b class="g">soft</b>). ~ = estimated line (his median, this season blended with every game since 2024, as a book would set it); sportsbook lines replace it when connected.</span></div></section>';
+  return h;
+}
+
+/* ---------- matchup cheat sheet ---------- */
+/* schedule-adjusted yards per carry / per attempt allowed: what offenses got against them minus what those offenses usually get */
+const SADJ={};
+function schedAdj(t,kind){
+  const ck=t+'|'+kind;if(ck in SADJ)return SADJ[ck];
+  const s=TS[t];if(!s||!s.def)return SADJ[ck]=null;
+  const opps=(s.log||[]).map(x=>x.opp).filter(o=>TS[o]&&TS[o].off);
+  const lg=meanOf(TL.map(x=>TS[x]&&TS[x].off?TS[x].off[kind]:null));
+  const faced=meanOf(opps.map(o=>TS[o].off[kind]));
+  if(!isNum(lg)||!isNum(faced))return SADJ[ck]=s.def[kind];
+  return SADJ[ck]=s.def[kind]-faced+lg;
+}
+function schedRank(t,kind){const v=TL.map(x=>[x,schedAdj(x,kind)]).filter(x=>isNum(x[1])),mine=schedAdj(t,kind);return isNum(mine)?1+v.filter(y=>y[1]<mine).length:null;}
+function funnelRow(off,def){
+  const rr=schedRank(def,'ypc'),rp=schedRank(def,'ypa'),vr=schedAdj(def,'ypc'),vp=schedAdj(def,'ypa');
+  let tag='No funnel',txt=nick(def)+' are about as good against the run (#'+rr+') as the pass (#'+rp+').';
+  if(isNum(rr)&&isNum(rp)&&rp-rr>=10){tag='Pass funnel';txt=nick(def)+' are much tougher against the run (#'+rr+') than the pass (#'+rp+'), so offenses tend to throw.';}
+  else if(isNum(rr)&&isNum(rp)&&rr-rp>=10){tag='Run funnel';txt=nick(def)+' are much tougher against the pass (#'+rp+') than the run (#'+rr+'), so offenses tend to run.';}
+  const bar=(r,v,u)=>'<div class="fnb"><div class="fnl"><span>vs the '+u+'</span><b class="'+(r>=17?'g':'o')+'">#'+r+' · '+(isNum(v)?v.toFixed(1):'—')+' '+(u==='run'?'YPC':'YPA')+'</b></div><div class="fbar"><i class="'+(r>=17?'g':'o')+'" style="width:'+Math.max(3,Math.round(r/32*100))+'%"></i></div></div>';
+  return '<div class="fnrow"><div class="fnt">'+flag(off,'sm')+'<span>vs</span>'+flag(def,'sm')+'<b>'+def+' D</b></div><div class="fnm"><div><em class="pill">'+tag+'</em> '+esc(txt)+'</div><div class="fnbars">'+bar(rr,vr,'run')+bar(rp,vp,'pass')+'</div></div></div>';
+}
+/* what each offense gets per game at a position (this season), and its rank */
+const OFFG={};
+function offGets(t,pos,k){
+  const ck=t+'|'+pos+'|'+k;if(ck in OFFG)return OFFG[ck];
+  const games=(TS[t]&&TS[t].g)||0;if(!games)return OFFG[ck]=null;
+  let s=0;(BY_TEAM[t]||[]).filter(p=>p.p===pos).forEach(p=>{(p.wk||[]).forEach(w=>{const v=weekVal(w,k);if(isNum(v))s+=v;});});
+  return OFFG[ck]=s/games;
+}
+function offGetsPer(t,pos,num,den){const a=offGets(t,pos,num),b=offGets(t,pos,den);return a&&b?a/b:null;}
+function offRank(t,pos,k,per){const f=x=>per?offGetsPer(x,pos,k,per):offGets(x,pos,k),v=TL.map(x=>[x,f(x)]).filter(x=>isNum(x[1])),mine=f(t);return isNum(mine)?1+v.filter(y=>y[1]>mine).length:null;}
+function csCell(def,off,pos,k,label,per){
+  const d=DA[def]&&DA[def][pos];if(!d)return '<div class="csc"><small>'+label+'</small>—</div>';
+  const v=per?(d[k]&&d[per]?d[k]/d[per]:null):d[k];
+  let r;if(per){const all=TL.map(t=>{const x=DA[t]&&DA[t][pos];return x&&x[per]?[t,x[k]/x[per]]:null;}).filter(Boolean);r=isNum(v)?1+all.filter(y=>y[1]<v).length:null;}else r=daRank(def,pos,k);
+  const tag=r&&r<=8?'hard':r&&r>=25?'soft':'';
+  const og=per?offGetsPer(off,pos,k,per):offGets(off,pos,k),orr=offRank(off,pos,k,per);
+  return '<div class="csc '+tag+'"><div class="csv">'+flag(def,'xs')+'<b>'+(isNum(v)?(per?v.toFixed(2):v.toFixed(1)):'—')+'</b><em>#'+(r||'—')+'</em>'+(tag?'<i>'+tag.toUpperCase()+'</i>':'')+'</div><span>'+off+' gets '+(isNum(og)?(per?og.toFixed(2):og.toFixed(1)):'—')+(orr?' <u class="'+(orr<=10?'g':orr>=23?'b':'')+'">#'+orr+'</u>':'')+'</span></div>';
+}
+function csCard(g){
+  const A=g.away,H=g.home;
+  const pick=(t,pos,key)=>(BY_TEAM[t]||[]).filter(p=>p.p===pos&&p.ss&&p.g>0&&!injOut(p,g)).sort((a,b)=>(b.ss[key]||0)-(a.ss[key]||0))[0];
+  const groups=[['QB','att',[['pyd','Pass yds'],['att','Attempts'],['cmp','Comps']]],['RB','car',[['ryd','Rush yds'],['ryd','YPC','car'],['rec','Receptions']]],['WR','tgt',[['recyd','Rec yds'],['rec','Receptions'],['tgt','Targets']]],['TE','tgt',[['recyd','Rec yds'],['rec','Receptions'],['tgt','Targets']]]];
+  let h='<section class="gp cs" aria-label="Matchup cheat sheet"><div class="gphd"><span>GAME SCRIPT · WEEK '+g.wk+' · MATCHUP CHEAT SHEET</span></div><div class="gptitle">'+flag(A,'lg')+'<h2>'+A+' <i>@</i> '+H+'</h2>'+flag(H,'lg')+'<span class="gpven">'+esc(kick(g))+(spreadTxt(g)?'<br>'+esc(spreadTxt(g))+(isNum(g.total)?' · O/U '+g.total:''):'')+'</span></div>'+
+    '<div class="cssec"><b>Script funnel</b> where each defense pushes the offense · schedule-adjusted · #1 = stingiest</div>'+funnelRow(A,H)+funnelRow(H,A);
+  groups.forEach(([pos,key,cells])=>{
+    h+='<div class="cssec"><b>'+pos+'</b> allowed per game · rank<span class="cshd">'+cells.map(c=>'<em>'+c[1]+'</em>').join('')+'</span></div>';
+    [[A,H],[H,A]].forEach(([off,def])=>{const p=pick(off,pos,key);if(!p)return;const L=gpLine(p,MAIN[pos],g.wk);
+      const sub=pos==='QB'?fx(p.ss.pyd,1)+' yds · '+fx(p.ss.att,1)+' att · '+fx(p.ss.cmp,1)+' comp':pos==='RB'?fx(p.ss.ryd,1)+' yds · '+fx(p.ss.car,1)+' car · '+fx(p.ss.rec,1)+' rec':fx(p.ss.recyd,1)+' yds · '+fx(p.ss.rec,1)+' rec · '+fx(p.ss.tgt,1)+' tgt';
+      h+='<div class="csrow"><div class="csp">'+flag(off,'sm')+'<div><a href="#/player/'+p.id+'">'+esc(p.n)+'</a><small>'+sub+(L?' · line '+(L.book?'':'~')+L.v:'')+'</small></div></div><div class="cscells">'+cells.map(c=>csCell(def,off,pos,c[0],c[1],c[2])).join('')+'</div></div>';});
+  });
+  h+='<div class="gpft"><span>Each cell: what that defense allows the position per game since '+(HIST[0]||SEASON)+', ranked (#1 = allows the least). <b class="b">HARD</b> = ranks 1–8, <b class="g">SOFT</b> = 25–32. Under it: what this offense gets at that position per game this season, and its rank (#1 = most). Funnels adjust yards per carry and per attempt for the offenses each defense has faced.</span></div></section>';
+  return h;
+}
+
+/* ======================================================================
+   Matchup board: the week's best schematic matchups, every add and removal
+   with its reason, a weekly archive, and the report card that retunes the model.
+   ====================================================================== */
+const BV={k:'',g:'',open:{}};
+const BK={pyd:'Pass yds',ptd:'Pass TDs',ryd:'Rush yds',rec:'Receptions',recyd:'Rec yds'};
+const BKL={pyd:'passing yards',ptd:'passing TDs',ryd:'rushing yards',rec:'receptions',recyd:'receiving yards'};
+function bdTime(iso){if(!iso)return '';const d=new Date(iso.replace('Z',':00Z'));if(isNaN(d))return iso;
+  return d.toLocaleString('en-US',{weekday:'short',month:'numeric',day:'numeric',hour:'numeric',minute:'2-digit',timeZone:'America/New_York'})+' ET';}
+function bdDay(iso){const d=new Date((iso||'').replace('Z',':00Z'));return isNaN(d)?'':d.toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric',timeZone:'America/New_York'});}
+function pctS(x){return isNum(x)?Math.round(x*100)+'%':'—';}
+function sideTxt(e){return (e.side==='over'?'Over ':'Under ')+e.line+' '+BKL[e.k];}
+function oddsTxt(e){if(e.lsrc!=='book')return '<span class="lsrc est" title="No sportsbook line connected: his matchup-neutral expectation">Est. line</span>';
+  const pr=e.odds?(e.side==='over'?e.odds.o:e.odds.u):null;return '<span class="lsrc book">Book'+(isNum(pr)?' '+(pr>0?'+':'')+pr:'')+(e.odds&&e.odds.books?' · '+e.odds.books+' books':'')+'</span>';}
+function effChip(r){const d=r.e;return '<span class="eff '+(r.helps?'up':'dn')+'">'+(d>0?'+':'−')+Math.abs(d).toFixed(0)+'%</span>';}
+function bdCard(e,key,locked){
+  const p=BY[e.pid],g=GAMES.find(x=>x.id===e.gid),inj=p&&p.inj&&g&&p.inj.wk===g.wk&&p.inj.st?' <span class="injb '+p.inj.st.toLowerCase()+'">'+esc(p.inj.st)+'</span>':'';
+  const moved=isNum(e.p0)&&Math.abs(e.p-e.p0)>=.02;
+  return '<article class="bcard'+(e.status==='removed'?' rem':'')+'"><header><div><a class="bn" href="#/player/'+e.pid+'">'+esc(e.n)+'</a> <span class="mut small">'+e.pos+' · '+flag(e.t,'sm')+' '+e.t+' '+(g&&g.home===e.t?'vs':'at')+' '+flag(e.opp,'sm')+' '+e.opp+(g?' · '+shortKick(g):'')+'</span>'+inj+'</div>'+
+    '<span class="bst '+e.status+'">'+(e.status==='locked'?'Locked':e.status==='removed'?'Removed':'Active')+'</span></header>'+
+    '<div class="bprop"><div class="bside '+e.side+'"><small>'+(e.side==='over'?'OVER':'UNDER')+'</small><b>'+e.line+'</b><span>'+BKL[e.k]+'</span></div>'+
+    '<dl class="bnums"><div><dt>Projection</dt><dd>'+(e.k==='ptd'?e.proj.toFixed(2):e.proj.toFixed(1))+'</dd></div><div><dt>Chance</dt><dd>'+pctS(e.p)+'</dd></div><div><dt>Line alone</dt><dd title="What this side wins with no matchup factors, plus the house cut">'+pctS(e.be)+'</dd></div><div><dt>Edge</dt><dd class="'+(e.edge>=.06?'g':'')+'">+'+(e.edge*100).toFixed(1)+'%</dd></div><div><dt title="How often this side won in his games since 2024, before the matchup">Past games</dt><dd>'+(e.hits?e.hits[0]+'/'+e.hits[1]:'—')+'</dd></div></dl>'+oddsTxt(e)+'</div>'+
+    '<p class="bhead">'+esc(e.head)+'</p>'+
+    '<ul class="bwhy">'+(e.reasons||[]).map(r=>'<li>'+effChip(r)+' <b>'+esc(r.l)+'</b> <span class="small">'+(r.helps?'helps':'works against')+' the '+e.side+'.</span> <span class="small mut">'+esc(r.t)+'</span></li>').join('')+'</ul>'+
+    '<p class="small mut bmeta">'+(e.status==='removed'?'<b>Removed '+esc(bdTime(e.removed))+':</b> '+esc(e.removed_why)+'<br>':'')+'Added '+esc(bdTime(e.added))+': '+esc(e.added_why||'')+(moved?'<br>What the model learned moved this from '+pctS(e.p0)+' to '+pctS(e.p)+'.':'')+(e.upd&&e.upd!==e.added?' · refreshed '+esc(bdTime(e.upd)):'')+'</p></article>';
+}
+function bdTabs(wk,tab){
+  const w=bdWeek(wk),wks=Object.keys(BD.weeks||{}).map(Number).sort((a,b)=>b-a);
+  const nlog=w&&w.log?w.log.filter(l=>l.kind!=='note').length:0;
+  return '<div class="row" style="margin-top:16px;align-items:flex-end;gap:10px"><label class="fld">Week<select id="bdWk" class="sel">'+wks.map(x=>{const ww=BD.weeks[x];return '<option value="'+x+'"'+(x===wk?' selected':'')+'>Week '+x+(x===BD.cur?' (this week)':ww.mode==='backtest'?' (backtest)':ww.report?' (graded)':'')+'</option>';}).join('')+'</select></label>'+
+    '<div class="chips" role="tablist">'+[['picks','Board'],['log','Changes'+(nlog?' ('+nlog+')':'')],['report','Report card']].map(([k,l])=>'<a role="tab" class="chipa" aria-selected="'+(k===tab)+'" href="#/board/'+wk+'/'+k+'">'+l+'</a>').join('')+'</div></div>';
+}
+function vBoard(wkArg,tabArg){
+  needBoard();
+  let h='<section class="hero"><div><h1>Matchup board</h1><p class="sub">The week’s best schematic matchups and the props they should move: defense against his position, man/zone fit, where he’s thrown to, target and pass/run funnels, pass rush, red zone, game script, weather and injuries. Rebuilt every day; every add and removal is logged with the reason. Picks lock at kickoff, get graded when the week ends, and the grading retunes the model. <a href="#/glossary/board">How it works</a>.</p></div></section>';
+  if(!BD)return h+'<p class="empty">Loading the board…</p>';
+  if(!BD.weeks||!Object.keys(BD.weeks).length)return h+'<p class="empty">The board hasn’t been built yet. It appears after the next data refresh.</p>';
+  const wk=+wkArg||BD.cur||Math.max(...Object.keys(BD.weeks).map(Number)),w=bdWeek(wk);
+  let tab=tabArg||(w&&!w.report&&wk===BD.cur?'picks':(w&&w.report?'report':'picks'));
+  if(!w)return h+bdTabs(BD.cur,'picks')+'<p class="empty">No board for week '+wk+'.</p>';
+  h+=bdTabs(wk,tab);
+  const all=Object.entries(w.board||{}),act=all.filter(([k,e])=>e.status!=='removed'),rem=all.filter(([k,e])=>e.status==='removed');
+  const books=all.some(([k,e])=>e.lsrc==='book');
+  h+='<p class="count">'+(w.mode==='backtest'?'<b>Backtest.</b> Built after the fact using only games before week '+wk+' (availability uses who actually played; a few team rates use the full season). ':'')+
+    (w.updated?'Updated '+esc(bdTime(w.updated))+'. ':'')+act.length+' picks'+(rem.length?', '+rem.length+' removed during the week':'')+'. Lines: '+(books?'sportsbook where available, estimated otherwise':'estimated (his matchup-neutral expectation; connect a free odds key for sportsbook lines)')+'.</p>';
+  if(tab==='log')return h+bdLog(w);
+  if(tab==='report')return h+bdReport(wk,w);
+  /* picks */
+  const ks=[...new Set(act.map(([k,e])=>e.k))];
+  const gs=[...new Set(act.map(([k,e])=>e.gid))].map(id=>GAMES.find(g=>g.id===id)).filter(Boolean).sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:(a.time||'')<(b.time||'')?-1:1);
+  h+='<div class="row" style="margin-top:8px;gap:10px;align-items:flex-end"><div class="chips" role="group" aria-label="Prop">'+[['','All']].concat(ks.map(k=>[k,BK[k]])).map(([k,l])=>'<button data-bdk="'+k+'" aria-pressed="'+(BV.k===k)+'">'+l+'</button>').join('')+'</div>'+
+    '<label class="fld">Game<select id="bdG" class="sel"><option value="">All games</option>'+gs.map(g=>'<option value="'+g.id+'"'+(BV.g===g.id?' selected':'')+'>'+g.away+' at '+g.home+'</option>').join('')+'</select></label></div>';
+  let list=act.filter(([k,e])=>(!BV.k||e.k===BV.k)&&(!BV.g||e.gid===BV.g)).sort((a,b)=>b[1].edge-a[1].edge);
+  /* group by player: one card per player, his props inside */
+  const by={};list.forEach(([k,e])=>{(by[e.pid]=by[e.pid]||[]).push([k,e]);});
+  const order=[...new Set(list.map(([k,e])=>e.pid))];
+  h+=order.length?'<div class="bgrid">'+order.map(pid=>by[pid].map(([k,e])=>bdCard(e,k)).join('')).join('')+'</div>':'<p class="empty">No picks match.</p>';
+  if(rem.length)h+='<details class="tview" style="margin-top:18px"><summary>Removed during the week ('+rem.length+')</summary><div class="bgrid" style="margin-top:10px">'+rem.map(([k,e])=>bdCard(e,k)).join('')+'</div></details>';
+  if(w.learned&&w.learned.length)h+='<h2>Where last week’s lessons show up</h2><p class="lede">Picks whose chance moved the most because of what the model learned from graded weeks (starting values → now).</p><ul class="blist">'+w.learned.map(x=>'<li><b>'+esc(x.n)+'</b> '+esc(sideTxt(x))+': '+pctS(x.p0)+' → <b>'+pctS(x.p)+'</b></li>').join('')+'</ul>';
+  return h;
+}
+function bdLog(w){
+  const L=(w.log||[]).slice().reverse();if(!L.length)return '<p class="empty">No changes logged yet.</p>';
+  const days={};L.forEach(l=>{const d=bdDay(l.ts);(days[d]=days[d]||[]).push(l);});
+  return '<p class="lede">Every change to this week’s board, newest first, with the reason. The board is rebuilt every day and after every game window; injuries, forecasts and lines are the usual reasons.</p>'+
+    Object.entries(days).map(([d,ls])=>'<h3 style="margin-top:18px">'+esc(d)+'</h3><ul class="blog">'+ls.map(l=>'<li class="'+l.kind+'"><span class="bk">'+(l.kind==='add'?'+ Added':l.kind==='remove'?'− Removed':l.kind==='update'?'↻ Updated':'Note')+'</span>'+(l.n?'<b>'+esc(l.n)+'</b> '+esc(sideTxt(l))+'. ':'')+'<span>'+esc(l.txt)+'</span> <span class="mut small">'+esc(bdTime(l.ts).split(', ').slice(-1)[0])+'</span></li>').join('')+'</ul>').join('');
+}
+function recTxt(r){r=r||{};return (r.hit||0)+'–'+((r.miss||0)+(r.near||0))+(r.push?'–'+r.push:'');}
+function bdReport(wk,w){
+  const R=w.report;
+  if(!R){const lastG=Object.values(BD.weeks).filter(x=>x.report).map(x=>x.wk).sort((a,b)=>b-a)[0];
+    return '<p class="empty">Week '+wk+' hasn’t been graded yet. Grading runs once every game is final and the stats are in, usually the Tuesday after.'+(lastG?' <a href="#/board/'+lastG+'/report">See the week '+lastG+' report card</a>.':'')+'</p>'+bdSeason();}
+  const rec=R.record||{},dec=(rec.hit||0)+(rec.miss||0)+(rec.near||0);
+  let h='<h2>Week '+wk+' report card</h2><dl class="tiles bt">'+
+    '<div class="tile"><dt>Record</dt><dd>'+recTxt(rec)+'</dd><span class="small mut">hits–misses'+(rec.push?'–pushes':'')+(rec.void?', '+rec.void+' didn’t play':'')+'</span></div>'+
+    '<div class="tile"><dt>Hit rate</dt><dd>'+(dec?Math.round((rec.hit||0)/dec*100)+'%':'—')+'</dd><span class="small mut">'+(rec.near?rec.near+' of the misses were near misses':'')+'</span></div>'+
+    '<div class="tile"><dt>Expected from the lines alone</dt><dd>'+(isNum(R.exp_hits)?R.exp_hits.toFixed(1)+' hits':'—')+'</dd><span class="small mut">'+(isNum(R.exp_hits)&&dec?((rec.hit||0)>=R.exp_hits?'Beat it by ':'Short by ')+Math.abs((rec.hit||0)-R.exp_hits).toFixed(1):'')+'</span></div>'+
+    '<div class="tile"><dt>Removed picks</dt><dd>'+(R.removed&&R.removed.length?recTxt(R.removed_record):'—')+'</dd><span class="small mut">'+(R.removed&&R.removed.length?'how the picks pulled during the week would have done':'nothing was removed')+'</span></div></dl>';
+  const byk=Object.entries(R.by_k||{});
+  if(byk.length)h+='<p class="small" style="margin-top:8px">By prop: '+byk.map(([k,v])=>BK[k]+' '+v[0]+'–'+v[1]).join(' · ')+'.</p>';
+  const item=(x,showWhy)=>'<li><span class="res '+x.r+'">'+({hit:'Hit',miss:'Miss',near:'Near miss',push:'Push',void:'DNP'}[x.r]||'')+'</span><b><a href="#/player/'+x.key.split('|')[0]+'">'+esc(x.n)+'</a></b> '+esc(sideTxt(x))+' → <b>'+(isNum(x.act)?fmtN(x.act):'—')+'</b>'+(isNum(x.p)?' <span class="mut small">('+pctS(x.p)+' chance)</span>':'')+
+    (showWhy&&x.why&&x.why.length?'<br><span class="small">Picked for: '+esc(x.why.join(', ').toLowerCase())+'.</span>':'')+(x.dx&&x.dx.length?'<br><span class="small mut">'+esc(x.dx.join(' '))+'</span>':'')+'</li>';
+  const P=R.picks||[];
+  const sec=(t,sub,arr,why)=>arr.length?'<h3 style="margin-top:20px">'+t+' ('+arr.length+')</h3>'+(sub?'<p class="small mut" style="margin:2px 0 6px">'+sub+'</p>':'')+'<ul class="blist rep">'+arr.map(x=>item(x,why)).join('')+'</ul>':'';
+  h+=sec('What it got right','',P.filter(x=>x.r==='hit'),true);
+  h+=sec('What it got wrong','Each miss with what actually happened: volume or efficiency, snaps, script, quarterback, teammates.',P.filter(x=>x.r==='miss'),true);
+  h+=sec('Near misses','Lost by a catch, a few yards or half a touchdown.',P.filter(x=>x.r==='near'),true);
+  h+=sec('Pushes and players who didn’t play','',P.filter(x=>x.r==='push'||x.r==='void'),false);
+  if(R.removed&&R.removed.length)h+=sec('Picks removed during the week','Were the removals right? How each would have done.',R.removed,false);
+  if(R.sneaky&&R.sneaky.length)h+='<h3 style="margin-top:20px">Sneaky looks it missed ('+R.sneaky.length+')</h3><p class="small mut" style="margin:2px 0 6px">The model leaned the right way but ranked them below the cut, and they cleared by a lot.</p><ul class="blist rep">'+R.sneaky.map(x=>'<li><span class="res sneaky">Sneaky</span><b>'+esc(x.n)+'</b> '+esc(sideTxt(x))+' → <b>'+fmtN(x.act)+'</b> <span class="mut small">('+pctS(x.p)+')</span>'+(x.why&&x.why.length?'<br><span class="small">Matchup: '+esc(x.why.join(', ').toLowerCase())+'.</span>':'')+(x.dx&&x.dx.length?'<br><span class="small mut">'+esc(x.dx.join(' '))+'</span>':'')+'</li>').join('')+'</ul>';
+  if(R.blind&&R.blind.length)h+='<h3 style="margin-top:20px">Blind spots ('+R.blind.length+')</h3><p class="small mut" style="margin:2px 0 6px">Confident leans that went badly the other way, and what the data says happened.</p><ul class="blist rep">'+R.blind.map(x=>'<li><span class="res miss">Blind spot</span><b>'+esc(x.n)+'</b> '+esc(sideTxt(x))+' → <b>'+fmtN(x.act)+'</b> <span class="mut small">('+pctS(x.p)+')</span>'+(x.dx&&x.dx.length?'<br><span class="small mut">'+esc(x.dx.join(' '))+'</span>':'<br><span class="small mut">Nothing in the box score explains it: normal volume, snaps and script. Variance.</span>')+'</li>').join('')+'</ul>';
+  /* what it learned */
+  h+='<h2>What the model learned from week '+wk+'</h2><p class="lede">After grading, the model re-fits on every graded week: how much each matchup factor should count, whether each prop type runs high or low, and how confident to be. Each is pulled toward its starting value so one odd week can’t swing it.</p>';
+  h+=(R.lessons&&R.lessons.length?'<ul class="blist">'+R.lessons.map(l=>'<li>'+esc(l.t)+'</li>').join('')+'</ul>':'<p class="small mut">No meaningful changes this week.</p>');
+  const MB=R.model_before||{},MA=R.model_after||{},FN=(BD.consts&&BD.consts.fname)||{};
+  h+='<div class="scroll" style="margin-top:12px"><table><thead><tr><th>Factor</th><th class="num">Before</th><th class="num">After</th><th>Weight (1 = as designed)</th></tr></thead><tbody>'+
+    Object.keys(MA.w||{}).map(f=>{const a=(MB.w||{})[f],b=MA.w[f];return '<tr><td>'+esc(FN[f]||f)+'</td><td class="num">'+fx(a,2)+'</td><td class="num"><b>'+fx(b,2)+'</b> '+(isNum(a)&&Math.abs(b-a)>=.03?'<span class="'+(b>a?'up':'dn')+'">'+(b>a?'↑':'↓')+'</span>':'')+'</td><td><span class="wbar"><i style="width:'+Math.min(100,b/2*100)+'%"></i><u style="left:50%"></u></span></td></tr>';}).join('')+'</tbody></table></div>';
+  h+='<p class="small mut" style="margin-top:6px">Weights multiply each factor’s effect: 1.30 means it now moves projections 30% more than designed, 0.70 means 30% less.</p>';
+  if(BD.cur&&bdWeek(BD.cur)&&bdWeek(BD.cur).learned&&bdWeek(BD.cur).learned.length&&wk<BD.cur)h+='<h3 style="margin-top:18px">How it shows up in week '+BD.cur+'</h3><ul class="blist">'+bdWeek(BD.cur).learned.slice(0,6).map(x=>'<li><b>'+esc(x.n)+'</b> '+esc(sideTxt(x))+': '+pctS(x.p0)+' → <b>'+pctS(x.p)+'</b></li>').join('')+'</ul><p class="small"><a href="#/board/'+BD.cur+'/picks">Open the week '+BD.cur+' board</a>.</p>';
+  return h+bdSeason();
+}
+function bdSeason(){
+  const H=(BD.history||[]).slice().sort((a,b)=>a.wk-b.wk);if(!H.length)return '';
+  let tot=[0,0,0];
+  const rows=H.map(x=>{const r=x.record||{},d=(r.hit||0)+(r.miss||0)+(r.near||0),R=(bdWeek(x.wk)||{}).report||{};tot[0]+=r.hit||0;tot[1]+=d;tot[2]+=R.exp_hits||0;
+    return '<tr><td><a href="#/board/'+x.wk+'/report">Week '+x.wk+'</a></td><td>'+(x.mode==='backtest'?'Backtest':'Live')+'</td><td class="num">'+recTxt(r)+'</td><td class="num">'+(d?Math.round((r.hit||0)/d*100)+'%':'—')+'</td><td class="num">'+(isNum(R.exp_hits)?R.exp_hits.toFixed(1):'—')+'</td><td class="num">'+(isNum(R.exp_hits)?((r.hit||0)-R.exp_hits>=0?'+':'')+((r.hit||0)-R.exp_hits).toFixed(1):'—')+'</td></tr>';}).join('');
+  return '<h2>Season so far</h2><p class="lede">Every graded week. “Expected” is how many the picks would win from their lines alone; beating it is the real test.</p><div class="scroll"><table><thead><tr><th>Week</th><th>Board</th><th class="num">Record</th><th class="num">Hit rate</th><th class="num">Expected</th><th class="num">Vs expected</th></tr></thead><tbody>'+rows+
+    '<tr><td><b>Total</b></td><td></td><td class="num"><b>'+tot[0]+'–'+(tot[1]-tot[0])+'</b></td><td class="num"><b>'+(tot[1]?Math.round(tot[0]/tot[1]*100)+'%':'—')+'</b></td><td class="num">'+tot[2].toFixed(1)+'</td><td class="num"><b>'+((tot[0]-tot[2])>=0?'+':'')+(tot[0]-tot[2]).toFixed(1)+'</b></td></tr></tbody></table></div>';
+}
+
+/* home page: the top of this week's board */
+function bdHome(){
+  needBoard();if(!BD)return '<p class="empty">Loading the matchup board\u2026</p>';
+  const w=bdWeek(BD.cur);if(!w)return '';
+  const act=Object.values(w.board||{}).filter(e=>e.status!=='removed').sort((a,b)=>b.edge-a.edge).slice(0,6);if(!act.length)return '';
+  const n=(w.log||[]).filter(l=>l.kind!=='note').length;
+  return '<h2>Matchup board: week '+BD.cur+'</h2><p class="lede">The strongest schematic matchups and the props they move. Updated '+esc(bdTime(w.updated))+(n?', '+n+' changes logged this week':'')+'. <a href="#/board">Full board, changes and report card</a>.</p><div class="bmini">'+
+    act.map(e=>'<a class="bm" href="#/board/'+BD.cur+'/picks"><span class="bside '+e.side+'"><small>'+(e.side==='over'?'OVER':'UNDER')+'</small><b>'+e.line+'</b></span><span><b>'+esc(e.n)+'</b><small>'+esc(BKL[e.k])+' \u00b7 '+e.t+' '+(e.gid.endsWith(e.t)?'vs':'at')+' '+e.opp+'</small><small class="mut">'+esc((e.reasons||[]).filter(r=>r.helps).slice(0,2).map(r=>r.l).join(', ')||'his track record')+'</small></span><em>'+pctS(e.p)+'</em></a>').join('')+'</div>';
+}
+
 /* ---------- situational views on player and team pages ---------- */
 function stateTable(p){
   if(!SS)return '<p class="empty">Loading play-by-play…</p>';
@@ -2994,8 +3352,9 @@ function render(keep){
   else if(v==='props'){html=vProps();title='Props';}
   else if(v==='outlook'||v==='proj'){html=vOutlook(r[1]);title='Projections';nav='outlook';}
   else if(v==='fantasy'){html=vFantasy();title='Fantasy';}
-  else if(v==='best'){html=vBest();title='Best props';}
+  else if(v==='best'){html=vBest();title='Best props';nav='board';}
   else if(v==='sim'){html=vSim(r[1],r[2]);title='Game simulator';}
+  else if(v==='board'){html=vBoard(r[1],r[2]);title='Matchup board';}
   else if(v==='leaders'){html=vLeaders(r[1],r[2]);title='Stat leaders';}
   else if(v==='glossary'){html=vGlossary(r[1]);title='Glossary';}
   else if(v==='allowed'){html=vAllowed(r[1],r[2],r[3]);title=(r[1]||'')+' defense vs '+(r[2]||'')+'s';nav='teams';}
@@ -3090,6 +3449,7 @@ document.addEventListener('click',e=>{
     let a=CMP.pa,b=CMP.pb;const src=np||(!a&&DUEL.of?BY[DUEL.of]:null);
     if(src&&src.id!==a){a=src.id;if(!b||b===a||!BY[b]||pk(BY[b])!==pk(BY[a]))b=suggestRival(BY[a])||b;}
     location.hash='#/compare/players/'+(a||'')+'/'+(b||'');return;}
+  if(t.dataset.bdk!==undefined){BV.k=t.dataset.bdk;render(true);const b=document.querySelector('[data-bdk="'+BV.k+'"]');if(b)b.focus();return;}
   if(t.dataset.olpos){OL.pos=t.dataset.olpos;OL.sort=null;OL.dir=-1;render(true);const b=document.querySelector('[data-olpos="'+OL.pos+'"]');if(b)b.focus();return;}
   if(t.dataset.olsort){const k=t.dataset.olsort;if(OL.sort===k)OL.dir=-OL.dir;else{OL.sort=k;OL.dir=k==='n'?1:-1;}render(true);const b=document.querySelector('[data-olsort="'+k+'"]');if(b)b.focus();return;}
   if(t.dataset.alspan){AL.span=t.dataset.alspan==='all'?'all':+t.dataset.alspan;render(true);const b=document.querySelector('[data-alspan="'+t.dataset.alspan+'"]');if(b)b.focus();return;}
@@ -3121,6 +3481,8 @@ document.addEventListener('change',e=>{
   else if(id==='alT'){const r=location.hash.split('/');location.hash='#/allowed/'+e.target.value+'/'+(r[3]||'WR')+'/'+(r[4]||'recyd');}
   else if(id==='olWk'){OL.wk=+e.target.value;OL.g='';render(true);refocus();}
   else if(id==='olG'){OL.g=e.target.value;render(true);refocus();}
+  else if(id==='bdWk'){location.hash='#/board/'+e.target.value;}
+  else if(id==='bdG'){BV.g=e.target.value;render(true);refocus();}
   else if(id==='ftWk'){FT.wk=+e.target.value;render(true);refocus();}
   else if(id==='bpWk'){BP.wk=+e.target.value;render(true);refocus();}
   else if(id==='bpStat'){BP.stat=e.target.value;render(true);refocus();}
