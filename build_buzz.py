@@ -23,10 +23,15 @@ BUZZ_FILE = "nfl_buzz.json"
 KEEP_DAYS, PER_PLAYER = 7, 40
 X_POST_COST, X_USER_COST = 0.005, 0.010
 
-PROP_WORDS = (r"over|under|o\s?\d+(?:\.5)?|u\s?\d+(?:\.5)?|\d+(?:\.5)?\s?\+|alt|alts|ladder|prop|props|line|parlay|sgp|"
-              r"anytime|atd|attd|first td|1st td|yds|yards|yd|rec|recs|receptions|catches|targets|tgts|"
-              r"rush(?:ing)?|pass(?:ing)?|completions|comps|attempts|atts|ints?|interceptions|tds?|touchdowns?|longest|lock|hammer|fade|smash")
-PROP_RE = re.compile(r"(?<![\w@#])(" + PROP_WORDS + r")(?!\w)", re.I)
+# What counts as "talking props": a betting-shaped phrase, not just a loose word like "over" or "pass".
+PROP_PATTERNS = [
+    r"\b(?:over|under|o|u)\s?\d+(?:\.5)?\b",                                   # over 64.5, o6.5, u 1.5
+    r"\b\d+(?:\.5)?\s?\+?\s?(?:rec(?:eiving)?\s|rush(?:ing)?\s|pass(?:ing)?\s)?(?:yds|yards|yd|recs?|receptions|catches|targets|tgts|tds?|touchdowns?|carries|completions|comps|attempts|atts)\b",
+    r"\b(?:prop|props|anytime|atd|attd|first td|1st td|alt|alts|ladder|parlay|sgp|o/u|over/under)\b",
+    r"\b(?:receiving|rushing|passing|rec|rush|pass)\s(?:yards|yds|tds?|touchdowns?)\b",
+    r"\b(?:receptions|catches|targets|tds?|touchdowns?)\b",
+]
+PROP_RE = re.compile("|".join(PROP_PATTERNS), re.I)
 STAT_MAP = [  # (regex, prop key)
     (r"rec(?:eiving)?\s*(?:yds|yards|yd)|(?:yds|yards)\s*rec", "recyd"),
     (r"rush(?:ing)?\s*(?:yds|yards|yd)|(?:yds|yards)\s*rush", "ryd"),
@@ -96,7 +101,7 @@ def is_prop_talk(text, player):
     t = re.sub(r"https?://\S+|[@#]\w+", " ", text)
     for part in [player["n"], _last(player["n"])]:
         t = re.sub(re.escape(part), " ", t, flags=re.I)
-    rest = re.sub(r"[^\w.+ ]", " ", t)
+    rest = re.sub(r"[^\w.+/ ]", " ", t)
     if len(rest.split()) < 2: return False              # basically just the name
     return bool(PROP_RE.search(rest))
 
@@ -269,7 +274,10 @@ def build_buzz(data, board, now=None):
     cut = (now - timedelta(days=KEEP_DAYS)).strftime("%Y-%m-%dT%H:%M")
     summ = {}
     for pid, lst in list(buzz["players"].items()):
-        lst = sorted([x for x in lst if x.get("ts", "") >= cut], key=lambda x: x.get("ts", ""), reverse=True)[:PER_PLAYER]
+        pl = by_id.get(pid)
+        # re-check stored posts against the current filter, so tightening it cleans old entries too
+        lst = sorted([x for x in lst if x.get("ts", "") >= cut and (not pl or is_prop_talk(x.get("t", ""), pl))],
+                     key=lambda x: x.get("ts", ""), reverse=True)[:PER_PLAYER]
         if not lst:
             buzz["players"].pop(pid); continue
         buzz["players"][pid] = lst
