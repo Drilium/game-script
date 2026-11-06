@@ -254,6 +254,7 @@ DEF_POS = {"DB", "LB", "DL"}
 # How many prior full seasons to pull for "vs this opponent" history and
 # for the real defense-allowed-by-position numbers. Keep this small —
 # each extra season is another multi-MB download.
+DEF_PRIOR_GAMES = 4      # last season's weight in 'defense allows', in games
 HIST_SEASONS_BACK = 2
 
 def fetch_season_stats(season):
@@ -794,6 +795,8 @@ def build(season):
     season_split = defaultdict(dict)      # pid -> prior season -> totals (full seasons, no windows)
     def_games = defaultdict(set)          # team -> set of (season, week) it played defense
     def_agg = defaultdict(lambda: defaultdict(float))  # (team,pos) -> field -> total
+    def_agg_s = defaultdict(lambda: defaultdict(float))  # (team,pos,season) -> field -> total
+    def_games_s = defaultdict(set)                     # (team,season) -> weeks
 
     for szn, row in all_season_rows:
         if row["season_type"] != "REG":
@@ -809,10 +812,13 @@ def build(season):
         row_spec = POS_STATS.get(row_pos)
         if row_spec and row_spec["fields"]:
             def_games[opp].add((szn, wk))
+            def_games_s[(opp, szn)].add(wk)
             for full in row_spec["fields"]:
                 def_agg[(opp, row_pos)][full] += num(row.get(full))
+                def_agg_s[(opp, row_pos, szn)][full] += num(row.get(full))
             if row_pos in ("QB", "RB", "WR", "TE"):
                 def_agg[(opp, row_pos)]["fantasy_points_ppr"] += num(row.get("fantasy_points_ppr"))
+                def_agg_s[(opp, row_pos, szn)]["fantasy_points_ppr"] += num(row.get("fantasy_points_ppr"))
 
         # Per-player history is only shown for players on a current roster, with columns
         # matching their CURRENT position so the table lines up on their page.
@@ -857,14 +863,24 @@ def build(season):
             sz.append(row)
         p["sz"] = sz
 
+    # What each defense allows, on recent form: every game this season, plus last season counted as
+    # DEF_PRIOR_GAMES games' worth (so week 2 isn't noise, and by midseason it's mostly this year's
+    # scheme). Two seasons back is left out. The game-by-game log still shows every game.
     defense_allowed = {}
     for (team, pos), sums in def_agg.items():
-        g = len(def_games.get(team, ())) or 1
+        gc, gl = len(def_games_s.get((team, season), ())), len(def_games_s.get((team, season - 1), ()))
+        cur_s, last_s = def_agg_s.get((team, pos, season), {}), def_agg_s.get((team, pos, season - 1), {})
+        def recent(full):
+            c = cur_s.get(full, 0)
+            if gl:
+                return (c + DEF_PRIOR_GAMES * last_s.get(full, 0) / gl) / (gc + DEF_PRIOR_GAMES)
+            return c / gc if gc else 0
         spec = POS_STATS[pos]
-        row_out = {short: round(sums.get(full, 0) / g, 2) for full, short in spec["fields"].items()}
-        row_out["g"] = len(def_games.get(team, ()))
+        row_out = {short: round(recent(full), 2) for full, short in spec["fields"].items()}
+        row_out["g"], row_out["gl"] = gc, gl
+        row_out["ga"] = len(def_games.get(team, ()))
         if pos in ("QB", "RB", "WR", "TE"):
-            row_out["fp"] = round(sums.get("fantasy_points_ppr", 0) / g, 2)   # PPR points allowed per game
+            row_out["fp"] = round(recent("fantasy_points_ppr"), 2)   # PPR points allowed per game
         defense_allowed.setdefault(team, {})[pos] = row_out
 
     games = []
@@ -958,7 +974,7 @@ def build(season):
     # ...and what each defense allows: average longest catch per game, 20+ yd catches per game
     for team, by_pos in defense_allowed.items():
         for pos, row in by_pos.items():
-            dl, g = dlong.get((team, pos)), row.get("g") or 0
+            dl, g = dlong.get((team, pos)), row.get("ga") or 0
             if dl and g:
                 row["lr"] = round(dl["sum_lr"] / g, 1)
                 row["x20"] = round(dl["x20"] / g, 2)
@@ -970,7 +986,7 @@ def build(season):
 
     teams_meta = build_team_meta({g["home"] for g in games} | {g["away"] for g in games})
 
-    out = {"season": season, "hist_seasons": hist_seasons, "generated": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%MZ"),
+    out = {"season": season, "hist_seasons": hist_seasons, "recent": {"pm": 3, "dm": DEF_PRIOR_GAMES}, "generated": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%MZ"),
            "players": players, "games": games, "past_games": past_games,
            "defense_allowed": defense_allowed, "team_scheme": scheme["team"],
            "team_stats": team_stats, "teams": teams_meta, "script": script}
@@ -1004,3 +1020,12 @@ if __name__ == "__main__":
     except Exception as e:
         import traceback; traceback.print_exc()
         print(f"Matchup board skipped: {e}")
+    # Chatter bot: prop talk about this week's players (X with a budget-capped key, Bluesky free).
+    try:
+        import os, json as _json
+        from build_buzz import build_buzz
+        bd = _json.load(open("nfl_board.json")) if os.path.exists("nfl_board.json") else {}
+        build_buzz(data, bd)
+    except Exception as e:
+        import traceback; traceback.print_exc()
+        print(f"Chatter skipped: {e}")

@@ -432,6 +432,10 @@ details.tview table{margin-top:8px;font-size:13.5px}
 /* Simulator, injuries */
 .simteams{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,520px),1fr));gap:18px;margin-top:12px}
 .simteam h2{margin-top:6px}
+.bzl{list-style:none;padding:0;margin:8px 0 0;display:grid;gap:8px}
+.bzp{background:var(--surface);border:1px solid var(--edge);border-radius:10px;padding:10px 12px;box-shadow:var(--lift)}
+.bzh{display:flex;align-items:center;gap:6px;flex-wrap:wrap}.bzp p{margin:6px 0 4px;line-height:1.45;white-space:pre-wrap;word-break:break-word}
+.bzsrc{font-size:10px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;border-radius:5px;padding:1px 6px;background:var(--sunken);color:var(--ink)}.bzsrc.x{background:#000;color:#fff;border:1px solid #333}.bzsrc.bsky{background:#1185fe;color:#fff}
 /* ---------- matchup board ---------- */
 .chips a.chipa[aria-selected="true"]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
 .bgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,460px),1fr));gap:14px;margin-top:12px}
@@ -1158,7 +1162,7 @@ document.addEventListener('pointermove',e=>{
 let HW=1;
 const PL={pos:'',team:'',q:'',sort:'scy',dir:-1};
 const TSORT={k:'winp',dir:1};
-const PV={key:null,span:'all',line:{}};
+const PV={key:null,span:null,line:{}};
 const CMP={pa:null,pb:null,ta:null,tb:null,span:'season',stat:null};
 const DUEL={of:null,team:null,d:null};
 /* A player picked on one Compare tab carries to the other on the next switch.
@@ -1243,6 +1247,13 @@ function lgAvg(pos,k){const ck=pos+'|'+k;if(ck in LG)return LG[ck];const v=TL.ma
 function impliedPts(g,t){if(!isNum(g.total)||!isNum(g.spread))return null;return g.home===t?(g.total+g.spread)/2:(g.total-g.spread)/2;}
 /* A new team, or a usage change of more than a third, means this season says more about him than his past */
 const ROLE_C={};
+/* Props run on recent form: this season, steadied by last season counted as a few games
+   (RECENT.pm for players, RECENT.dm for defenses). Two seasons back is history, not a prop input. */
+const RECENT={pm:3,dm:4};
+function rtxt(){return 'this season, steadied by '+(SEASON-1);}   /* SEASON is set after the data loads */
+function recentGames(p){return playerGames(p).filter(x=>x.s>=SEASON-1);}
+function recentMean(cur,last,m){const mc=cur.length?cur.reduce((a,b)=>a+b,0)/cur.length:null,ml=last.length?last.reduce((a,b)=>a+b,0)/last.length:null;
+  if(mc===null)return ml;if(ml===null)return mc;return (cur.length*mc+m*ml)/(cur.length+m);}
 function roleChanged(p){
   if(p.id in ROLE_C)return ROLE_C[p.id];
   const prior=(p.sz||[]).filter(r=>r.s<SEASON).sort((a,b)=>b.s-a.s),last=prior[0];
@@ -1253,17 +1264,17 @@ function roleChanged(p){
 }
 function project(p,g){
   const ck=p.id+'|'+g.id;if(PROJ_C[ck])return PROJ_C[ck];
-  const opp=oppOf(g,p.t),games=playerGames(p),cur=games.filter(x=>x.s===SEASON),w=roleChanged(p)?Math.min(cur.length,5)/5:Math.min(cur.length,6)/12;
+  const opp=oppOf(g,p.t),games=recentGames(p),cur=games.filter(x=>x.s===SEASON),last=games.filter(x=>x.s<SEASON),m=roleChanged(p)?1:RECENT.pm;
   const ip=impliedPts(g,p.t),pf=TS[p.t]&&TS[p.t].pfpg,ratio=isNum(ip)&&pf?ip/pf:1;
   const out={opp:opp,g:g,ip:ip,pf:pf,keys:{}};
   (PROJ_KEYS[p.p]||[]).forEach(k=>{
-    const all=games.map(x=>weekVal(x,k)).filter(isNum),c=cur.map(x=>weekVal(x,k)).filter(isNum);if(!all.length)return;
-    const mean=a=>a.reduce((s,v)=>s+v,0)/a.length,aAll=mean(all),aCur=c.length?mean(c):null;
-    const base=aCur===null?aAll:w*aCur+(1-w)*aAll;
+    const all=games.map(x=>weekVal(x,k)).filter(isNum),c=cur.map(x=>weekVal(x,k)).filter(isNum),l=last.map(x=>weekVal(x,k)).filter(isNum);if(!all.length)return;
+    const mean=a=>a.reduce((s,v)=>s+v,0)/a.length,aAll=l.length?mean(l):null,aCur=c.length?mean(c):null;
+    const base=recentMean(c,l,m);
     const da=DA[opp]&&DA[opp][p.p]?DA[opp][p.p][k]:null,lg=lgAvg(p.p,k);
     const mf=isNum(da)&&lg?Math.min(1.2,Math.max(0.8,1+(da/lg-1)*0.5)):1;
     const sf=(VOLUME[k]||TDK[k])?Math.min(1.1,Math.max(0.9,1+(ratio-1)*(TDK[k]?0.6:0.3))):1;
-    const f=mf*sf,sc=all.map(v=>v*f).sort((a,b)=>a-b),q=x=>sc[Math.round(x*(sc.length-1))];
+    const ref=c.length>=4?c:all,f=mf*sf,sc=ref.map(v=>v*(base/(mean(ref)||base||1))*f).sort((a,b)=>a-b),q=x=>sc[Math.round(x*(sc.length-1))];
     out.keys[k]={aAll:aAll,aCur:aCur,base:base,da:da,lg:lg,mf:mf,sf:sf,f:f,proj:base*f,lo:q(.25),hi:q(.75),n:all.length,rank:isNum(da)?daRank(opp,p.p,k):null};
   });
   return PROJ_C[ck]=out;
@@ -1271,12 +1282,12 @@ function project(p,g){
 function pfmt(k,v){return isNum(v)?((TDK[k]||k==='int')?v.toFixed(2):v.toFixed(1)):'\u2014';}
 function fct(x,k){if(!isNum(x))return '';const d=Math.round((x-1)*100),bad=k==='int';const good=bad?d<0:d>0;
   return '<span class="'+(Math.abs(d)>=5?(good?'rk hi':'rk lo'):'rk')+'">'+(d>0?'+':d<0?'\u2212':'\u00b1')+Math.abs(d)+'%</span>';}
-const PROJ_NOTE='Start: his per-game average, blending this season with every game since '+'__H__'+' (this season counts for more as he plays more games, up to half). Then adjusted for how this defense compares with the league average at his position (half the gap, capped at 20%), and for the betting market\u2019s implied team total compared with his team\u2019s usual scoring. Range is the middle half of his games after the same adjustments. These are estimates from public data, not betting advice.';
+const PROJ_NOTE='Start: his per-game average this season, steadied by last season counted as 3 games (1 game if his team or role changed). Two seasons back isn\u2019t used for props. Then adjusted for how this defense compares with the league average at his position (half the gap, capped at 20%), and for the betting market\u2019s implied team total compared with his team\u2019s usual scoring. Range is the middle half of his games after the same adjustments. These are estimates from public data, not betting advice.';
 function outlookTable(p,g){
   const pr=project(p,g),keys=Object.keys(pr.keys);if(!keys.length)return '';
   const o=pr.opp;
   let h='<p class="lede">Week '+g.wk+' '+(g.home===p.t?'vs ':'at ')+esc(fullName(o))+', '+esc(kick(g))+'.'+(isNum(pr.ip)?' The betting market expects about <b>'+pr.ip.toFixed(1)+' points</b> from '+esc(nick(p.t))+' (they average '+fx(pr.pf,1)+').':' Lines aren\u2019t posted yet, so only the defense adjusts the numbers.')+'</p>';
-  h+='<div class="scroll"><table><thead><tr><th>Stat</th><th class="num">This season</th><th class="num">Since '+(HIST[0]||SEASON)+'</th><th class="num">'+o+' allows to '+p.p+'s</th><th class="num">Matchup</th><th class="num">Projection</th><th class="num">Typical range</th></tr></thead><tbody>'+
+  h+='<div class="scroll"><table><thead><tr><th>Stat</th><th class="num">This season</th><th class="num">'+(SEASON-1)+'</th><th class="num">'+o+' allows to '+p.p+'s</th><th class="num">Matchup</th><th class="num">Projection</th><th class="num">Typical range</th></tr></thead><tbody>'+
     keys.map(k=>{const x=pr.keys[k];return '<tr><td>'+glab(ST[k].l,k)+'</td><td class="num">'+pfmt(k,x.aCur)+'</td><td class="num">'+pfmt(k,x.aAll)+'</td><td class="num">'+(isNum(x.da)&&DA_ALL[p.p].some(y=>y[0]===k)?alink(o,p.p,k,pfmt(k,x.da)):pfmt(k,x.da))+(x.rank?' <span class="small">'+mup(x.rank).replace(', a friendly matchup','').replace(', a tough matchup','')+'</span>':'')+'</td><td class="num">'+fct(x.f,k)+'</td><td class="num"><b>'+pfmt(k,x.proj)+'</b></td><td class="num">'+pfmt(k,x.lo)+'\u2013'+pfmt(k,x.hi)+'</td></tr>';}).join('')+
     '</tbody></table></div><details class="tview" style="margin-top:6px"><summary>How the projection works</summary><p class="small mut" style="max-width:72ch;margin-top:6px">'+PROJ_NOTE.replace('__H__',HIST[0]||SEASON)+'</p></details>';
   return h;
@@ -1390,7 +1401,7 @@ function vGame(id){
     '<h3 style="margin-top:18px">When '+nick(A)+' have the ball</h3>'+unitBlock(A,H,'off')+
     '<h3 style="margin-top:26px">When '+nick(H)+' have the ball</h3>'+unitBlock(H,A,'def');
 
-  h+='<h2>What each defense gives up by position</h2><p class="lede">Every stat, per game, across every game since '+(HIST[0]||SEASON)+'. Rank 1 allows the least (for interceptions, 1st takes away the most). Click any number to see every game and player behind it.</p>'+daCompareTable(A,H);
+  h+='<h2>What each defense gives up by position</h2><p class="lede">Every stat, per game, '+rtxt()+' (counted as '+RECENT.dm+' games). Rank 1 allows the least (for interceptions, 1st takes away the most). Click any number to see every game and player behind it.</p>'+daCompareTable(A,H);
 
   h+='<h2>Players to know</h2><p class="lede">Each team’s main skill players by usage, with what the other defense allows at their position.</p><div class="split">'+
     '<div><h3>'+esc(fullName(A))+'</h3>'+kpList(A,H)+'</div><div><h3>'+esc(fullName(H))+'</h3>'+kpList(H,A)+'</div></div>';
@@ -1468,7 +1479,7 @@ function vTeam(t){
     return '<div class="tile"><dt>'+glab(m.l,m.k)+'</dt><dd>'+fmtTM(m,v)+'</dd><p class="pt"><span class="'+(m.b&&r?rkCls(r):'rk')+'">'+(r?rankTxt(m,r)+' of 32':'Not ranked')+'</span></p></div>';}).join('')+'</dl>';
   h+='<h2>Offense</h2>'+tiles('Offense')+'<h2>Defense</h2>'+tiles('Defense')+'<h2>Style</h2><p class="lede">How they play rather than how well. Ranked from most to least.</p>'+tiles('Style');
   needScript();h+=teamStateSection(t);
-  h+='<h2>What this defense allows by position</h2><p class="lede">Every stat, per game, across every game since '+(HIST[0]||SEASON)+'. Rank 1 allows the least (for interceptions, 1st takes away the most). Click any number to see every game and player behind it.</p><div class="scroll"><table><thead><tr><th>Position</th><th>Stat</th><th class="num">Allowed per game</th><th class="num">Rank</th></tr></thead><tbody>'+
+  h+='<h2>What this defense allows by position</h2><p class="lede">Every stat, per game, '+rtxt()+' (counted as '+RECENT.dm+' games). Rank 1 allows the least (for interceptions, 1st takes away the most). Click any number to see every game and player behind it.</p><div class="scroll"><table><thead><tr><th>Position</th><th>Stat</th><th class="num">Allowed per game</th><th class="num">Rank</th></tr></thead><tbody>'+
     OFF_POS.map(pos=>DA_ALL[pos].map(([k,l],i)=>{const v=DA[t]&&DA[t][pos]?DA[t][pos][k]:null,r=daRank(t,pos,k);
       return '<tr><td>'+(i?'':'<b>'+pos+'s</b>')+'</td><td>'+l+'</td><td class="num">'+alink(t,pos,k,fx(v,/td|int/.test(k)?2:1))+'</td><td class="num"><span class="'+(r?rkCls(r):'rk')+'">'+(r?ord(r):'\u2014')+'</span></td></tr>';}).join('')).join('')+'</tbody></table></div>';
   h+='<h2>Key players on offense</h2>'+kpList(t,ng?oppOf(ng,t):null);
@@ -1586,9 +1597,10 @@ function gameSection(p){
   if(!PV.key||wkeys.indexOf(PV.key)<0)PV.key=wkeys[0];
   const games=playerGames(p);if(!games.length)return '';
   const seasons=[...new Set(games.map(g=>g.s))].sort();
-  if(PV.span!=='all'&&seasons.indexOf(+PV.span)<0)PV.span='all';
+  if(PV.span==null)PV.span=String(SEASON);
+  if(PV.span!=='all'&&seasons.indexOf(+PV.span)<0)PV.span=seasons.indexOf(SEASON-1)>=0?String(SEASON-1):'all';
   const chart=gbHTML(p),line=PV.line[p.id+'|'+PV.key+'|'+PV.span],ctx=!isDef(p)&&OFF_POS.indexOf(p.p)>=0;
-  let h='<h2>Game by game</h2><p class="lede">'+(isDef(p)?'Every game this season.':'Every game since '+seasons[0]+', not just the recent ones.')+' Pick a stat and set a line. The yellow line starts near his average for the games shown; type a sportsbook number to see how often he clears it.</p>'+
+  let h='<h2>Game by game</h2><p class="lede">'+(isDef(p)?'Every game this season.':'This season by default, since that\u2019s what props run on; switch to last season or every game since '+seasons[0]+' for the longer view.')+' Pick a stat and set a line. The yellow line starts near his average for the games shown; type a sportsbook number to see how often he clears it.</p>'+
     '<div class="row"><label class="fld">Stat<select id="pvStat" class="sel">'+wkeys.map(k=>'<option value="'+k+'"'+(k===PV.key?' selected':'')+'>'+esc(ST[k].l)+'</option>').join('')+'</select></label>'+
     (seasons.length>1?'<label class="fld">Games<select id="pvSpan" class="sel"><option value="all"'+(PV.span==='all'?' selected':'')+'>All since '+seasons[0]+'</option>'+seasons.map(s=>'<option value="'+s+'"'+(String(s)===String(PV.span)?' selected':'')+'>'+s+(s===SEASON?' season so far':' season')+'</option>').join('')+'</select></label>':'')+
     '<label class="fld">Line<input id="pvLine" class="inp" type="number" step="0.5" min="0" value="'+line+'" style="width:110px"></label></div><div id="gb">'+chart+'</div>';
@@ -1610,6 +1622,7 @@ function vPlayer(p){
   if(offp)h+=band('pro','Player props','His next-game projection and what moves it, whether his last game was a fluke, and how often he clears a line.');
   if(offp&&ng&&p.ss)h+=projSection(p,ng);
   if(offp&&p.ss)h+=lastGameBox(p,ng);
+  if(offp)h+=bzSection(p);
   if(!def)h+=gameSection(p);
   if(offp){needScript();h+=stateTable(p);}
   if(offp)h+=band('ctx','Context for both','His season, how he wins, and the defenders and schedule ahead.');
@@ -1639,7 +1652,7 @@ function scheduleAhead(p){
   const rows=remaining(p.t);if(!rows.length)return '';
   const off=OFF_POS.indexOf(p.p)>=0,def=isDef(p);let fr=0,tg=0;
   rows.forEach(r=>{if(!r.g)return;const k=oppRank(p,oppOf(r.g,p.t));if(k>24)fr++;else if(k&&k<=8)tg++;});
-  const basis=off?'what each defense has allowed to '+p.p+'s per game since '+(HIST[0]||SEASON)+' ('+DA_HEAD[p.p][0][1].toLowerCase()+'; 1st allows the least)':def?'each opponent\u2019s offense by EPA per play this season (1st is the best offense)':'';
+  const basis=off?'what each defense has allowed to '+p.p+'s per game, '+rtxt()+' ('+DA_HEAD[p.p][0][1].toLowerCase()+'; 1st allows the least)':def?'each opponent\u2019s offense by EPA per play this season (1st is the best offense)':'';
   return '<h2>Schedule ahead</h2><p class="lede">Every game left for '+esc(nick(p.t))+', with kickoff times'+(basis?' and '+basis:'')+'.'+(basis?' <b>'+fr+' friendly and '+tg+' tough matchups left.</b>':'')+'</p>'+
     '<div class="scroll"><table><thead><tr><th>Week</th><th>Kickoff</th><th>Opponent</th><th class="num">Their record</th>'+(basis?'<th>Matchup for him</th>':'')+'<th>Where</th></tr></thead><tbody>'+
     rows.map(r=>{const g=r.g;if(!g)return '<tr class="bye"><td>'+r.wk+'</td><td colspan="'+(basis?5:4)+'">Bye week</td></tr>';
@@ -1681,7 +1694,7 @@ function offNext(p,opp){
   const ng=nextGame(p.t),lk=pairFor(p,opp);
   let h='<h2>Next matchup: '+esc(fullName(opp))+' defense</h2>';
   if(lk)h+='<p class="note">Likely one-on-one: <b>'+plink(lk)+'</b> ('+esc(posLabel(lk))+', '+(isNum(lk.sn)?lk.sn+'% of snaps':'')+'). <a href="#/compare/duel/'+p.id+'/'+lk.id+'">See them side by side</a>. Pairings come from playing time and role, not charted coverage.</p>';
-  h+='<h3 style="margin-top:22px">What '+esc(nick(opp))+' allow to '+p.p+'s</h3><p class="lede">Per game since '+(HIST[0]||SEASON)+'. '+DA_NOTE+'</p>'+daTiles(opp,p.p);
+  h+='<h3 style="margin-top:22px">What '+esc(nick(opp))+' allow to '+p.p+'s</h3><p class="lede">Per game, '+rtxt()+'. '+DA_NOTE+'</p>'+daTiles(opp,p.p);
   h+='<h3 style="margin-top:22px">'+grp[1]+' he’ll see</h3>'+defTable(defendersAt(opp,grp[0]),grp[0],p,false)+'<p class="small mut" style="margin-top:6px">'+CREDIT_NOTE+'</p>';
   h+='<p style="margin-top:14px"><a class="btn solid" href="#/compare/defense/'+p.id+'/'+opp+'">See every '+esc(nick(opp))+' defender against him</a></p>';
   return h;
@@ -1814,7 +1827,7 @@ function cmpDefense(pid,team){
 
   const og=GAMES.find(x=>!isFinal(x)&&((x.home===P.t&&x.away===opp)||(x.away===P.t&&x.home===opp)));
   if(og)h+=projSection(P,og,'Projection for this game');
-  h+='<h2>What '+esc(nick(opp))+' allow to '+P.p+'s</h2><p class="lede">Per game across every game since '+(HIST[0]||SEASON)+'. '+DA_NOTE+'</p>'+daTiles(opp,P.p);
+  h+='<h2>What '+esc(nick(opp))+' allow to '+P.p+'s</h2><p class="lede">Per game, '+rtxt()+'. '+DA_NOTE+'</p>'+daTiles(opp,P.p);
   const sc=SCHEME[opp];
   if(sc&&sc.def){
     const ms=['d_prs','d_bl','d_box','d_rz','d_pepa','d_repa'];
@@ -1874,7 +1887,7 @@ function cmpTeams(a,b){
   const lg=t=>(TS[t]&&TS[t].log)||[];
   h+='<h2>Points scored by week</h2>'+lineChart([A,B].map((t,i)=>({name:fullName(t),short:t,c:i?'B':'A',pts:lg(t).map(x=>({x:x.wk,y:x.pf,note:(x.home?'vs ':'at ')+x.opp+', '+(x.pf>x.pa?'W':x.pf<x.pa?'L':'T')+' '+x.pf+'–'+x.pa}))})),{fmt:v=>String(Math.round(v)),label:'Points scored by week'});
   h+='<h2>Points allowed by week</h2>'+lineChart([A,B].map((t,i)=>({name:fullName(t),short:t,c:i?'B':'A',pts:lg(t).map(x=>({x:x.wk,y:x.pa,note:(x.home?'vs ':'at ')+x.opp}))})),{fmt:v=>String(Math.round(v)),label:'Points allowed by week'});
-  h+='<h2>What each defense allows by position</h2><p class="lede">Per game, every game since '+(HIST[0]||SEASON)+'. The longer bar is the stingier defense. '+DA_NOTE_DEF+'</p>'+tugKey('Small number = rank among 32 defenses')+
+  h+='<h2>What each defense allows by position</h2><p class="lede">Per game, '+rtxt()+'. The longer bar is the stingier defense. '+DA_NOTE_DEF+'</p>'+tugKey('Small number = rank among 32 defenses')+
     '<div class="tugs" role="table">'+OFF_POS.map(pos=>'<div class="tug-g"><span>'+pos+'s</span></div>'+DA_ALL[pos].map(([k,l])=>{
       const side=t=>{const v=DA[t]&&DA[t][pos]?DA[t][pos][k]:null,r=daRank(t,pos,k);return {v:alink(t,pos,k,fx(v,/td|int/.test(k)?2:1)),raw:v,g:r?Math.round((32-r)/31*100):null,note:r?'<span class="'+rkCls(r)+'">'+ord(r)+'</span>':'',better:DA_HI[k]?1:-1};};
       return tug(l+' allowed','',side(A),side(B));}).join('')).join('')+'</div>';
@@ -1972,7 +1985,7 @@ function vOutlook(gid){
         cols.map(k=>{if(k==='td')return '<td class="num">'+pctTxt(r.pr.td)+'</td>';const v=r.pr.k[k];if(!v)return '<td class="num">—</td>';
           return '<td class="num">'+(k===OL.sort||k===main?'<b>'+pjFmt(k,v.m)+'</b>':pjFmt(k,v.m))+(k===main&&pjRange(k,v)?'<br><span class="small mut">'+pjRange(k,v)+'</span>':'')+'</td>';}).join('')+
         '<td>'+(chips.join(' ')||'<span class="mut small">—</span>')+'</td><td>'+(last||'<span class="mut small">Normal</span>')+'</td></tr>';}).join('')+
-    '</tbody></table></div><details class="tview" style="margin-top:8px"><summary>How the projections work</summary><p class="small mut" style="max-width:72ch;margin-top:6px">Each game is simulated 8,000 times. The point spread sets how the game goes; a real game with a similar result decides how many plays happen while each team is ahead, behind or tied, and each team passes as often as it really does in each of those situations (nudged if offenses usually throw more or less against this defense). Targets and carries go to players by their real share in that situation, tilted toward the positions this defense lets the ball go to, and handed to teammates when someone is out. Every catch and run is a real play from his history since '+(HIST[0]||SEASON)+', scaled by: how this defense does against his position; how he does against man vs zone and how often they play man; where he gets targeted vs where they give up yards; his quarterback; and their pass rush. Touchdown chances are adjusted for their red-zone defense. Coverage charting stops at the last completed season, and weather forecasts aren’t in the free data. Estimates from public data, not betting advice.</p></details>';
+    '</tbody></table></div><details class="tview" style="margin-top:8px"><summary>How the projections work</summary><p class="small mut" style="max-width:72ch;margin-top:6px">Each game is simulated 8,000 times. The point spread sets how the game goes; a real game with a similar result decides how many plays happen while each team is ahead, behind or tied, and each team passes as often as it really does in each of those situations (nudged if offenses usually throw more or less against this defense). Targets and carries go to players by their real share in that situation, tilted toward the positions this defense lets the ball go to, and handed to teammates when someone is out. Every catch and run is a real play from this season (padded from last season only when his sample is thin), scaled by: how this defense does against his position; how he does against man vs zone and how often they play man; where he gets targeted vs where they give up yards; his quarterback; and their pass rush. Touchdown chances are adjusted for their red-zone defense. Coverage charting stops at the last completed season, and weather forecasts aren’t in the free data. Estimates from public data, not betting advice.</p></details>';
   return h;
 }
 
@@ -1987,7 +2000,7 @@ const GLOSS=[
  ['real-role','Reading this site','Real role','The group a player is ranked against. QBs need 15+ pass attempts a game, RBs 5+ carries or 3+ targets, WRs and TEs 3+ targets, and defenders 1.5+ tackles a game or 30%+ of snaps, all with at least two games.','Keeps backups with one lucky game from skewing the rankings.','Rule set on this site.',[]],
  ['median','Reading this site','League median (the yellow line)','The yellow line marks the benchmark. On percentile sliders and comparison bars it’s the league median (the 50th percentile). On game charts and Props it’s the line you typed in.','Past the yellow line means better than half the league, or over your line.','Design convention on this site.',[]],
  ['rank','Reading this site','League rank','A team’s place among all 32, where 1st is best. For defense stats, 1st means it allows the least. For “style” stats (pass rate, motion, blitzes), 1st just means the most, not the best.','Green ranks are the top quarter of the league and red the bottom quarter.','Calculated on this site.',[]],
- ['since-2024','Reading this site','Every game since 2024','Many views use every regular-season game since 2024 instead of only recent games, so a hot or cold stretch doesn’t decide the picture. This season is always shown separately too.','When this season and the full sample disagree, it’s worth asking what changed (role, team, quarterback, injury).','nflverse weekly stats, 2024 to now.',[]],
+ ['since-2024','Reading this site','Every game since 2024','Many views use every regular-season game since 2024 instead of only recent games, so a hot or cold stretch doesn’t decide the picture. This season is always shown separately too. Player props are the exception: projections, lines, hit rates, the matchup board and what defenses allow run on recent form (this season, with last season counted as a few games), because roles and schemes change.','When this season and the full sample disagree, it’s worth asking what changed (role, team, quarterback, injury).','nflverse weekly stats, 2024 to now.',[]],
 
  ['epa','Efficiency (EPA)','EPA (expected points added)','Every down, distance and field position is worth a certain number of expected points to the offense. EPA is how much a single play changed that number. A 9-yard gain on 3rd and 8 adds a lot; the same 9 yards on 3rd and 12 can lose expected points.','Positive is good for the offense, negative is good for the defense. It rewards what actually moves a team toward points, which raw yards don’t.','nflverse expected points model, play by play.',['pepa']],
  ['epa-play','Efficiency (EPA)','EPA per play','A team’s average EPA across all its passes, sacks and runs. The single best quick measure of how good an offense (or, allowed, a defense) is play to play.','Offense: higher is better. Defense (allowed): lower is better. League average sits near zero; roughly +0.10 is very good and −0.10 is poor.','Calculated on this site from nflverse player stats: total passing plus rushing EPA divided by pass attempts, sacks and carries.',['o_epa','d_epa']],
@@ -2026,8 +2039,8 @@ const GLOSS=[
  ['simulator','Matchups and projections','Game simulator','Plays a game out thousands of times. Each run draws a final margin from the spread (with real-game noise), borrows how a real game with a similar margin unfolded (how many plays were run trailing, tied or leading), applies each team\u2019s pass rate in each of those situations, hands every target and carry to a player by his share in that situation, and replays a real target or carry from his history, adjusted for this defense and this quarterback. The quarterback\u2019s line is the sum of his targets.','Read the chance of any line, the 1-in-5 ceiling, and which game script makes it happen. Change who plays or anyone\u2019s share to test a different game plan.','Built on this site from nflverse play-by-play since 2024 and closing lines.',[]],
  ['score-state','Matchups and projections','Game state','The score from the offense\u2019s side before each snap: trailing by 9 or more, trailing by 1 to 8, tied, leading by 1 to 8, or leading by 9 or more. Teams pass much more when behind and run when ahead, and players\u2019 roles shift with it.','A receiver whose share grows when his team trails is a natural over when his team is an underdog.','Calculated on this site from nflverse play-by-play.',[]],
  ['coverage','Team style and pressure','Man and zone coverage','Whether the defense matched receivers one-on-one (man) or covered areas (zone), and the shell (Cover 1, Cover 3 and so on), from play charting published in nflverse\u2019s play participation file. It is released after each season, so the latest full season is used.','Some receivers win much more against one than the other; see their split on the player page.','nflverse play participation (FTN charting).',[]],
- ['fp-proj','Fantasy','Fantasy projection and starter-level weeks','Projected PPR points start from his fantasy average (this season blended with every game since 2024) and move by the same defense and betting-market adjustments the prop model applies to each scoring stat (yards, catches, touchdowns, interceptions). The range is the middle half of his games after the same adjustment. A starter-level week is the per-game average of the 12th-best QB or TE, or 24th-best RB or WR, this season.','Projection for the expected score, range for the floor and ceiling, starter weeks for how often he actually helps you.','Calculated on this site from nflverse weekly stats, play-by-play and closing lines.',[]],
- ['fp-allowed','Fantasy','Fantasy points allowed','PPR points per game a defense has given up to every player at a position, across every game since 2024.','The quickest start/sit read: high means a friendly matchup for that position.','Calculated on this site from nflverse weekly player stats.',[]],
+ ['fp-proj','Fantasy','Fantasy projection and starter-level weeks','Projected PPR points start from his fantasy average (this season, steadied by last season counted as 3 games) and move by the same defense and betting-market adjustments the prop model applies to each scoring stat (yards, catches, touchdowns, interceptions). The range is the middle half of his games after the same adjustment. A starter-level week is the per-game average of the 12th-best QB or TE, or 24th-best RB or WR, this season.','Projection for the expected score, range for the floor and ceiling, starter weeks for how often he actually helps you.','Calculated on this site from nflverse weekly stats, play-by-play and closing lines.',[]],
+ ['fp-allowed','Fantasy','Fantasy points allowed','PPR points per game a defense has given up to every player at a position, this season with last season counted as 4 games.','The quickest start/sit read: high means a friendly matchup for that position.','Calculated on this site from nflverse weekly player stats.',[]],
  ['fp','Fantasy','Fantasy points (PPR)','Points-per-reception scoring: 1 per catch, 0.1 per rushing or receiving yard, 0.04 per passing yard, 6 per rushing or receiving TD, 4 per passing TD, minus 2 per interception or lost fumble, plus 2-point conversions.','A quick all-in-one measure of production, weighted toward receptions.','nflverse fantasy_points_ppr.',['fp']],
 
  ['cpoe','Play charting and tracking','Completion % over expected','How much more (or less) often a QB completes passes than expected, given how hard each throw was (distance, separation, pressure).','Positive is accurate; it separates accuracy from easy throws.','Next Gen Stats via nflverse.',['cpoe']],
@@ -2067,7 +2080,7 @@ const GLOSS=[
  ['blitz','Team style and pressure','Blitzers sent per dropback','Average number of extra rushers (beyond the usual four) a defense sends.','Style: blitz-heavy defenses can be beaten by quick throws.','FTN play charting via nflverse.',['d_bl']],
  ['box','Team style and pressure','Defenders in the box vs runs','Average defenders near the line of scrimmage on running plays.','Style: higher means they load up against the run.','FTN play charting via nflverse.',['d_box']],
 
- ['def-allowed','Defense allowed','What a defense allows by position','Per game, the totals a defense has given up to all opposing players at one position (for example all wide receivers combined), across every game since 2024. Each game is credited using the position the player had that day.','Rank 1 allows the least, so a rank in the high 20s is a friendly matchup for that position. For interceptions, 1st means the defense takes the ball away most.','Calculated on this site from nflverse weekly stats.',[]],
+ ['def-allowed','Defense allowed','What a defense allows by position','Per game, the totals a defense has given up to all opposing players at one position (for example all wide receivers combined), on recent form: every game this season, plus last season counted as 4 games so early weeks aren\u2019t noise. Two seasons back isn\u2019t counted (schemes and coordinators change); the game-by-game page still shows every game since 2024. Each game is credited using the position the player had that day.','Rank 1 allows the least, so a rank in the high 20s is a friendly matchup for that position. For interceptions, 1st means the defense takes the ball away most.','Calculated on this site from nflverse weekly stats.',[]],
  ['x20','Defense allowed','20+ yard catches allowed','Catches of 20 yards or more a defense allows to a position, per game.','Shows how often a defense gets beaten deep or misses tackles.','Calculated on this site from nflverse play-by-play.',['x20']],
 
  ['tkl','Defenders','Tackles','Solo plus assisted tackles per game.','Linebackers and safeties lead here. A cornerback with many tackles is often being thrown at.','nflverse weekly player stats.',['tkl']],
@@ -2083,12 +2096,13 @@ const GLOSS=[
  ['one-on-one','Matchups and projections','Likely one-on-one','A pairing by playing time and role: a team’s receivers ranked by targets against the other team’s corners ranked by snaps, the top tight end against the top safety, the lead back against the busiest linebacker, and the QB against the top pass rusher.','A sensible guess at who will meet most often, not a confirmed assignment. Slot and wide alignment and coverage aren’t in free data.','Rule set on this site.',[]],
  ['projection','Matchups and projections','Projection','On player pages and the Projections page: his next game played out 8,000 times by the simulator, using the betting lines, his team\u2019s play calling in each score situation, his share of the work (handed out again when teammates are out), his real plays since 2024 and the schematic matchups with this defense. The projection is the average of those games; the range is the middle 60%. Best props, Prop research and Fantasy use a quicker average-based estimate: his per-game average (this season blended with every game since 2024), adjusted for what this defense allows at his position and the betting market\u2019s team total.','A starting point for your own judgment, not a betting pick. Read the factor table on his page to see what is pushing it up or down.','Calculated on this site.',[]],
  ['board','Matchups and projections','Matchup board','Each week\u2019s best schematic matchups and the props they should move. Every qualifying player\u2019s passing yards, passing TDs, rushing yards, receptions and receiving yards are scored on the matchup factors (defense against his position, man/zone fit, field zones, target and pass/run funnels, pass rush, red zone), game script, the weather forecast and injuries. The board keeps the 30 biggest edges, at most five per game and two per player. It is rebuilt every day and after every game window; each add, removal and update is logged with its reason, and picks lock at kickoff.','Chance is how often the model expects the pick to win; \u201cline alone\u201d is what that side wins with no matchup at all, plus the house cut. Edge is the gap. Without a sportsbook key the line is estimated as his matchup-neutral expectation, so the board measures the matchup itself rather than a hot start. When a free The Odds API key is added as ODDS_API_KEY, real lines and prices replace the estimates.','nflverse play-by-play, charting, schedules and injury reports; Open-Meteo forecasts; optional The Odds API lines.',[]],
+ ['chatter','Matchups and projections','Chatter','Public posts about this week\u2019s players that mention a prop: a line or number, over/under, a stat (yards, catches, TDs), alt, ladder or parlay. A post that only says the player\u2019s name is left out; otherwise nothing is filtered yet. The bot watches the matchup board\u2019s players first, then each team\u2019s main skill players, and keeps a week of posts. X posts appear when an X API key is connected (X charges per post read, so the bot runs on a monthly budget); Bluesky posts are free and always on.','Crowd lean is a count of over vs under posts, not a probability. When it disagrees with the board, read why on the player\u2019s page.','X API recent search (optional, paid), Bluesky public search.',[]],
  ['report-card','Matchups and projections','Report card and self-learning','After every game is final, the board is graded: hits, misses, near misses (lost by a catch, a few yards or half a TD), pushes and players who didn\u2019t play, plus the picks removed during the week, \u201csneaky looks\u201d it ranked below the cut that cleared big, and \u201cblind spots\u201d where a confident lean went badly the other way. Each one gets a diagnosis from the box score: volume or efficiency, snaps, blowout, quarterback change, teammates, wind. Then the model re-fits on every graded week: a weight for each matchup factor, a bias for each prop type and a confidence slope, each pulled toward its starting value so one odd week can\u2019t swing it.','Judge it against \u201cexpected\u201d, the hits its lines alone would produce. Beating that over many weeks is the only proof of an edge; the weeks before the board existed are backtests and say so.','Calculated on this site.',[]],
  ['schematic','Matchups and projections','Schematic matchups','How this defense plays, against how this player wins. Man or zone: how often they played man last season, against his yards per target versus man and zone. Where he\u2019s thrown to: his targets by area of the field (short or deep; left, middle or right) against the yards they give up in each area. Who gets targeted: the share of throws they let go to his position. Pass or run funnel: how often offenses throw against them. Pass rush and red zone: pressure rate and touchdown rate on red-zone trips. Each one is compared with the league and only part of the gap is applied.','Each factor is a matchup effect on top of the defense\u2019s overall quality, so they don\u2019t double count. Most move a projection a few percent; together they can move it 10% or more.','nflverse play-by-play 2024 to now, participation charting for coverage (completed seasons only), FTN charting for pressure and box counts.',[]],
  ['last-game','Matchups and projections','Last game: anything unusual?','Checks whether his last game had a reason to look different: key teammates who didn\u2019t play or played few snaps, his own snap share, a quarterback change, a blowout of 17+ points, wind or cold, and a top-3 or bottom-3 defense against his position. Usage spike or dip means his targets (or touches, or attempts) were at least a third above or below his other games and by 3 or more.','If the reason carries into the next game (the teammate is listed Out again), the bigger or smaller role may continue; if not, treat the game as a one-off. The full game log on his page tags every game this season the same way.','nflverse weekly stats, snap counts, schedules (starting QBs, weather) and injury reports.',[]],
  ['matchup-factor','Matchups and projections','Matchup (%)','How much the defense and the betting lines move a projection up or down from his baseline.','Green means a friendlier spot than usual, red a tougher one.','Calculated on this site.',[]],
- ['range','Matchups and projections','Typical range','The middle half of his games since 2024, after the same matchup adjustments: 1 in 4 games land below it and 1 in 4 above.','A wide range means an unpredictable player.','Calculated on this site.',[]],
- ['read','Matchups and projections','Prop read','Compares your line with his average this season and since 2024. It leans over or under only when the average beats the line by a quarter of the line (at least 0.3).','When the two samples disagree, the read says so instead of picking one.','Calculated on this site.',[]],
+ ['range','Matchups and projections','Typical range','The middle half of his games this season (this season and last when he has fewer than 4 games), after the same matchup adjustments: 1 in 4 games land below it and 1 in 4 above.','A wide range means an unpredictable player.','Calculated on this site.',[]],
+ ['read','Matchups and projections','Prop read','Compares your line with his average this season and last season. It leans over or under only when the average beats the line by a quarter of the line (at least 0.3).','When the two samples disagree, the read says so instead of picking one.','Calculated on this site.',[]],
 
  ['kickoff','Schedule','Kickoff and venue','Game day and time in Eastern time, the stadium, whether it’s indoors, and the playing surface. Neutral site marks international and other neutral games.','Weather and surface can matter for kickers and deep passing.','nflverse schedules.',[]],
  ['rest','Schedule','Rest days','Days since each team’s previous game. The number in brackets is the edge over the opponent.','Three or more extra days of rest is a real, if small, advantage.','nflverse schedules.',[]],
@@ -2123,7 +2137,7 @@ function lblId(label){
    teams[TEAM] = [[season, week, offense team, defense at home?, [temp, wind, roof], {pos: 20+ catches}, [[pid, pos, ...values]]], ...]
    ====================================================================== */
 let ALW=null,ALW_P=null;
-const AL={span:'all'};
+const AL={span:'recent'};
 function needAllowed(){
   if(ALW||ALW_P)return;
   ALW_P=fetch('nfl_allowed.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
@@ -2153,15 +2167,17 @@ function vAllowed(team,pos,k){
   h+='<div class="navrow"><div class="chips" role="group" aria-label="Position">'+OFF_POS.map(x=>{const kk=alStats(x).some(y=>y[0]===k)?k:DA_ALL[x][0][0];return '<a href="#/allowed/'+team+'/'+x+'/'+kk+'"'+(x===pos?' aria-current="page"':'')+'>'+x+'s</a>';}).join('')+'</div>'+
     '<div class="chips" role="group" aria-label="Stat">'+alStats(pos).map(([kk,l])=>'<a href="#/allowed/'+team+'/'+pos+'/'+kk+'"'+(kk===k?' aria-current="page"':'')+'>'+esc(l)+'</a>').join('')+'</div></div>';
   if(!ALW)return h+'<p class="empty">Loading every game…</p>';
-  const seasons=ALW.seasons||[];if(AL.span!=='all'&&seasons.indexOf(+AL.span)<0)AL.span='all';
-  h+='<div class="row" style="margin-top:14px"><div class="seg" role="group" aria-label="Games">'+['all'].concat(seasons).map(x=>'<button data-alspan="'+x+'" aria-pressed="'+(String(AL.span)===String(x))+'">'+(x==='all'?'Every game since '+since:x+(x===SEASON?' so far':''))+'</button>').join('')+'</div></div>';
-  const inSpan=g=>AL.span==='all'||g[0]===+AL.span;
+  const seasons=ALW.seasons||[];if(AL.span!=='all'&&AL.span!=='recent'&&seasons.indexOf(+AL.span)<0)AL.span='recent';
+  h+='<div class="row" style="margin-top:14px"><div class="seg" role="group" aria-label="Games">'+['recent','all'].concat(seasons).map(x=>'<button data-alspan="'+x+'" aria-pressed="'+(String(AL.span)===String(x))+'">'+(x==='recent'?'Recent form (props)':x==='all'?'Every game since '+since:x+(x===SEASON?' so far':''))+'</button>').join('')+'</div></div>';
+  const inSpan=g=>AL.span==='all'||(AL.span==='recent'?g[0]>=SEASON-1:g[0]===+AL.span);
+  /* recent form = this season + last season counted as RECENT.dm games, the same number every prop uses */
+  const wavg=gs=>{const c=gs.filter(g=>g.g[0]===SEASON).map(g=>g.y),l=gs.filter(g=>g.g[0]<SEASON).map(g=>g.y);return AL.span==='recent'?recentMean(c,l,RECENT.dm):(gs.length?gs.reduce((a,b)=>a+b.y,0)/gs.length:null);};
   const games=(ALW.teams[team]||[]).filter(inSpan);
   if(!games.length)return h+'<p class="empty">No games in this span.</p>';
   const tot=games.map(g=>({g:g,y:gameTotal(g,pos,k)}));
-  const mean=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:null,avg=mean(tot.map(t=>t.y));
+  const mean=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:null,avg=wavg(tot);
   /* league average and rank for the same span */
-  const per=TL.map(t=>{const gs=(ALW.teams[t]||[]).filter(inSpan);return [t,gs.length?mean(gs.map(g=>gameTotal(g,pos,k))):null];}).filter(x=>isNum(x[1]));
+  const per=TL.map(t=>{const gs=(ALW.teams[t]||[]).filter(inSpan);return [t,gs.length?wavg(gs.map(g=>({g:g,y:gameTotal(g,pos,k)}))):null];}).filter(x=>isNum(x[1]));
   const lg=mean(per.map(x=>x[1])),hi=DA_HI[k],rank=1+per.filter(x=>hi?x[1]>avg:x[1]<avg).length;
   const most=tot.reduce((a,b)=>b.y>a.y?b:a),least=tot.reduce((a,b)=>b.y<a.y?b:a),above=tot.filter(t=>t.y>lg).length;
   const gname=t=>'week '+t.g[1]+' '+t.g[0]+' vs '+t.g[2];
@@ -2319,7 +2335,7 @@ function propResearch(n){
     const pr=project(p,g),x=pr.keys[MAIN_PROP[pos]];if(x)rows.push({p:p,g:g,o:pr.opp,k:MAIN_PROP[pos],x:x});}));
   if(!rows.length)return '';
   const li=r=>'<li><span>'+plink(r.p)+'<small>'+flag(r.p.t,'sm')+' '+(r.g.home===r.p.t?'vs ':'at ')+r.o+', avg '+pfmt(r.k,r.x.base)+'</small></span><span class="v">'+pfmt(r.k,r.x.proj)+' '+fct(r.x.f,r.k)+'</span></li>';
-  let h='<h2>Prop research: week '+wk+'</h2><p class="lede">Projected '+'per game from each player’s full sample since '+(HIST[0]||SEASON)+', adjusted for the defense he faces and the betting market’s team total. The percentage is how much the matchup moves him. <a href="#/outlook">Every player and stat in Outlook</a>.</p><div class="ldr">'+
+  let h='<h2>Prop research: week '+wk+'</h2><p class="lede">Projected per game from each player’s recent form ('+rtxt()+'), adjusted for the defense he faces and the betting market’s team total. The percentage is how much the matchup moves him. <a href="#/outlook">Every player and stat in Outlook</a>.</p><div class="ldr">'+
     OFF_POS.map(pos=>{const rs=rows.filter(r=>r.p.p===pos).sort((a,b)=>b.x.proj-a.x.proj).slice(0,n||5);
       return '<div><h3>'+pos+'s, '+glab(ST[MAIN_PROP[pos]].l,MAIN_PROP[pos])+'</h3><ol>'+rs.map(li).join('')+'</ol></div>';}).join('')+'</div>';
   const vol=rows.filter(r=>r.x.n>=4);
@@ -2465,13 +2481,13 @@ const BPC={};
 function propPick(p,g,k){
   const ck=p.id+'|'+g.id+'|'+k;if(ck in BPC)return BPC[ck];
   const pr=project(p,g),x=pr.keys[k];if(!x)return BPC[ck]=null;
-  const games=playerGames(p),vals=games.map(w=>weekVal(w,k)).filter(isNum),cur=games.filter(w=>w.s===SEASON).map(w=>weekVal(w,k)).filter(isNum);
-  if(vals.length<8)return BPC[ck]=null;
+  const games=recentGames(p),vals=games.map(w=>weekVal(w,k)).filter(isNum),cur=games.filter(w=>w.s===SEASON).map(w=>weekVal(w,k)).filter(isNum);
+  if(vals.length<6||cur.length<2)return BPC[ck]=null;
   const ref=cur.length>=4?cur:vals,line=halfLine(median(ref),ref.reduce((a,b)=>a+b,0)/ref.length);
   const sc=scriptFactor(p,g,k),f=x.f*sc,proj=x.proj*sc;
   if(line<(BP_MIN[k]||.5))return BPC[ck]=null;           /* too small a role for a real prop */
   /* his whole spread of games (how much he swings week to week), centered on this week's projection */
-  const n=vals.length,rA=x.aAll>0?proj/x.aAll:f;
+  const n=vals.length,mv=vals.reduce((a,b)=>a+b,0)/n,rA=mv>0?proj/mv:f;
   const hits=vals.filter(v=>v*rA>line).length,adj=hits/n;
   const raw=vals.filter(v=>v>line).length,curHits=cur.filter(v=>v>line).length;
   const over=proj>line;
@@ -2479,7 +2495,7 @@ function propPick(p,g,k){
   /* older games are not independent fresh evidence: count at most 16 */
   const z=(adj-.5)*Math.sqrt(Math.min(n,16))/.5,score=Math.abs(z);
   if(score<1)return BPC[ck]=null;
-  return BPC[ck]={p:p,g:g,k:k,o:pr.opp,x:x,line:line,lineFrom:cur.length>=4?'this season':'since '+(HIST[0]||SEASON),
+  return BPC[ck]={p:p,g:g,k:k,o:pr.opp,x:x,line:line,lineFrom:cur.length>=4?'this season':'this season and last',
     proj:proj,f:f,sc:sc,hits:hits,n:n,raw:raw,cur:cur.length,curHits:curHits,over:over,adj:adj,z:z,score:score,
     tier:score>=2?'Strong':score>=1.4?'Solid':'Lean',role:roleChanged(p)};
 }
@@ -2498,7 +2514,7 @@ function bpReasons(q){
   if(isNum(x.da)&&x.rank)out.push({t:'Defense',v:pc(x.mf),h:(DA_ALL[p.p].some(y=>y[0]===q.k)?alink(q.o,p.p,q.k,q.o+' allows '+pfmt(q.k,x.da)):q.o+' allows '+pfmt(q.k,x.da))+' '+esc(bpStat(q.k))+' to '+p.p+'s, '+ord(x.rank)+' of 32 (league '+pfmt(q.k,x.lg)+')'});
   if(s)out.push({t:'Game script',v:pc(q.sc),h:esc(nick(p.t))+' '+(s.fav>0?'favored by '+fx(s.fav,1):s.fav<0?'underdog by '+fx(-s.fav,1):'a pick’em')+' (usually '+(s.usual>=0?'favored by '+fx(s.usual,1):'underdog by '+fx(-s.usual,1))+'): expected pass rate '+fx(s.exp*100,1)+'% vs '+fx(s.pr*100,1)+'% usual'});
   if(isNum(x.sf)&&x.sf!==1){const ip=impliedPts(g,p.t),pf=TS[p.t]&&TS[p.t].pfpg;out.push({t:'Betting market',v:pc(x.sf),h:'Implied '+fx(ip,1)+' points vs '+fx(pf,1)+' average'});}
-  out.push({t:'Form',v:'',h:'This season '+pfmt(q.k,x.aCur)+' per game, since '+(HIST[0]||SEASON)+' '+pfmt(q.k,x.aAll)+(q.role?'. New team or role this season, so this season counts for more':'')+'. This season he cleared '+q.line+' in '+q.curHits+' of '+q.cur+' games'});
+  out.push({t:'Form',v:'',h:'This season '+pfmt(q.k,x.aCur)+' per game'+(isNum(x.aAll)?', last season '+pfmt(q.k,x.aAll):'')+(q.role?'. New team or role this season, so last season barely counts':'')+'. This season he cleared '+q.line+' in '+q.curHits+' of '+q.cur+' games'});
   return out;
 }
 function bpCard(q,i){
@@ -2824,7 +2840,7 @@ function vSim(gid,pid){
   /* both rosters */
   h+=band('ctx','Who plays and how much','Injury report designations are applied automatically. Change who plays, or anyone’s share of targets and carries, to test a different game plan.');
   h+='<div class="simteams">'+[g.away,g.home].map(t=>simTeamPanel(g,t,res)).join('')+'</div>';
-  h+='<p class="note">The simulator uses real plays since '+(HIST[0]||SEASON)+', so a player who changed teams or roles carries some of his old profile. Coverage, weather and in-game injuries are not modeled. These are probabilities from public data, not betting advice.</p>';
+  h+='<p class="note">The simulator replays this season\u2019s plays, padded from last season only when a sample is thin, so a player who changed teams or roles carries only a little of his old profile. Coverage, weather and in-game injuries are not modeled. These are probabilities from public data, not betting advice.</p>';
   return h;
 }
 function simTeamPanel(g,t,res){
@@ -2927,22 +2943,22 @@ function pjFactors(p,g,pr){
     rows.push({g:'Volume',l:'Teammates out',e:b0?fxTag(nowS/b0):'',t:outs.map(r=>esc(r.p.n)+' ('+r.p.p+(r.inj?', '+esc(r.inj.st):', not playing')+')').join(', ')+' '+(outs.length>1?'are':'is')+' out. Their usage is handed to everyone else in proportion to their normal roles: '+(pos==='QB'?'':'his share of '+(k==='t'?'targets':'carries')+' goes from '+Math.round(b0*100)+'% to '+Math.round(nowS*100)+'%.')});}
   /* efficiency */
   if(pos==='RB'){const d=defPer(opp,'RB','ryd','car'),l=lgPer('RB','ryd','car');
-    if(isNum(x.dfc)&&d&&l)rows.push({g:'Efficiency',l:'Run defense',e:fxTag(x.dfc),t:on+' allow '+d.toFixed(2)+' yards per carry to running backs since '+(HIST[0]||SEASON)+' (league '+l.toFixed(2)+'). Half of that gap is applied to each of his real runs.'});
+    if(isNum(x.dfc)&&d&&l)rows.push({g:'Efficiency',l:'Run defense',e:fxTag(x.dfc),t:on+' allow '+d.toFixed(2)+' yards per carry to running backs, '+rtxt()+' (league '+l.toFixed(2)+'). Half of that gap is applied to each of his real runs.'});
     const sc=SCHEME[opp]&&SCHEME[opp].def,lb=lgScheme('def','avg_box_shown');
     if(sc&&isNum(sc.avg_box_shown)&&lb)rows.push({g:'Context',l:'Men in the box',e:'',t:on+' put '+sc.avg_box_shown.toFixed(2)+' defenders in the box on average this season (league '+lb.toFixed(2)+'). '+(sc.avg_box_shown>lb+.15?'They load up against the run, which leaves more room for throws.':sc.avg_box_shown<lb-.15?'Lighter boxes usually mean more room to run.':'About normal.')+' Already inside their yards-per-carry number, so not applied twice.'});}
   if(pos!=='QB'&&isNum(x.dft)){const dp=pos==='RB'?'RB':pos,d=defPer(opp,dp,'recyd','tgt'),l=lgPer(dp,'recyd','tgt');
-    if(d&&l)rows.push({g:'Efficiency',l:'Defense vs '+ROLE,e:fxTag(x.dft),t:on+' allow '+d.toFixed(1)+' yards per target to '+(ROLE_NAME[dp]||dp)+' since '+(HIST[0]||SEASON)+' (league '+l.toFixed(1)+'). Half the gap is applied.'});}
+    if(d&&l)rows.push({g:'Efficiency',l:'Defense vs '+ROLE,e:fxTag(x.dft),t:on+' allow '+d.toFixed(1)+' yards per target to '+(ROLE_NAME[dp]||dp)+', '+rtxt()+' (league '+l.toFixed(1)+'). Half the gap is applied.'});}
   if(x.cov){const c=x.cov,sh=c.sh?String(c.sh[0]).replace('COVER_','Cover ').replace('2_MAN','2-man'):null;
     rows.push({g:'Efficiency',l:'Man or zone',e:fxTag(c.f),t:on+' played man coverage on '+Math.round(c.man*100)+'% of '+c.s+' dropbacks (league '+Math.round(c.lm*100)+'%)'+(sh?', most often '+sh:'')+'. He gains '+c.yM.toFixed(1)+' yards per target against man ('+c.nM+' targets) and '+c.yZ.toFixed(1)+' against zone ('+c.nZ+'). Coverage charts come out after each season, so a new coordinator can change this.'});}
   if(x.zone&&x.zone.best){const z=x.zone.best;rows.push({g:'Efficiency',l:'Where he’s thrown to',e:fxTag(x.zone.f),
-    t:'His most common target is '+ZN[z.z]+(isNum(z.dy)&&z.n>=10?', where '+on+' allow '+z.dy.toFixed(1)+' yards per target since '+(HIST[0]||SEASON)+' (league '+z.ly.toFixed(1)+')':'')+'. '+Math.round(x.zone.deep*100)+'% of his targets are 15+ yards downfield. The effect compares his whole target map with theirs.'});}
+    t:'His most common target is '+ZN[z.z]+(isNum(z.dy)&&z.n>=10?', where '+on+' allow '+z.dy.toFixed(1)+' yards per target this season and last (league '+z.ly.toFixed(1)+')':'')+'. '+Math.round(x.zone.deep*100)+'% of his targets are 15+ yards downfield. The effect compares his whole target map with theirs.'});}
   if(m&&m.qb&&(pos==='WR'||pos==='TE'||pos==='RB'||pos==='QB')){const qp=BY[m.qb];
     if(qp&&isNum(m.qbOwn))rows.push({g:'Efficiency',l:pos==='QB'?'His passing':'His quarterback',e:fxTag(m.qbOwn),t:(pos==='QB'?'His':esc(qp.n)+'’s')+' yards per attempt in his play-by-play since '+(HIST[0]||SEASON)+' compared with the league, shrunk toward average when the sample is small.'});}
   {const sx=SS.players[p.id],ss=p.ss||{},avgY=a=>{const v=a.map(y=>y===-99||y===null?0:y);return v.length?v.reduce((s,y)=>s+y,0)/v.length:null;};
    if(sx&&pos!=='QB'&&sx.ty&&sx.ty.length>=15&&ss.tgt){const s=avgY(sx.ty),c=ss.recyd/ss.tgt;
-     if(isNum(s)&&isNum(c))rows.push({g:'Efficiency',l:'His own catches',e:'',t:'The sim replays his real targets since '+(HIST[0]||SEASON)+' (latest '+sx.ty.length+'): '+s.toFixed(1)+' yards per target in that sample, '+c.toFixed(1)+' this season. '+(Math.abs(s-c)>=1.5?(s>c?'His longer track record is better than this season, which pulls the projection up.':'He’s been better this season than his longer track record, which pulls the projection down.'):'This season is close to his track record.')});}
+     if(isNum(s)&&isNum(c))rows.push({g:'Efficiency',l:'His own catches',e:'',t:'The sim replays his targets from this season'+(p.ss&&p.ss.tgt*p.g<60?', padded from last season':'')+' ('+sx.ty.length+'): '+s.toFixed(1)+' yards per target in that sample, '+c.toFixed(1)+' this season. '+(Math.abs(s-c)>=1.5?(s>c?'Last season was better, which pulls the projection up a little.':'He’s been better this season than last, which pulls the projection down a little.'):'This season is close to last season.')});}
    if(sx&&sx.cy&&sx.cy.length>=20&&ss.car>=3){const s=avgY(sx.cy),c=ss.ryd/ss.car;
-     if(isNum(s)&&isNum(c))rows.push({g:'Efficiency',l:'His own runs',e:'',t:'The sim replays his real carries since '+(HIST[0]||SEASON)+' (latest '+sx.cy.length+'): '+s.toFixed(2)+' yards per carry in that sample, '+c.toFixed(2)+' this season.'});}}
+     if(isNum(s)&&isNum(c))rows.push({g:'Efficiency',l:'His own runs',e:'',t:'The sim replays his carries from this season'+(p.ss&&p.ss.car*p.g<80?', padded from last season':'')+' ('+sx.cy.length+'): '+s.toFixed(2)+' yards per carry in that sample, '+c.toFixed(2)+' this season.'});}}
   if(m&&m.prs&&(pos!=='RB'))rows.push({g:'Efficiency',l:'Pass rush',e:fxTag(m.prs.f),t:on+' pressure the quarterback on '+m.prs.d.toFixed(1)+'% of dropbacks this season (league '+m.prs.lg.toFixed(1)+'%). More pressure means slightly fewer yards per throw and more interceptions.'});
   if(m&&m.rz)rows.push({g:'Touchdowns',l:'Red zone defense',e:fxTag(m.rz.f),t:on+' allow touchdowns on '+m.rz.r.toFixed(1)+'% of red-zone trips this season ('+m.rz.n+' trips; league '+m.rz.lg.toFixed(1)+'%). Applied to his touchdown rate, shrunk toward average.'});
   if(g.roof&&(g.roof==='outdoors'||g.roof==='open'))rows.push({g:'Context',l:'Weather',e:'',t:'Outdoor game. Forecasts aren’t in the free data, so wind and cold aren’t applied; check the forecast closer to kickoff.'});
@@ -2958,7 +2974,7 @@ function projSection(p,g,title){
   if(!g)return '';
   needScript();
   const opp=oppOf(g,p.t),simU='#/sim/'+g.id+'/'+p.id;
-  let h='<h2>'+(title||'Next game projection')+'</h2><p class="lede">Week '+g.wk+' '+(g.home===p.t?'vs ':'at ')+esc(fullName(opp))+', '+esc(kick(g))+'. The <a href="#/glossary/simulator">simulator</a> plays this game 8,000 times from the betting lines, '+esc(nick(p.t))+'’ play calling in every score situation, his share of the work, and his real plays since '+(HIST[0]||SEASON)+', adjusted for how this defense plays. Projection is the average; the range is what happens in the middle 60% of games.</p>';
+  let h='<h2>'+(title||'Next game projection')+'</h2><p class="lede">Week '+g.wk+' '+(g.home===p.t?'vs ':'at ')+esc(fullName(opp))+', '+esc(kick(g))+'. The <a href="#/glossary/simulator">simulator</a> plays this game 8,000 times from the betting lines, '+esc(nick(p.t))+'’ play calling in every score situation, his share of the work, and his real plays this season (padded from last season only when thin), adjusted for how this defense plays. Projection is the average; the range is what happens in the middle 60% of games.</p>';
   if(!SS)return h+'<p class="empty">Loading play-by-play…</p>';
   if(injOut(p,g))return h+'<p class="empty">He’s listed '+esc(p.inj.st)+' for week '+g.wk+', so the simulator sits him out. <a href="'+simU+'">Put him back in the simulator</a>.</p>';
   const pr=simProj(p,g);
@@ -2966,9 +2982,9 @@ function projSection(p,g,title){
   if(pr.out)return h+'<p class="empty">He isn’t in the simulated lineup (no games this season). <a href="'+simU+'">Put him in</a>.</p>';
   const games=playerGames(p),cur=games.filter(x=>x.s===SEASON),avg=(a,k)=>{const v=a.map(x=>weekVal(x,k)).filter(isNum);return v.length?v.reduce((s,y)=>s+y,0)/v.length:null;};
   const keys=(PJ_KEYS[p.p]||[]).filter(k=>pr.k[k]);
-  h+='<div class="scroll"><table><thead><tr><th>Stat</th><th class="num">This season</th><th class="num">Since '+(HIST[0]||SEASON)+'</th><th class="num">'+opp+' allows to '+p.p+'s</th><th class="num">Projection</th><th class="num">Likely range</th></tr></thead><tbody>'+
+  h+='<div class="scroll"><table><thead><tr><th>Stat</th><th class="num">This season</th><th class="num">'+(SEASON-1)+'</th><th class="num">'+opp+' allows to '+p.p+'s</th><th class="num">Projection</th><th class="num">Likely range</th></tr></thead><tbody>'+
     keys.map(k=>{const x=pr.k[k],dk=k,da=DA[opp]&&DA[opp][p.p]?DA[opp][p.p][dk]:null,rk=isNum(da)?daRank(opp,p.p,dk):null;
-      return '<tr><td>'+(ST[k]?glab(ST[k].l,k):SIM_L[k])+'</td><td class="num">'+pjFmt(k,avg(cur,k))+'</td><td class="num">'+pjFmt(k,avg(games,k))+'</td><td class="num">'+(isNum(da)?(DA_ALL[p.p].some(y=>y[0]===dk)?alink(opp,p.p,dk,pjFmt(k,da)):pjFmt(k,da))+(rk?' <span class="small">'+mup(rk).replace(', a friendly matchup','').replace(', a tough matchup','')+'</span>':''):'—')+'</td><td class="num"><b>'+pjFmt(k,x.m)+'</b></td><td class="num">'+(pjRange(k,x)||'—')+'</td></tr>';}).join('')+
+      return '<tr><td>'+(ST[k]?glab(ST[k].l,k):SIM_L[k])+'</td><td class="num">'+pjFmt(k,avg(cur,k))+'</td><td class="num">'+pjFmt(k,avg(games.filter(x=>x.s===SEASON-1),k))+'</td><td class="num">'+(isNum(da)?(DA_ALL[p.p].some(y=>y[0]===dk)?alink(opp,p.p,dk,pjFmt(k,da)):pjFmt(k,da))+(rk?' <span class="small">'+mup(rk).replace(', a friendly matchup','').replace(', a tough matchup','')+'</span>':''):'—')+'</td><td class="num"><b>'+pjFmt(k,x.m)+'</b></td><td class="num">'+(pjRange(k,x)||'—')+'</td></tr>';}).join('')+
     '</tbody></table></div>';
   const mu=pjMatchup(p,pr);
   h+='<p class="small" style="margin-top:8px">'+(p.p!=='QB'?'Scores a touchdown in <b>'+pctTxt(pr.td)+'</b> of simulated games. ':'')+(isNum(mu)?'The defense moves his '+(p.p==='RB'?'yards per carry':p.p==='QB'?'yards per throw':'yards per target')+' by '+fxTag(mu)+'. ':'')+'<a href="'+simU+'">Test any line in the simulator</a>.</p>';
@@ -3015,8 +3031,8 @@ function gameNotes(p,w){
       notes.push({k:'wx',tag:(isNum(g.wind)&&g.wind>=15?g.wind+' mph wind':g.temp+'°F'),t:'Weather: '+(isNum(g.temp)?g.temp+'°F':'')+(isNum(g.wind)?', wind '+g.wind+' mph':'')+'. Wind cuts deep passing and kicking.'});
   }
   const mk=MAIN[p.p],rk=mk?daRank(w.opp,p.p,mk):null;
-  if(rk&&rk<=3)notes.push({k:'opp',tag:'Tough defense',t:esc(nick(w.opp))+' allow the '+(rk===1?'fewest':ord(rk)+'-fewest')+' '+ST[mk].l.toLowerCase()+' to '+(ROLE_NAME[p.p]||p.p)+' in the league since '+(HIST[0]||SEASON)+'.'});
-  else if(rk&&rk>=30)notes.push({k:'opp',tag:'Soft defense',t:esc(nick(w.opp))+' allow the '+(rk===32?'most':ord(33-rk)+'-most')+' '+ST[mk].l.toLowerCase()+' to '+(ROLE_NAME[p.p]||p.p)+' in the league since '+(HIST[0]||SEASON)+'.'});
+  if(rk&&rk<=3)notes.push({k:'opp',tag:'Tough defense',t:esc(nick(w.opp))+' allow the '+(rk===1?'fewest':ord(rk)+'-fewest')+' '+ST[mk].l.toLowerCase()+' to '+(ROLE_NAME[p.p]||p.p)+' in the league ('+rtxt()+').'});
+  else if(rk&&rk>=30)notes.push({k:'opp',tag:'Soft defense',t:esc(nick(w.opp))+' allow the '+(rk===32?'most':ord(33-rk)+'-most')+' '+ST[mk].l.toLowerCase()+' to '+(ROLE_NAME[p.p]||p.p)+' in the league ('+rtxt()+').'});
   const v=volOf(w,p),av=meanOf(others.map(x=>volOf(x,p))),r=isNum(av)&&av>0?v/av:null;
   const vol={v:v,av:av,r:r,kind:r===null?'':r>=1.35&&v-av>=3?'spike':r<=.65&&av-v>=3?'dip':''};
   return GN_C[ck]={notes:notes,vol:vol,g:g};
@@ -3091,14 +3107,14 @@ function gpH2H(A,H){
 /* a player's line for a stat: sportsbook when we have it, otherwise his median (this season once he has 4 games) */
 function gpLine(p,k,wk){
   const b=bookLine(p.id,k,wk);if(b&&isNum(b.line))return {v:b.line,book:true};
-  const gs=playerGames(p),cur=gs.filter(x=>x.s===SEASON).map(x=>weekVal(x,k)).filter(isNum),all=gs.map(x=>weekVal(x,k)).filter(isNum);
-  if(!all.length)return null;
-  /* like a book would: this season counts more as it grows (up to half), the rest is every game since 2024 */
-  const w=Math.min(cur.length,6)/12,md=cur.length?w*median(cur)+(1-w)*median(all):median(all),mn=all.reduce((a,b)=>a+b,0)/all.length;
-  return {v:halfLine(md,mn),book:false};
+  const gs=recentGames(p),cur=gs.filter(x=>x.s===SEASON).map(x=>weekVal(x,k)).filter(isNum),last=gs.filter(x=>x.s<SEASON).map(x=>weekVal(x,k)).filter(isNum);
+  if(!cur.length&&!last.length)return null;
+  /* like a book would: this season's median, steadied by last season counted as a few games */
+  const md=cur.length&&last.length?(cur.length*median(cur)+RECENT.pm*median(last))/(cur.length+RECENT.pm):median(cur.length?cur:last);
+  return {v:halfLine(md,recentMean(cur,last,RECENT.pm)),book:false};
 }
 function gpHit(p,k,line){
-  const v=playerGames(p).map(x=>weekVal(x,k)).filter(isNum);if(!v.length||!line)return null;
+  const v=playerGames(p).filter(x=>x.s===SEASON).map(x=>weekVal(x,k)).filter(isNum);if(!v.length||!line)return null;
   const o=v.filter(x=>x>line.v).length;return {o:o,n:v.length,r:o/v.length};
 }
 function gpOdef(opp,pos,k){const r=daRank(opp,pos,k);return r;}
@@ -3140,7 +3156,7 @@ function gpCard(g){
     '<div><small>'+A+' implied</small><b>'+(isNum(ipA)?ipA.toFixed(1):'—')+'</b><span>away</span></div><div><small>'+H+' implied</small><b>'+(isNum(ipH)?ipH.toFixed(1):'—')+'</b><span>home</span></div><div><small>Conditions</small><b>'+cond.v+'</b><span>'+cond.s+'</span></div></div>'+
     '<div class="gpteams">'+side(A,false)+'<div class="gph2h"><small>HEAD TO HEAD</small></div>'+side(H,true)+'</div>'+gpH2H(A,H)+
     gpTeamPlayers(A,H,g)+gpTeamPlayers(H,A,g)+
-    '<div class="gpft"><span><b class="g">Green</b> ranks top 10 · <b class="b">red</b> bottom 10. Hit rate = cleared this line, every game since '+(HIST[0]||SEASON)+'. Odef = what '+'the opponent allows at his position for that stat (1st = allows the least: <b class="b">hard</b>; 25th+ <b class="g">soft</b>). ~ = estimated line (his median, this season blended with every game since 2024, as a book would set it); sportsbook lines replace it when connected.</span></div></section>';
+    '<div class="gpft"><span><b class="g">Green</b> ranks top 10 · <b class="b">red</b> bottom 10. Hit rate = cleared this line this season. Odef = what '+'the opponent allows at his position for that stat (1st = allows the least: <b class="b">hard</b>; 25th+ <b class="g">soft</b>). ~ = estimated line (his median this season, steadied by last season, as a book would set it); sportsbook lines replace it when connected.</span></div></section>';
   return h;
 }
 
@@ -3195,7 +3211,7 @@ function csCard(g){
       const sub=pos==='QB'?fx(p.ss.pyd,1)+' yds · '+fx(p.ss.att,1)+' att · '+fx(p.ss.cmp,1)+' comp':pos==='RB'?fx(p.ss.ryd,1)+' yds · '+fx(p.ss.car,1)+' car · '+fx(p.ss.rec,1)+' rec':fx(p.ss.recyd,1)+' yds · '+fx(p.ss.rec,1)+' rec · '+fx(p.ss.tgt,1)+' tgt';
       h+='<div class="csrow"><div class="csp">'+flag(off,'sm')+'<div><a href="#/player/'+p.id+'">'+esc(p.n)+'</a><small>'+sub+(L?' · line '+(L.book?'':'~')+L.v:'')+'</small></div></div><div class="cscells">'+cells.map(c=>csCell(def,off,pos,c[0],c[1],c[2])).join('')+'</div></div>';});
   });
-  h+='<div class="gpft"><span>Each cell: what that defense allows the position per game since '+(HIST[0]||SEASON)+', ranked (#1 = allows the least). <b class="b">HARD</b> = ranks 1–8, <b class="g">SOFT</b> = 25–32. Under it: what this offense gets at that position per game this season, and its rank (#1 = most). Funnels adjust yards per carry and per attempt for the offenses each defense has faced.</span></div></section>';
+  h+='<div class="gpft"><span>Each cell: what that defense allows the position per game, '+rtxt()+', ranked (#1 = allows the least). <b class="b">HARD</b> = ranks 1–8, <b class="g">SOFT</b> = 25–32. Under it: what this offense gets at that position per game this season, and its rank (#1 = most). Funnels adjust yards per carry and per attempt for the offenses each defense has faced.</span></div></section>';
   return h;
 }
 
@@ -3221,7 +3237,7 @@ function bdCard(e,key,locked){
     '<span class="bst '+e.status+'">'+(e.status==='locked'?'Locked':e.status==='removed'?'Removed':'Active')+'</span></header>'+
     '<div class="bprop"><div class="bside '+e.side+'"><small>'+(e.side==='over'?'OVER':'UNDER')+'</small><b>'+e.line+'</b><span>'+BKL[e.k]+'</span></div>'+
     '<dl class="bnums"><div><dt>Projection</dt><dd>'+(e.k==='ptd'?e.proj.toFixed(2):e.proj.toFixed(1))+'</dd></div><div><dt>Chance</dt><dd>'+pctS(e.p)+'</dd></div><div><dt>Line alone</dt><dd title="What this side wins with no matchup factors, plus the house cut">'+pctS(e.be)+'</dd></div><div><dt>Edge</dt><dd class="'+(e.edge>=.06?'g':'')+'">+'+(e.edge*100).toFixed(1)+'%</dd></div><div><dt title="How often this side won in his games since 2024, before the matchup">Past games</dt><dd>'+(e.hits?e.hits[0]+'/'+e.hits[1]:'—')+'</dd></div></dl>'+oddsTxt(e)+'</div>'+
-    '<p class="bhead">'+esc(e.head)+'</p>'+
+    '<p class="bhead">'+esc(e.head)+'</p>'+(()=>{const c=bzCrowd(e);if(!c)return '';const v=c.k;return '<p class="small mut" style="margin:0 0 4px">Chatter: '+c.n+' post'+(c.n===1?'':'s')+(v&&(v.over||v.under)?', on this prop '+v.over+' over / '+v.under+' under':'')+'. <a href="#/player/'+e.pid+'">Read them</a></p>';})()+
     '<ul class="bwhy">'+(e.reasons||[]).map(r=>'<li>'+effChip(r)+' <b>'+esc(r.l)+'</b> <span class="small">'+(r.helps?'helps':'works against')+' the '+e.side+'.</span> <span class="small mut">'+esc(r.t)+'</span></li>').join('')+'</ul>'+
     '<p class="small mut bmeta">'+(e.status==='removed'?'<b>Removed '+esc(bdTime(e.removed))+':</b> '+esc(e.removed_why)+'<br>':'')+'Added '+esc(bdTime(e.added))+': '+esc(e.added_why||'')+(moved?'<br>What the model learned moved this from '+pctS(e.p0)+' to '+pctS(e.p)+'.':'')+(e.upd&&e.upd!==e.added?' · refreshed '+esc(bdTime(e.upd)):'')+'</p></article>';
 }
@@ -3229,10 +3245,10 @@ function bdTabs(wk,tab){
   const w=bdWeek(wk),wks=Object.keys(BD.weeks||{}).map(Number).sort((a,b)=>b-a);
   const nlog=w&&w.log?w.log.filter(l=>l.kind!=='note').length:0;
   return '<div class="row" style="margin-top:16px;align-items:flex-end;gap:10px"><label class="fld">Week<select id="bdWk" class="sel">'+wks.map(x=>{const ww=BD.weeks[x];return '<option value="'+x+'"'+(x===wk?' selected':'')+'>Week '+x+(x===BD.cur?' (this week)':ww.mode==='backtest'?' (backtest)':ww.report?' (graded)':'')+'</option>';}).join('')+'</select></label>'+
-    '<div class="chips" role="tablist">'+[['picks','Board'],['log','Changes'+(nlog?' ('+nlog+')':'')],['report','Report card']].map(([k,l])=>'<a role="tab" class="chipa" aria-selected="'+(k===tab)+'" href="#/board/'+wk+'/'+k+'">'+l+'</a>').join('')+'</div></div>';
+    '<div class="chips" role="tablist">'+[['picks','Board'],['log','Changes'+(nlog?' ('+nlog+')':'')],['chatter','Chatter'],['report','Report card']].map(([k,l])=>'<a role="tab" class="chipa" aria-selected="'+(k===tab)+'" href="#/board/'+wk+'/'+k+'">'+l+'</a>').join('')+'</div></div>';
 }
 function vBoard(wkArg,tabArg){
-  needBoard();
+  needBoard();needBuzz();
   let h='<section class="hero"><div><h1>Matchup board</h1><p class="sub">The week’s best schematic matchups and the props they should move: defense against his position, man/zone fit, where he’s thrown to, target and pass/run funnels, pass rush, red zone, game script, weather and injuries. Rebuilt every day; every add and removal is logged with the reason. Picks lock at kickoff, get graded when the week ends, and the grading retunes the model. <a href="#/glossary/board">How it works</a>.</p></div></section>';
   if(!BD)return h+'<p class="empty">Loading the board…</p>';
   if(!BD.weeks||!Object.keys(BD.weeks).length)return h+'<p class="empty">The board hasn’t been built yet. It appears after the next data refresh.</p>';
@@ -3245,6 +3261,7 @@ function vBoard(wkArg,tabArg){
   h+='<p class="count">'+(w.mode==='backtest'?'<b>Backtest.</b> Built after the fact using only games before week '+wk+' (availability uses who actually played; a few team rates use the full season). ':'')+
     (w.updated?'Updated '+esc(bdTime(w.updated))+'. ':'')+act.length+' picks'+(rem.length?', '+rem.length+' removed during the week':'')+'. Lines: '+(books?'sportsbook where available, estimated otherwise':'estimated (his matchup-neutral expectation; connect a free odds key for sportsbook lines)')+'.</p>';
   if(tab==='log')return h+bdLog(w);
+  if(tab==='chatter')return h+bdChatter(w);
   if(tab==='report')return h+bdReport(wk,w);
   /* picks */
   const ks=[...new Set(act.map(([k,e])=>e.k))];
@@ -3319,6 +3336,53 @@ function bdHome(){
     act.map(e=>'<a class="bm" href="#/board/'+BD.cur+'/picks"><span class="bside '+e.side+'"><small>'+(e.side==='over'?'OVER':'UNDER')+'</small><b>'+e.line+'</b></span><span><b>'+esc(e.n)+'</b><small>'+esc(BKL[e.k])+' \u00b7 '+e.t+' '+(e.gid.endsWith(e.t)?'vs':'at')+' '+e.opp+'</small><small class="mut">'+esc((e.reasons||[]).filter(r=>r.helps).slice(0,2).map(r=>r.l).join(', ')||'his track record')+'</small></span><em>'+pctS(e.p)+'</em></a>').join('')+'</div>';
 }
 
+
+/* ======================================================================
+   Chatter: prop talk about this week's players from X (when a key is set)
+   and Bluesky. Only posts that name the player AND mention a prop.
+   ====================================================================== */
+let BZ=null,BZ_P=null;
+function needBuzz(){
+  if(BZ||BZ_P)return;
+  BZ_P=fetch('nfl_buzz.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+    .then(j=>{BZ=j;}).catch(e=>{console.warn(e);BZ={players:{},summary:{}};}).then(()=>render(true));
+}
+const BZK={recyd:'Rec yds',rec:'Receptions',ryd:'Rush yds',pyd:'Pass yds',ptd:'Pass TDs',td:'TD',tgt:'Targets',other:'General'};
+function agoTxt(iso){const d=new Date((iso||'').replace('Z',':00Z'));if(isNaN(d))return '';const m=Math.round((Date.now()-d)/60000);
+  return m<60?m+'m ago':m<1440?Math.round(m/60)+'h ago':Math.round(m/1440)+'d ago';}
+function bzLean(s){if(!s)return '';const parts=Object.entries(s.k||{}).filter(([k,v])=>v.n).sort((a,b)=>b[1].n-a[1].n);
+  return parts.map(([k,v])=>'<span class="gtag">'+esc(BZK[k]||k)+': '+v.n+(v.over||v.under?' · '+v.over+' over / '+v.under+' under':'')+'</span>').join(' ');}
+function bzPost(x){
+  const tag=(x.k?(BZK[x.k]||x.k):'')+(x.side?' '+x.side:'')+(isNum(x.line)?' '+x.line:'');
+  return '<li class="bzp"><div class="bzh"><span class="bzsrc '+x.src+'">'+(x.src==='x'?'X':'Bluesky')+'</span><b>'+esc(x.nm||x.by||'')+'</b> <span class="mut small">@'+esc(x.by||'')+' · '+agoTxt(x.ts)+(x.reply?' · reply':'')+'</span>'+(tag.trim()?'<span class="gtag">'+esc(tag.trim())+'</span>':'')+'</div><p>'+esc(x.t)+'</p><a class="small" href="'+esc(x.url)+'" target="_blank" rel="noopener noreferrer">Open on '+(x.src==='x'?'X':'Bluesky')+'</a></li>';
+}
+function bzSection(p){
+  needBuzz();
+  let h='<h2>What people are saying</h2><p class="lede">Public posts from the last week that name him and mention a prop (a line, over/under, yards, catches, TDs). Posts that only say his name are left out. Unfiltered otherwise: these are opinions, not picks. <a href="#/glossary/chatter">How it works</a>.</p>';
+  if(!BZ)return h+'<p class="empty">Loading…</p>';
+  const L=(BZ.players||{})[p.id]||[],S=(BZ.summary||{})[p.id];
+  if(!L.length)return h+'<p class="empty">No prop talk about him in the last week'+(BZ.watch?' (the bot watches this week’s board players and each team’s main skill players)':'')+'.</p>';
+  return h+'<p class="small" style="margin:6px 0">'+L.length+' posts · '+bzLean(S)+'</p><ul class="bzl">'+L.slice(0,8).map(bzPost).join('')+'</ul>'+(L.length>8?'<details class="tview"><summary>'+(L.length-8)+' more</summary><ul class="bzl">'+L.slice(8).map(bzPost).join('')+'</ul></details>':'');
+}
+/* board: crowd lean vs board lean */
+function bzCrowd(e){
+  if(!BZ||!BZ.summary)return null;const s=BZ.summary[e.pid];if(!s)return null;
+  const v=(s.k||{})[e.k]||null;return {n:s.n,k:v};
+}
+function bdChatter(w){
+  needBuzz();if(!BZ)return '<p class="empty">Loading chatter…</p>';
+  const run=BZ.run||{},x=run.x||{},bs=run.bsky||{};
+  let h='<p class="lede">What people are saying about this week’s board players, next to what the board says. Only posts that name the player and mention a prop count. Updated '+esc(bdTime(BZ.updated))+'.</p>'+
+    '<p class="small mut">X: '+esc(x.status||'off')+(x.read?' · '+x.read+' posts read this run':'')+'. Bluesky: '+esc(bs.status||'off')+(bs.read?' · '+bs.read+' posts read this run':'')+'.</p>';
+  const act=Object.values(w.board||{}).filter(e=>e.status!=='removed').sort((a,b)=>b.edge-a.edge);
+  const rows=act.map(e=>{const c=bzCrowd(e),L=((BZ.players||{})[e.pid]||[]).filter(x=>!x.k||x.k===e.k||(x.k==='yds'));
+    const v=c&&c.k,crowd=v&&(v.over||v.under)?(v.over>v.under?'over':v.under>v.over?'under':'split'):null;
+    const agree=crowd&&crowd!=='split'?(crowd===e.side?'<span class="eff up">Agrees</span>':'<span class="eff dn">Disagrees</span>'):'';
+    return '<tr><td><a href="#/player/'+e.pid+'">'+esc(e.n)+'</a> <span class="mut small">'+e.t+'</span></td><td>'+esc(sideTxt(e))+'</td><td class="num">'+(c?c.n:0)+'</td><td>'+(v?v.n+' on this prop'+(v.over||v.under?': '+v.over+' over, '+v.under+' under':''):'<span class="mut small">—</span>')+'</td><td>'+agree+'</td><td class="small">'+(L[0]?esc(L[0].t.slice(0,120))+(L[0].t.length>120?'…':''):'')+'</td></tr>';}).join('');
+  h+='<div class="scroll"><table><thead><tr><th>Player</th><th>Board</th><th class="num">Posts</th><th>Crowd on this prop</th><th></th><th>Latest</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+  return h;
+}
+
 /* ---------- situational views on player and team pages ---------- */
 function stateTable(p){
   if(!SS)return '<p class="empty">Loading play-by-play…</p>';
@@ -3351,8 +3415,8 @@ function teamStateSection(t){
   /* throws by location and depth */
   const L=x.loc_def[String(SEASON)]||{},A=x.loc_def.all||{},lg=SS.league.loc.all||{};
   const ypt=v=>v&&v[0]?v[2]/v[0]:null;
-  h+='<h2>Where passes beat their defense</h2><p class="lede">Yards per target allowed by area of the field, this season and since '+(HIST[0]||SEASON)+', against the league. Short is under 15 air yards.</p>';
-  h+='<div class="scroll"><table><thead><tr><th>Area</th><th class="num">Targets this season</th><th class="num">Yds/target this season</th><th class="num">Since '+(HIST[0]||SEASON)+'</th><th class="num">League</th></tr></thead><tbody>'+
+  h+='<h2>Where passes beat their defense</h2><p class="lede">Yards per target allowed by area of the field, this season and this season plus last, against the league. Short is under 15 air yards.</p>';
+  h+='<div class="scroll"><table><thead><tr><th>Area</th><th class="num">Targets this season</th><th class="num">Yds/target this season</th><th class="num">This + last season</th><th class="num">League</th></tr></thead><tbody>'+
     LOC_Z.map(([z,l])=>{const c=ypt(L[z]),a=ypt(A[z]),g=ypt(lg[z]),d=isNum(a)&&isNum(g)?a-g:null;
       return '<tr><td>'+l+'</td><td class="num">'+((L[z]||[0])[0])+'</td><td class="num">'+fx(c,1)+'</td><td class="num"><b>'+fx(a,1)+'</b>'+(isNum(d)?' <span class="small '+(Math.abs(d)>=.5?(d>0?'dn':'up'):'mut')+'">'+(d>=0?'+':'−')+fx(Math.abs(d),1)+'</span>':'')+'</td><td class="num mut">'+fx(g,1)+'</td></tr>';}).join('')+'</tbody></table></div>';
   /* penalties */
@@ -3516,7 +3580,7 @@ document.addEventListener('click',e=>{
   if(t.dataset.bdk!==undefined){BV.k=t.dataset.bdk;render(true);const b=document.querySelector('[data-bdk="'+BV.k+'"]');if(b)b.focus();return;}
   if(t.dataset.olpos){OL.pos=t.dataset.olpos;OL.sort=null;OL.dir=-1;render(true);const b=document.querySelector('[data-olpos="'+OL.pos+'"]');if(b)b.focus();return;}
   if(t.dataset.olsort){const k=t.dataset.olsort;if(OL.sort===k)OL.dir=-OL.dir;else{OL.sort=k;OL.dir=k==='n'?1:-1;}render(true);const b=document.querySelector('[data-olsort="'+k+'"]');if(b)b.focus();return;}
-  if(t.dataset.alspan){AL.span=t.dataset.alspan==='all'?'all':+t.dataset.alspan;render(true);const b=document.querySelector('[data-alspan="'+t.dataset.alspan+'"]');if(b)b.focus();return;}
+  if(t.dataset.alspan){AL.span=(t.dataset.alspan==='all'||t.dataset.alspan==='recent')?t.dataset.alspan:+t.dataset.alspan;render(true);const b=document.querySelector('[data-alspan="'+t.dataset.alspan+'"]');if(b)b.focus();return;}
   if(t.dataset.span){CMP.span=t.dataset.span;render(true);const b=document.querySelector('[data-span="'+CMP.span+'"]');if(b)b.focus();return;}
   if(t.dataset.duel){DUEL.d=t.dataset.duel;render(true);const d=document.getElementById('duel');if(d)d.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});return;}
   if(t.dataset.swap==='players'){picked(CMP.pb,'players');location.hash='#/compare/players/'+CMP.pb+'/'+CMP.pa;return;}

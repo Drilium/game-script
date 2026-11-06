@@ -597,6 +597,52 @@ look impossible but are just what a team has to do to win.
 - Best props, Prop research and Fantasy still use the quicker
   average-based `project()`; the glossary explains both.
 
+## Props on recent form + chatter bot (2026-11-06)
+
+**Recent form (Dre: "only helpful to look at general data from 2024; base
+props on more recent data").** Everything prop-related now runs on this
+season, steadied by last season counted as a few games; two seasons back
+is out. General history views (season tables, head-to-head, game logs,
+"every game since 2024" options) are unchanged.
+- Players: baseline = (this-season games x this-season mean + 3 x last
+  season mean) / (games + 3); 1 instead of 3 if team or role changed.
+  `recentGames`, `recentMean`, `RECENT` in index.html; `PRIOR_GAMES` in
+  build_board.py. Hit rates on the game preview are this season; the
+  prop-research chart defaults to this season.
+- Defenses: `defense_allowed` = this season + last season as 4 games
+  (`DEF_PRIOR_GAMES` in build_data.py; `gl`/`g` = games used, `ga` = all
+  games for long-catch rates). The allowed drill-down has a matching
+  "Recent form (props)" span (default) next to every game since 2024.
+- Simulator samples (build_script.py): this season's plays, padded from
+  last season only up to `RECENT_MIN`; target maps and team identity use
+  this season + last. Coverage/route charting still uses every charted
+  season (it only exists for completed seasons).
+- Board: `METHOD = "recent-1"` - a method bump rebuilds backtests and the
+  learned model and logs the switch as the reason for the live week's
+  changes. The estimated line is the *weighted* median (same weights as the
+  projection) - an unweighted one was stale and faked a +21-hit edge.
+  Scoring average and pass-funnel rate are now point-in-time in backtests
+  (the funnel was leaking). Backtest weeks 3-8: 104 hits vs 89.6 expected
+  over 180 picks; this-season defense numbers carry most of it; pressure
+  and red-zone rates are still full-season, so treat it as suggestive.
+
+**Chatter bot (`build_buzz.py` -> `nfl_buzz.json`).** Watches the board's
+players, then each team's top 5 skill players in this week's games.
+- X recent search when `X_BEARER_TOKEN` secret is set. X has no free read
+  tier (about $0.005 per post + $0.010 per author returned), so runs are
+  capped by `X_MONTHLY_BUDGET` (repo variable, default $10, spend tracked
+  per month in the file) and `X_MAX_READS` per run (default 40); since_id
+  per name group prevents paying twice for a post. Six names per query.
+- Bluesky public search (free, no key) always on; `BUZZ_BLUESKY=0` turns it
+  off. 45 players a run, rotating.
+- Filter: keep a post only if it names a watched player (full name, or a
+  last name only one watched player has) AND talks props (over/under,
+  o/u numbers, 5+, stat words, alt/ladder/parlay...). Name-only replies are
+  dropped. Prop key, side and line are parsed when present. 7 days kept.
+- Site: "What people are saying" on player pages (props band), a Chatter
+  tab on the Board comparing crowd lean with the board's lean, and a
+  chatter line on each board card. Glossary `chatter`.
+
 ## Broadcast skin across the whole site (2026-11-03)
 
 Dre asked every page to match the StatTree-style screenshots. Dark

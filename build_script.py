@@ -33,6 +33,10 @@ def _flag(x):
     return x in ("1", "1.0", "TRUE", "True", "true")
 
 SAMPLE_N = {"tgt": 220, "car": 260, "att": 450, "scr": 80}
+# Props run on recent form: this season's plays, padded from last season only up to these minimums.
+# Two seasons ago is out (schemes and roles move on). Coverage/route charting is the exception: it only
+# exists for completed seasons, so man/zone splits and target maps still use every charted season.
+RECENT_MIN = {"tgt": 60, "car": 80, "att": 150, "scr": 25}
 
 def build_script(fetch_bytes, seasons, cur, roster, pos_group, drop_raw=None, snap_games=None):
     """
@@ -221,7 +225,7 @@ def build_script(fetch_bytes, seasons, cur, roster, pos_group, drop_raw=None, sn
                 for i in range(STATES):
                     tot[i][0] += arr[i][0]; tot[i][1] += arr[i][1]
             return tot
-        cur_ = pr_for([cur]); all_ = pr_for(seasons)
+        cur_ = pr_for([cur]); all_ = pr_for([s for s in seasons if s >= cur - 1])   # identity: last season, not two back
         # team identity: overall pass rate vs league, applied to every state, then shrunk
         def overall(tt):
             p = sum(x[0] for x in tt); d = sum(x[1] for x in tt)
@@ -240,12 +244,12 @@ def build_script(fetch_bytes, seasons, cur, roster, pos_group, drop_raw=None, sn
         plays = sum(g["plays"] for g in gcur.values()) / nG
         db = sum(g["db"] for g in gcur.values()); tg = sum(g["tgt"] for g in gcur.values())
         att = sum(g["att"] for g in gcur.values()); car = sum(g["car"] for g in gcur.values())
-        # location/depth, offense and defense, this season and since the first season
+        # location/depth, offense and defense: this season, and this season + last ("all")
         def loc_pack(src):
             out = {}
             for s in (cur, "all"):
                 agg = defaultdict(lambda: [0, 0, 0.0])
-                for ss in (seasons if s == "all" else [cur]):
+                for ss in ([x for x in seasons if x >= cur - 1] if s == "all" else [cur]):   # "all" = this season + last
                     for z, v in src.get((t, ss), {}).items():
                         A = agg[z]; A[0] += v[0]; A[1] += v[1]; A[2] += v[2]
                 out[str(s)] = {z: [v[0], v[1], round(v[2])] for z, v in agg.items()}
@@ -278,7 +282,7 @@ def build_script(fetch_bytes, seasons, cur, roster, pos_group, drop_raw=None, sn
     lg_loc = {}
     for s in (cur, "all"):
         agg = defaultdict(lambda: [0, 0, 0.0])
-        for ss in (seasons if s == "all" else [cur]):
+        for ss in ([x for x in seasons if x >= cur - 1] if s == "all" else [cur]):   # "all" = this season + last
             for z, v in loc_lg[ss].items():
                 A = agg[z]; A[0] += v[0]; A[1] += v[1]; A[2] += v[2]
         lg_loc[str(s)] = {z: [v[0], v[1], round(v[2])] for z, v in agg.items()}
@@ -316,17 +320,25 @@ def build_script(fetch_bytes, seasons, cur, roster, pos_group, drop_raw=None, sn
         for s in sorted(seasons, reverse=True):
             X = pl[s].get(pid)
             if not X: continue
-            for gid, tm in X["gt"].items():
-                x = tg_state[s].get((tm, gid))
-                if x: all_tt += sum(x[0]); all_tc += sum(x[1])
-            ty += list(reversed(X["ty"])); cy += list(reversed(X["cy"])); ay += list(reversed(X["ay"])); sy += list(reversed(X["sy"]))
-            rec_td += X["rec_td"]; rush_td += X["rush_td"]; tg += X["tg"]; cr += X["cr"]
-            att += X["att"]; ptd += X["ptd"]; pint += X["pint"]; db += X["db"]; sk += X["sk"]; scr += X["scr"]
-            deep += X["deep"]; airs += X["airs"]; airn += X["airn"]
             for i in range(3): loc[i] += X["loc"][i]
             for k in ("M", "Z"):
                 for i in range(3): vs[k][i] += X["vs"][k][i]
             dpi_n += X["dpi_n"]; dpi_y += X["dpi_y"]
+            if s < cur - 1:
+                continue                                   # two seasons back: charting only
+            for gid, tm in X["gt"].items():
+                x = tg_state[s].get((tm, gid))
+                if x: all_tt += sum(x[0]); all_tc += sum(x[1])
+            if s == cur:
+                ty += list(reversed(X["ty"])); cy += list(reversed(X["cy"])); ay += list(reversed(X["ay"])); sy += list(reversed(X["sy"]))
+            else:                                          # last season: only enough to steady a thin sample
+                ty += list(reversed(X["ty"]))[:max(0, RECENT_MIN["tgt"] - len(ty))]
+                cy += list(reversed(X["cy"]))[:max(0, RECENT_MIN["car"] - len(cy))]
+                ay += list(reversed(X["ay"]))[:max(0, RECENT_MIN["att"] - len(ay))]
+                sy += list(reversed(X["sy"]))[:max(0, RECENT_MIN["scr"] - len(sy))]
+            rec_td += X["rec_td"]; rush_td += X["rush_td"]; tg += X["tg"]; cr += X["cr"]
+            att += X["att"]; ptd += X["ptd"]; pint += X["pint"]; db += X["db"]; sk += X["sk"]; scr += X["scr"]
+            deep += X["deep"]; airs += X["airs"]; airn += X["airn"]
             if s == cur:
                 rz_t, rz_c = X["rz_t"], X["rz_c"]
         if not (tg or cr or att):

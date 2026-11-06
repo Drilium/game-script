@@ -74,6 +74,16 @@ Actions tab for a failed run — the most common cause is nflverse not having
 published a file yet (rare, but the script skips that season gracefully
 rather than crashing).
 
+## Optional: X chatter (paid by X, capped)
+
+The chatter bot reads free Bluesky posts with no setup. To add X:
+1. Create an X developer app and buy pay-per-use credits (X charges about
+   $0.005 per post read; there is no free read tier).
+2. Add the app's bearer token as the repository secret `X_BEARER_TOKEN`.
+3. Optional repository variables: `X_MONTHLY_BUDGET` (USD, default 10) and
+   `X_MAX_READS` (posts per run, default 40). The bot stops for the month
+   when the budget is reached. Set a matching spending limit in X's console.
+
 ## Optional: real sportsbook lines (free)
 
 Without a key, the board uses estimated lines. To use real lines:

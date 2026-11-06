@@ -45,6 +45,8 @@ FNAME = {"def_pos": "Defense vs his position", "script": "Game script", "funnel"
 BOARD_SIZE, MIN_EDGE, BREAKEVEN, PER_GAME_CAP, PER_PLAYER_CAP = 30, 0.03, 0.524, 5, 2
 TAU_W, TAU_B, TAU_A, A0 = 0.35, 0.08, 0.3, 0.85          # prior widths: factor weights, bias, calibration
 DECAY = 0.9                                               # older weeks count a little less
+METHOD = "recent-1"                # bump when the model's inputs change: backtests are rebuilt, the live week logs why
+PRIOR_GAMES, DEF_PRIOR = 3, 4      # recent form: last season counts as this many games; two seasons back is out
 
 STADIUMS = {  # home team -> (lat, lon); neutral sites by stadium name
     "ARI": (33.5276, -112.2626), "ATL": (33.7554, -84.4008), "BAL": (39.2780, -76.6227), "BUF": (42.7738, -78.7870),
@@ -79,6 +81,14 @@ def _clamp(x, lo, hi):
 
 def _phi(z):
     return 0.5 * (1 + math.erf(z / math.sqrt(2)))
+
+
+def _wmedian(vals, wts):
+    s = sorted(zip(vals, wts)); tot = sum(wts); acc = 0.0
+    for v, w in s:
+        acc += w
+        if acc >= tot / 2: return v
+    return s[-1][0] if s else None
 
 
 def half_line(med, mean):
@@ -147,7 +157,7 @@ class Ctx:
         self.tg = {}
         for g in self.games:
             self.tg[(g["home"], g["wk"])] = g; self.tg[(g["away"], g["wk"])] = g
-        # defense-allowed per game from the game log, so backtests only see earlier games
+        # defense-allowed per game from the game log (this season + last season as DEF_PRIOR games), so backtests only see earlier games
         self.allowed = defaultdict(list)
         keys = (allowed or {}).get("keys", {})
         for t, rows in (allowed or {}).get("teams", {}).items():
@@ -171,6 +181,31 @@ class Ctx:
         self.lg_off_pass = _mean([v.get("off", {}).get("pass_rate") for v in self.TS.values()]) or 57.0
         self.script_b = (data.get("script") or {}).get("b", -0.0027)
 
+    def pf_before(self, t, W):
+        """Points per game before week W (point-in-time for backtests; the full season so far when live)."""
+        lg = [x["pf"] for x in (self.TS.get(t) or {}).get("log", []) if x.get("wk", 99) < W and x.get("pf") is not None]
+        return (sum(lg) / len(lg)) if lg else (self.TS.get(t) or {}).get("pfpg")
+
+    def def_pass_rate(self, before):
+        """Share of opponents' plays that were passes (attempts / (attempts + carries)), recent form, point-in-time."""
+        ck = ("dpr",) + before
+        if ck in self._da: return self._da[ck]
+        out = {}
+        for t, gs in self.allowed.items():
+            cur_g = [a for sw, a in gs if sw < before and sw[0] == before[0]]
+            last_g = [a for sw, a in gs if sw[0] == before[0] - 1]
+            def tot(g):
+                att = sum(a.get("QB", {}).get("att", 0) for a in g)
+                car = sum(a.get(p, {}).get("car", 0) for a in g for p in ("RB", "WR", "TE"))
+                return att, car
+            ca, cc = tot(cur_g); la, lc = tot(last_g)
+            w = (DEF_PRIOR / len(last_g)) if last_g else 0
+            A, Cr = ca + w * la, cc + w * lc
+            if A + Cr: out[t] = 100 * A / (A + Cr)
+        lg = _mean(list(out.values()))
+        self._da[ck] = (out, lg)
+        return out, lg
+
     def script_center(self, W):
         """This week's typical implied-points-to-scoring ratio, so the factor is relative to the league that week."""
         if not hasattr(self, "_scc"): self._scc = {}
@@ -179,7 +214,7 @@ class Ctx:
             for g in self.games:
                 if g["wk"] != W or g.get("spread") is None or g.get("total") is None: continue
                 for t, sp in ((g["home"], g["spread"]), (g["away"], -g["spread"])):
-                    pf = (self.TS.get(t) or {}).get("pfpg")
+                    pf = self.pf_before(t, W)
                     if pf: rs.append(((g["total"] + sp) / 2) / pf)
             self._scc[W] = (_mean(rs) or 1.0)
         return self._scc[W]
@@ -192,14 +227,20 @@ class Ctx:
         if before in self._da: return self._da[before]
         out = {}
         for t, gs in self.allowed.items():
-            use = [a for sw, a in gs if sw < before]
-            if not use: continue
-            n = len(use); o = defaultdict(dict)
+            cur_g = [a for sw, a in gs if sw < before and sw[0] == before[0]]
+            last_g = [a for sw, a in gs if sw[0] == before[0] - 1]
+            if not cur_g and not last_g: continue
+            o = defaultdict(dict)
             for pos in ("QB", "RB", "WR", "TE"):
                 ks = set()
-                for a in use: ks |= set(a.get(pos, {}).keys())
+                for a in cur_g + last_g: ks |= set(a.get(pos, {}).keys())
                 for k in ks:
-                    o[pos][k] = sum(a.get(pos, {}).get(k, 0) for a in use) / n
+                    c = sum(a.get(pos, {}).get(k, 0) for a in cur_g)
+                    if last_g:
+                        l = sum(a.get(pos, {}).get(k, 0) for a in last_g) / len(last_g)
+                        o[pos][k] = (c + DEF_PRIOR * l) / (len(cur_g) + DEF_PRIOR)
+                    else:
+                        o[pos][k] = c / len(cur_g)
             out[t] = o
         lg = defaultdict(dict)
         for pos in ("QB", "RB", "WR", "TE"):
@@ -227,9 +268,10 @@ class Ctx:
 
 # ---------------------------------------------------------------- one player's props for one game
 def _games_before(ctx, p, W):
-    """His games before week W of this season (with his current team) and every earlier season."""
+    """His games before week W this season (with his current team) and last season. Two seasons back is out."""
     out = []
     for h in ctx.hist[p["id"]]:
+        if h["s"] < ctx.season - 1: continue
         if h["s"] < ctx.season: out.append(h)
         elif h["w"] < W:
             g = ctx.tg.get((p["t"], h["w"]))
@@ -244,16 +286,19 @@ def _val(h, k):
 
 def baseline(ctx, p, k, games):
     if p["p"] == "QB" and k in ("pyd", "ptd"): games = [h for h in games if _val(h, "att") >= 10]
+    """Recent form: this season's average, steadied by last season counted as PRIOR_GAMES games
+    (one game if his role clearly changed). By midseason it is almost all this season."""
     cur = [h for h in games if h["s"] == ctx.season]
-    allv = [_val(h, k) for h in games]
-    if not allv: return None
+    last = [h for h in games if h["s"] == ctx.season - 1]
+    if not cur and not last: return None
     vk = VOL.get(k, k)
-    prior = [_val(h, vk) for h in games if h["s"] < ctx.season]
-    cv = _mean([_val(h, vk) for h in cur])
-    changed = len(prior) >= 4 and cv is not None and (_mean(prior) or 0) > 0 and not (0.67 <= cv / _mean(prior) <= 1.5)
-    w = (min(len(cur), 5) / 5) if changed else (min(len(cur), 6) / 12)
-    m_all, m_cur = _mean(allv), _mean([_val(h, k) for h in cur])
-    return (w * m_cur + (1 - w) * m_all) if m_cur is not None else m_all
+    cv, lv = _mean([_val(h, vk) for h in cur]), _mean([_val(h, vk) for h in last])
+    changed = len(last) >= 4 and cv is not None and (lv or 0) > 0 and not (0.67 <= cv / lv <= 1.5)
+    m = 1 if changed else PRIOR_GAMES
+    mc, ml = _mean([_val(h, k) for h in cur]), _mean([_val(h, k) for h in last])
+    if mc is None: return ml
+    if ml is None: return mc
+    return (len(cur) * mc + m * ml) / (len(cur) + m)
 
 
 def factors(ctx, p, k, g, W, mode, avail, wx):
@@ -271,13 +316,13 @@ def factors(ctx, p, k, g, W, mode, avail, wx):
     if dv is not None and lv and k != "ptd":      # TDs: red zone + implied points already say this
         m = _clamp(1 + 0.5 * (dv / lv - 1), 0.8, 1.2)
         rk = ctx.da_rank(before, opp, pos, dk)
-        F["def_pos"] = (math.log(m), f"{on} allow {dv:.1f} {PNAME[k]} a game to {pos}s since 2024 ({_ord(rk)} fewest of 32; league {lv:.1f}). Half the gap is applied.")
+        F["def_pos"] = (math.log(m), f"{on} allow {dv:.1f} {PNAME[k]} a game to {pos}s this season, steadied by last season ({_ord(rk)} fewest of 32; league {lv:.1f}). Half the gap is applied.")
     # game script: implied points and spread
     sp = g.get("spread"); tot = g.get("total")
     if sp is not None and tot is not None:
         sp_for = sp if g["home"] == t else -sp
         imp = (tot + sp_for) / 2
-        pf = (ctx.TS.get(t) or {}).get("pfpg")
+        pf = ctx.pf_before(t, W)
         ratio = (imp / pf / ctx.script_center(W)) if pf else 1.0
         m = _clamp(ratio ** (0.6 if k == "ptd" else 0.3), 0.85, 1.15)
         pr = ((ctx.TS.get(t) or {}).get("off", {}).get("pass_rate") or ctx.lg_off_pass) / 100
@@ -287,9 +332,10 @@ def factors(ctx, p, k, g, W, mode, avail, wx):
         F["script"] = (math.log(m), f"{me} are {'favored by ' + _n(sp_for) if sp_for > 0 else 'underdogs by ' + _n(-sp_for) if sp_for < 0 else 'a pick’em'} with about {imp:.1f} implied points (they average {pf or 0:.1f}). "
                        + ("Favorites run more late; underdogs throw more." if passing or rushing else ""))
     # pass/run funnel
-    r_def = (ctx.TS.get(opp) or {}).get("def", {}).get("pass_rate")
-    if r_def is not None and ctx.lg_ts.get("pass_rate") and (passing or rushing):
-        lgp = ctx.lg_ts["pass_rate"]; pr = ((ctx.TS.get(t) or {}).get("off", {}).get("pass_rate") or ctx.lg_off_pass) / 100
+    dpr, lgp = ctx.def_pass_rate(before)
+    r_def = dpr.get(opp)
+    if r_def is not None and lgp and (passing or rushing):
+        pr = ((ctx.TS.get(t) or {}).get("off", {}).get("pass_rate") or ctx.lg_off_pass) / 100
         shift = _clamp(0.35 * (r_def - lgp) / 100, -0.035, 0.035)
         m = (pr + shift) / pr if passing else (1 - pr - shift) / (1 - pr)
         if abs(m - 1) >= 0.003:
@@ -430,7 +476,7 @@ def candidates(ctx, W, mode, model, wxs, lines, avail_fn, now=None):
                 if not avail.get(p["id"], True): continue
                 games = _games_before(ctx, p, W)
                 cur = [h for h in games if h["s"] == ctx.season]
-                if len(cur) < 2 or len(games) < 5: continue
+                if len(cur) < 2 or len(games) < 4: continue
                 cv = lambda k: _mean([_val(h, k) for h in cur]) or 0
                 pos = p["p"]
                 if (pos == "QB" and (cv("att") < 20 or len(cur) < 3)) or (pos == "RB" and cv("car") < 5 and cv("tgt") < 3) or (pos in ("WR", "TE") and cv("tgt") < 3): continue
@@ -449,16 +495,18 @@ def candidates(ctx, W, mode, model, wxs, lines, avail_fn, now=None):
                     vproj = vb * math.exp(sum(wts_f.get(f, 1.0) * F[f][0] for f in F if f in ("script", "funnel", "tgt_funnel", "injury", "weather", "own_status")))
                     pg = [h for h in games if _val(h, "att") >= 10] if (pos == "QB" and k in ("pyd", "ptd")) else games
                     vals = [_val(h, k) for h in pg]
-                    wts = [2.0 if h["s"] == ctx.season else 1.0 for h in pg]
+                    nl = sum(1 for h in pg if h["s"] != ctx.season) or 1
+                    wts = [1.0 if h["s"] == ctx.season else PRIOR_GAMES / nl for h in pg]   # last season = 3 games' worth
                     key = f"{p['id']}|{k}"
                     bl = lines.get(key)
                     if bl: line, lsrc = bl["line"], "book"
                     else:
                         # no sportsbook line: use his matchup-neutral expectation (the 50% point of his own
                         # games rescaled to his baseline), so any edge comes from this matchup, not a hot start
-                        mv = _mean(vals) or base
+                        mv = (sum(v * w for v, w in zip(vals, wts)) / sum(wts)) if vals else base
                         nb = math.exp(bias.get(k, 0.0))           # what the model learned about his kind of baseline
-                        med = (_median(vals) or 0) * (base / mv if mv else 1) * nb
+                        # weighted exactly like the projection, so a stale line can't fake an edge
+                        med = (_wmedian(vals, wts) or 0) * (base / mv if mv else 1) * nb
                         line, lsrc = half_line(med, base * nb), "est"
                     nb = math.exp(bias.get(k, 0.0))
                     po = prob_over(vals, wts, base, proj, line, k)
@@ -478,13 +526,14 @@ def candidates(ctx, W, mode, model, wxs, lines, avail_fn, now=None):
                     praw = po if side == "over" else 1 - po
                     pc = cal(praw)
                     p0 = 0.5 + A0 * ((po0 if side == "over" else 1 - po0) - 0.5)
-                    hit_n = sum(1 for v in vals if (v > line if side == "over" else v < line))
+                    curv = [_val(h, k) for h in pg if h["s"] == ctx.season]
+                    hit_n = sum(1 for v in curv if (v > line if side == "over" else v < line))
                     edge = pc - be(side)
                     out[key] = {"pid": p["id"], "n": p["n"], "t": t, "opp": g["away"] if g["home"] == t else g["home"], "pos": pos,
                                 "gid": g["id"], "k": k, "side": side, "line": line, "lsrc": lsrc, "base": round(base, 2),
                                 "proj": round(proj, 2), "vproj": round(vproj, 2), "vk": VOL[k], "praw": round(praw, 4), "p": round(pc, 4),
                                 "p0": round(p0, 4), "edge": round(edge, 4), "be": round(be(side), 4), "sc": round(edge * min(1, len(games) / 10), 4),
-                                "hits": [hit_n, len(vals)], "fx": {f: round(F[f][0], 4) for f in F},
+                                "hits": [hit_n, len(curv)], "fx": {f: round(F[f][0], 4) for f in F},
                                 "why": {f: F[f][1] for f in F}}
                     if bl: out[key]["odds"] = {"o": bl.get("over"), "u": bl.get("under"), "books": bl.get("n")}
     return out
@@ -837,8 +886,19 @@ def build_board(data, states, allowed, now=None, odds_key=None):
     if board.get("season") not in (None, data["season"]):
         board, learn = {"weeks": {}, "history": []}, {"weeks": {}}
     board["season"] = data["season"]
+    method_change = board.get("method") not in (None, METHOD) or (board.get("weeks") and not board.get("method"))
+    if method_change:
+        # the model's inputs changed: rebuild the backtests and the learned model from scratch; the live week
+        # keeps its history and logs the switch as the reason for whatever changes
+        for w in [w for w, wb in board["weeks"].items() if wb.get("mode") == "backtest"]:
+            board["weeks"].pop(w, None); learn["weeks"].pop(w, None)
+        for wb in board["weeks"].values():
+            wb.pop("report", None)
+        board["history"], board["model"] = [], None
+        print(f"  method changed to {METHOD}: backtests and learned model rebuilt")
+    board["method"] = METHOD
     ctx = Ctx(data, states, allowed)
-    model = board.get("model") or {"w": {f: 1.0 for f in FACTORS}, "b": {}, "a": {}, "n": 0, "acc": {}}
+    model = (board.get("model") if not method_change else None) or {"w": {f: 1.0 for f in FACTORS}, "b": {}, "a": {}, "n": 0, "acc": {}}
     weeks = sorted({g["wk"] for g in ctx.games})
     open_wk = [w for w in weeks if any(not _final(g) for g in ctx.games if g["wk"] == w)]
     live = open_wk[0] if open_wk else None
@@ -916,6 +976,9 @@ def build_board(data, states, allowed, now=None, odds_key=None):
         sel_keys = {f"{c['pid']}|{c['k']}" for c in sel}
         B = wb["board"]; log = wb["log"]
         opening = not B
+        if method_change and B:
+            log.append({"ts": ts, "kind": "note", "txt": "Method change: props now run on recent form (this season, with last season counted as 3 games and two seasons back dropped), and so do the defense numbers. Every change below in this run comes from that switch."})
+        tag = "Recent-form switch: " if (method_change and B) else ""
         # lock everything whose game has started
         for key, e in B.items():
             if e["gid"] in started and e["status"] == "active":
@@ -935,6 +998,7 @@ def build_board(data, states, allowed, now=None, odds_key=None):
                 if c["side"] != e["side"]: why = f"The lean flipped to the {c['side']}: " + (change_reason(old.get(key) or e, c) or "the projection moved through the line.")
             else:
                 why = f"Bumped by stronger plays (score {c['sc'] * 100:.1f} vs the cut at {cut * 100:.1f})." + (f" {change_reason(old.get(key) or e, c)}" if change_reason(old.get(key) or e, c) else "")
+            why = tag + why
             e["status"] = "removed"; e["removed"] = ts; e["removed_why"] = why
             log.append({"ts": ts, "kind": "remove", "key": key, "n": e["n"], "k": e["k"], "side": e["side"], "line": e["line"], "txt": why})
         for c in sel:
@@ -946,7 +1010,7 @@ def build_board(data, states, allowed, now=None, odds_key=None):
                 if c["side"] != e["side"]: chg.append(f"lean flipped to the {c['side']}")
                 if abs(c["p"] - e["p"]) >= 0.05: chg.append(f"chance {e['p'] * 100:.0f}% → {c['p'] * 100:.0f}%")
                 if chg:
-                    why = "; ".join(chg)
+                    why = tag + "; ".join(chg)
                     cr = change_reason(old.get(key) or e, c)
                     if cr: why += f". Why: {cr}"
                     log.append({"ts": ts, "kind": "update", "key": key, "n": c["n"], "k": c["k"], "side": c["side"], "line": c["line"], "txt": why})
@@ -964,6 +1028,7 @@ def build_board(data, states, allowed, now=None, odds_key=None):
                 why = f"Moved into the top {BOARD_SIZE} as other picks dropped off (edge {c['edge'] * 100:.0f}%, unchanged)."
             else:
                 why = "New candidate this run: " + ("; ".join(f"{r['l'].lower()} ({'+' if r['e'] > 0 else ''}{r['e']:.0f}%)" for r in top_reasons(c, 2, model) if r["helps"]) or "his track record against this line.")
+            why = tag + why
             B[key] = _entry(c, model, ts, why)
             log.append({"ts": ts, "kind": "add", "key": key, "n": c["n"], "k": c["k"], "side": c["side"], "line": c["line"], "txt": why})
         L["cand"] = new
