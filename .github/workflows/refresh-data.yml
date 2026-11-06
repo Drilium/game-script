@@ -46,6 +46,8 @@ jobs:
           X_BEARER_TOKEN: ${{ secrets.X_BEARER_TOKEN }} # optional, paid per post read; chatter uses free Bluesky without it
           X_MONTHLY_BUDGET: ${{ vars.X_MONTHLY_BUDGET || '10' }}  # USD cap per month for X reads
           X_MAX_READS: ${{ vars.X_MAX_READS || '40' }}            # posts per run
+          BSKY_HANDLE: ${{ secrets.BSKY_HANDLE }}               # optional free Bluesky login for chatter search
+          BSKY_APP_PASSWORD: ${{ secrets.BSKY_APP_PASSWORD }}   # an app password (Settings > App passwords), not your real one
         run: python3 build_data.py
 
       - name: Commit updated data if it changed

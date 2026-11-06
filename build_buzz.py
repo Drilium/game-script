@@ -131,9 +131,36 @@ def x_search(token, query, max_results, since_id=None):
                      {"Authorization": f"Bearer {token}"})
 
 
+BSKY = {"token": None, "host": None, "tried": False}
+
+
+def _bsky_login():
+    """Free Bluesky app password (BSKY_HANDLE + BSKY_APP_PASSWORD secrets); Bluesky blocks anonymous search from some hosts."""
+    BSKY["tried"] = True
+    h, pw = os.environ.get("BSKY_HANDLE"), os.environ.get("BSKY_APP_PASSWORD")
+    if not (h and pw): return False
+    req = urllib.request.Request("https://bsky.social/xrpc/com.atproto.server.createSession",
+                                 data=json.dumps({"identifier": h, "password": pw}).encode(),
+                                 headers={"Content-Type": "application/json", "User-Agent": "game-script-nfl/1.0"})
+    with urllib.request.urlopen(req, timeout=20) as r:
+        j = json.loads(r.read().decode())
+    BSKY["token"], BSKY["host"] = j["accessJwt"], "https://bsky.social"
+    return True
+
+
 def bsky_search(q, since):
-    params = {"q": q, "limit": 40, "sort": "latest", "lang": "en", "since": since}
-    return _get_json("https://public.api.bsky.app/xrpc/app.bsky.feed.searchPosts?" + urllib.parse.urlencode(params))
+    params = urllib.parse.urlencode({"q": q, "limit": 40, "sort": "latest", "lang": "en", "since": since})
+    if BSKY["token"]:
+        return _get_json(f"{BSKY['host']}/xrpc/app.bsky.feed.searchPosts?" + params, {"Authorization": f"Bearer {BSKY['token']}"})
+    last = None
+    for host in ("https://api.bsky.app", "https://public.api.bsky.app"):
+        try:
+            return _get_json(f"{host}/xrpc/app.bsky.feed.searchPosts?" + params)
+        except Exception as e:
+            last = e
+    if not BSKY["tried"] and _bsky_login():
+        return bsky_search(q, since)
+    raise last
 
 
 def build_buzz(data, board, now=None):
@@ -223,7 +250,8 @@ def build_buzz(data, board, now=None):
             except Exception as e:
                 fails += 1
                 if fails >= 3:
-                    stats["bsky"]["status"] = f"error: {str(e)[:120]}"; print(f"  Bluesky search skipped: {e}"); break
+                    need = "" if os.environ.get("BSKY_APP_PASSWORD") else " (Bluesky blocks anonymous search here: add free BSKY_HANDLE and BSKY_APP_PASSWORD secrets)"
+                    stats["bsky"]["status"] = f"error: {str(e)[:80]}{need}"; print(f"  Bluesky search skipped: {e}"); break
                 continue
             stats["bsky"]["queries"] += 1
             for post in j.get("posts") or []:

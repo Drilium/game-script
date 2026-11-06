@@ -74,6 +74,13 @@ Actions tab for a failed run — the most common cause is nflverse not having
 published a file yet (rare, but the script skips that season gracefully
 rather than crashing).
 
+## Optional: Bluesky chatter login (free)
+
+Bluesky blocks anonymous search from GitHub's servers. To turn on the free
+chatter feed: in Bluesky, Settings -> Privacy and security -> App passwords
+-> add one. Then add repository secrets `BSKY_HANDLE` (e.g. you.bsky.social)
+and `BSKY_APP_PASSWORD` (the app password, never your real password).
+
 ## Optional: X chatter (paid by X, capped)
 
 The chatter bot reads free Bluesky posts with no setup. To add X:
