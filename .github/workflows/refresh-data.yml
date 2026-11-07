@@ -43,18 +43,13 @@ jobs:
       - name: Rebuild the data files
         env:
           ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}   # optional free key from the-odds-api.com; estimated lines without it
-          X_BEARER_TOKEN: ${{ secrets.X_BEARER_TOKEN }} # optional, paid per post read; chatter uses free Bluesky without it
-          X_MONTHLY_BUDGET: ${{ vars.X_MONTHLY_BUDGET || '10' }}  # USD cap per month for X reads
-          X_MAX_READS: ${{ vars.X_MAX_READS || '40' }}            # posts per run
-          BSKY_HANDLE: ${{ secrets.BSKY_HANDLE }}               # optional free Bluesky login for chatter search
-          BSKY_APP_PASSWORD: ${{ secrets.BSKY_APP_PASSWORD }}   # an app password (Settings > App passwords), not your real one
         run: python3 build_data.py
 
       - name: Commit updated data if it changed
         run: |
           git config user.name "nfl-data-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add nfl_data.json nfl_h2h.json nfl_allowed.json nfl_script.json nfl_board.json nfl_learn.json nfl_buzz.json
+          git add nfl_data.json nfl_h2h.json nfl_allowed.json nfl_script.json nfl_board.json nfl_learn.json
           if git diff --cached --quiet; then
             echo "No data changes."
           else
@@ -78,7 +73,7 @@ jobs:
       - name: Collect the site files
         run: |
           mkdir _site
-          cp index.html nfl_data.json nfl_h2h.json nfl_allowed.json nfl_script.json nfl_board.json nfl_buzz.json _site/
+          cp index.html nfl_data.json nfl_h2h.json nfl_allowed.json nfl_script.json nfl_board.json _site/
           touch _site/.nojekyll
 
       - uses: actions/configure-pages@v5

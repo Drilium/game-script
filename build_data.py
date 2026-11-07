@@ -1050,12 +1050,3 @@ if __name__ == "__main__":
     except Exception as e:
         import traceback; traceback.print_exc()
         print(f"Matchup board skipped: {e}")
-    # Chatter bot: prop talk about this week's players (X with a budget-capped key, Bluesky free).
-    try:
-        import os, json as _json
-        from build_buzz import build_buzz
-        bd = _json.load(open("nfl_board.json")) if os.path.exists("nfl_board.json") else {}
-        build_buzz(data, bd)
-    except Exception as e:
-        import traceback; traceback.print_exc()
-        print(f"Chatter skipped: {e}")

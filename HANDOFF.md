@@ -610,8 +610,7 @@ projected volume vs season (teammates out), trades (`tradeInfo` infers a
 player's former team from his game logs; `departed` lists teammates who
 left), explosive plays allowed (DA `x20`, `lru`), his deep-target share and
 25+ yard plays, man/zone and field-zone fit, game total, forecast wind,
-Questionable status. Tags: Under the radar (not on the board and zero
-chatter), Sneaky hit last week (report card), Trade, More volume,
+Questionable status. Tags: Under the radar (not on the board or in any game's best five), Sneaky hit last week (report card), Trade, More volume,
 Shootout, Risk. Games are simulated progressively (`olWarm`).
 
 ## Props page: best 5 props in every game (2026-11-07)
@@ -630,7 +629,7 @@ QB1 (`depth_charts_{season}.csv`, players carry `dc`/`dcs`), decide the
 starter everywhere (`expQB`/`benchQB` in index.html, `exp_qb` in
 build_board.py). "Most attempts" had 7 teams wrong after trades/injuries.
 
-## Props on recent form + chatter bot (2026-11-06)
+## Props on recent form (2026-11-06; the chatter bot from that day was removed 2026-11-07)
 
 **Recent form (Dre: "only helpful to look at general data from 2024; base
 props on more recent data").** Everything prop-related now runs on this
@@ -659,22 +658,7 @@ is out. General history views (season tables, head-to-head, game logs,
   over 180 picks; this-season defense numbers carry most of it; pressure
   and red-zone rates are still full-season, so treat it as suggestive.
 
-**Chatter bot (`build_buzz.py` -> `nfl_buzz.json`).** Watches the board's
-players, then each team's top 5 skill players in this week's games.
-- X recent search when `X_BEARER_TOKEN` secret is set. X has no free read
-  tier (about $0.005 per post + $0.010 per author returned), so runs are
-  capped by `X_MONTHLY_BUDGET` (repo variable, default $10, spend tracked
-  per month in the file) and `X_MAX_READS` per run (default 40); since_id
-  per name group prevents paying twice for a post. Six names per query.
-- Bluesky public search (free, no key) always on; `BUZZ_BLUESKY=0` turns it
-  off. 45 players a run, rotating.
-- Filter: keep a post only if it names a watched player (full name, or a
-  last name only one watched player has) AND talks props (over/under,
-  o/u numbers, 5+, stat words, alt/ladder/parlay...). Name-only replies are
-  dropped. Prop key, side and line are parsed when present. 7 days kept.
-- Site: "What people are saying" on player pages (props band), a Chatter
-  tab on the Board comparing crowd lean with the board's lean, and a
-  chatter line on each board card. Glossary `chatter`.
+**Chatter bot:** built 2026-11-06 (X recent search with a budget cap, Bluesky public search, prop-mention filter) and removed on 2026-11-07 at Dre's request. It lives in git history (`build_buzz.py`, commit "Props on recent form; chatter bot for X and Bluesky") if it comes back. Note for later: X has no free read tier, and Bluesky's anonymous search works from GitHub only via api.bsky.app.
 
 ## Broadcast skin across the whole site (2026-11-03)
 

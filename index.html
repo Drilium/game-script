@@ -432,10 +432,6 @@ details.tview table{margin-top:8px;font-size:13.5px}
 /* Simulator, injuries */
 .simteams{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,520px),1fr));gap:18px;margin-top:12px}
 .simteam h2{margin-top:6px}
-.bzl{list-style:none;padding:0;margin:8px 0 0;display:grid;gap:8px}
-.bzp{background:var(--surface);border:1px solid var(--edge);border-radius:10px;padding:10px 12px;box-shadow:var(--lift)}
-.bzh{display:flex;align-items:center;gap:6px;flex-wrap:wrap}.bzp p{margin:6px 0 4px;line-height:1.45;white-space:pre-wrap;word-break:break-word}
-.bzsrc{font-size:10px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;border-radius:5px;padding:1px 6px;background:var(--sunken);color:var(--ink)}.bzsrc.x{background:#000;color:#fff;border:1px solid #333}.bzsrc.bsky{background:#1185fe;color:#fff}
 .pggrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,520px),1fr));gap:14px;margin-top:12px}
 .pgcard{background:var(--surface);border:1px solid var(--edge);border-radius:12px;padding:12px 14px;box-shadow:var(--lift)}
 .pgcard header{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;border-bottom:1px solid var(--rule2);padding-bottom:8px}
@@ -1659,7 +1655,6 @@ function vPlayer(p){
   if(offp&&ng&&p.ss)h+=projSection(p,ng);
   if(offp&&p.ss)h+=lastGameBox(p,ng);
   if(offp&&ng)h+=ldPlayer(p,ng);
-  if(offp)h+=bzSection(p);
   if(!def)h+=gameSection(p);
   if(offp){needScript();h+=stateTable(p);}
   if(offp)h+=band('ctx','Context for both','His season, how he wins, and the defenders and schedule ahead.');
@@ -2133,8 +2128,7 @@ const GLOSS=[
  ['one-on-one','Matchups and projections','Likely one-on-one','A pairing by playing time and role: a team’s receivers ranked by targets against the other team’s corners ranked by snaps, the top tight end against the top safety, the lead back against the busiest linebacker, and the QB against the top pass rusher.','A sensible guess at who will meet most often, not a confirmed assignment. Slot and wide alignment and coverage aren’t in free data.','Rule set on this site.',[]],
  ['projection','Matchups and projections','Projection','On player pages and the Projections page: his next game played out 8,000 times by the simulator, using the betting lines, his team\u2019s play calling in each score situation, his share of the work (handed out again when teammates are out), his real plays since 2024 and the schematic matchups with this defense. The projection is the average of those games; the range is the middle 60%. Best props, Prop research and Fantasy use a quicker average-based estimate: his per-game average (this season blended with every game since 2024), adjusted for what this defense allows at his position and the betting market\u2019s team total.','A starting point for your own judgment, not a betting pick. Read the factor table on his page to see what is pushing it up or down.','Calculated on this site.',[]],
  ['board','Matchups and projections','Matchup board','Each week\u2019s best schematic matchups and the props they should move. Every qualifying player\u2019s passing yards, passing TDs, rushing yards, receptions and receiving yards are scored on the matchup factors (defense against his position, man/zone fit, field zones, target and pass/run funnels, pass rush, red zone), game script, the weather forecast and injuries. The board keeps the 30 biggest edges, at most five per game and two per player. It is rebuilt every day and after every game window; each add, removal and update is logged with its reason, and picks lock at kickoff.','Chance is how often the model expects the pick to win; \u201cline alone\u201d is what that side wins with no matchup at all, plus the house cut. Edge is the gap. Without a sportsbook key the line is estimated as his matchup-neutral expectation, so the board measures the matchup itself rather than a hot start. When a free The Odds API key is added as ODDS_API_KEY, real lines and prices replace the estimates.','nflverse play-by-play, charting, schedules and injury reports; Open-Meteo forecasts; optional The Odds API lines.',[]],
- ['ladder','Matchups and projections','Ladders','Betting several alt lines of the same prop at rising thresholds (60+, 80+, 100+ yards). Each rung\u2019s chance is the share of the simulator\u2019s 8,000 games where he reaches it; fair odds are that chance turned into an American price with no house cut. Players are ranked by their ceiling (what they reach in their best 15% of simulated games), nudged up or down a little by how much more often the simulator reaches his ladder top (the highest rung still at 15% or better) than he did in his own games this season. The reasons cover projected volume and teammates out, trades (joined a new team, or a teammate left), explosive plays the defense allows (20+ yard catches, longest runs), his own big-play rate, man/zone and field-zone fit, the game total, weather and injury risk. \u201cUnder the radar\u201d means he isn\u2019t on the matchup board and nobody is posting about him; \u201cSneaky hit last week\u201d comes from the report card.','A book price longer than the fair odds is the value side. Higher rungs swing on one big play, so size them small.','Calculated on this site from the simulator, nflverse stats and schedules.',[]],
- ['chatter','Matchups and projections','Chatter','Public posts about this week\u2019s players that mention a prop: a line or number, over/under, a stat (yards, catches, TDs), alt, ladder or parlay. A post that only says the player\u2019s name is left out; otherwise nothing is filtered yet. The bot watches the matchup board\u2019s players first, then each team\u2019s main skill players, and keeps a week of posts. X posts appear when an X API key is connected (X charges per post read, so the bot runs on a monthly budget); Bluesky posts are free and always on.','Crowd lean is a count of over vs under posts, not a probability. When it disagrees with the board, read why on the player\u2019s page.','X API recent search (optional, paid), Bluesky public search.',[]],
+ ['ladder','Matchups and projections','Ladders','Betting several alt lines of the same prop at rising thresholds (60+, 80+, 100+ yards). Each rung\u2019s chance is the share of the simulator\u2019s 8,000 games where he reaches it; fair odds are that chance turned into an American price with no house cut. Players are ranked by their ceiling (what they reach in their best 15% of simulated games), nudged up or down a little by how much more often the simulator reaches his ladder top (the highest rung still at 15% or better) than he did in his own games this season. The reasons cover projected volume and teammates out, trades (joined a new team, or a teammate left), explosive plays the defense allows (20+ yard catches, longest runs), his own big-play rate, man/zone and field-zone fit, the game total, weather and injury risk. \u201cUnder the radar\u201d means he isn\u2019t on the matchup board or in any game\u2019s best five props; \u201cSneaky hit last week\u201d comes from the report card.','A book price longer than the fair odds is the value side. Higher rungs swing on one big play, so size them small.','Calculated on this site from the simulator, nflverse stats and schedules.',[]],
  ['report-card','Matchups and projections','Report card and self-learning','After every game is final, the board is graded: hits, misses, near misses (lost by a catch, a few yards or half a TD), pushes and players who didn\u2019t play, plus the picks removed during the week, \u201csneaky looks\u201d it ranked below the cut that cleared big, and \u201cblind spots\u201d where a confident lean went badly the other way. Each one gets a diagnosis from the box score: volume or efficiency, snaps, blowout, quarterback change, teammates, wind. Then the model re-fits on every graded week: a weight for each matchup factor, a bias for each prop type and a confidence slope, each pulled toward its starting value so one odd week can\u2019t swing it.','Judge it against \u201cexpected\u201d, the hits its lines alone would produce. Beating that over many weeks is the only proof of an edge; the weeks before the board existed are backtests and say so.','Calculated on this site.',[]],
  ['schematic','Matchups and projections','Schematic matchups','How this defense plays, against how this player wins. Man or zone: how often they played man last season, against his yards per target versus man and zone. Where he\u2019s thrown to: his targets by area of the field (short or deep; left, middle or right) against the yards they give up in each area. Who gets targeted: the share of throws they let go to his position. Pass or run funnel: how often offenses throw against them. Pass rush and red zone: pressure rate and touchdown rate on red-zone trips. Each one is compared with the league and only part of the gap is applied.','Each factor is a matchup effect on top of the defense\u2019s overall quality, so they don\u2019t double count. Most move a projection a few percent; together they can move it 10% or more.','nflverse play-by-play 2024 to now, participation charting for coverage (completed seasons only), FTN charting for pressure and box counts.',[]],
  ['last-game','Matchups and projections','Last game: anything unusual?','Checks whether his last game had a reason to look different: key teammates who didn\u2019t play or played few snaps, his own snap share, a quarterback change, a blowout of 17+ points, wind or cold, and a top-3 or bottom-3 defense against his position. Usage spike or dip means his targets (or touches, or attempts) were at least a third above or below his other games and by 3 or more.','If the reason carries into the next game (the teammate is listed Out again), the bigger or smaller role may continue; if not, treat the game as a one-off. The full game log on his page tags every game this season the same way.','nflverse weekly stats, snap counts, schedules (starting QBs, weather) and injury reports.',[]],
@@ -3279,7 +3273,7 @@ function bdCard(e,key,locked){
     '<span class="bst '+e.status+'">'+(e.status==='locked'?'Locked':e.status==='removed'?'Removed':'Active')+'</span></header>'+
     '<div class="bprop"><div class="bside '+e.side+'"><small>'+(e.side==='over'?'OVER':'UNDER')+'</small><b>'+e.line+'</b><span>'+BKL[e.k]+'</span></div>'+
     '<dl class="bnums"><div><dt>Projection</dt><dd>'+(e.k==='ptd'?e.proj.toFixed(2):e.proj.toFixed(1))+'</dd></div><div><dt>Chance</dt><dd>'+pctS(e.p)+'</dd></div><div><dt>Line alone</dt><dd title="What this side wins with no matchup factors, plus the house cut">'+pctS(e.be)+'</dd></div><div><dt>Edge</dt><dd class="'+(e.edge>=.06?'g':'')+'">+'+(e.edge*100).toFixed(1)+'%</dd></div><div><dt title="How often this side won in his games since 2024, before the matchup">Past games</dt><dd>'+(e.hits?e.hits[0]+'/'+e.hits[1]:'—')+'</dd></div></dl>'+oddsTxt(e)+'</div>'+
-    '<p class="bhead">'+esc(e.head)+'</p>'+(()=>{const c=bzCrowd(e);if(!c)return '';const v=c.k;return '<p class="small mut" style="margin:0 0 4px">Chatter: '+c.n+' post'+(c.n===1?'':'s')+(v&&(v.over||v.under)?', on this prop '+v.over+' over / '+v.under+' under':'')+'. <a href="#/player/'+e.pid+'">Read them</a></p>';})()+
+    '<p class="bhead">'+esc(e.head)+'</p>'+
     '<ul class="bwhy">'+(e.reasons||[]).map(r=>'<li>'+effChip(r)+' <b>'+esc(r.l)+'</b> <span class="small">'+(r.helps?'helps':'works against')+' the '+e.side+'.</span> <span class="small mut">'+esc(r.t)+'</span></li>').join('')+'</ul>'+
     '<p class="small mut bmeta">'+(e.status==='removed'?'<b>Removed '+esc(bdTime(e.removed))+':</b> '+esc(e.removed_why)+'<br>':'')+'Added '+esc(bdTime(e.added))+': '+esc(e.added_why||'')+(moved?'<br>What the model learned moved this from '+pctS(e.p0)+' to '+pctS(e.p)+'.':'')+(e.upd&&e.upd!==e.added?' · refreshed '+esc(bdTime(e.upd)):'')+'</p></article>';
 }
@@ -3287,10 +3281,10 @@ function bdTabs(wk,tab){
   const w=bdWeek(wk),wks=Object.keys(BD.weeks||{}).map(Number).sort((a,b)=>b-a);
   const nlog=w&&w.log?w.log.filter(l=>l.kind!=='note').length:0;
   return '<div class="row" style="margin-top:16px;align-items:flex-end;gap:10px"><label class="fld">Week<select id="bdWk" class="sel">'+wks.map(x=>{const ww=BD.weeks[x];return '<option value="'+x+'"'+(x===wk?' selected':'')+'>Week '+x+(x===BD.cur?' (this week)':ww.mode==='backtest'?' (backtest)':ww.report?' (graded)':'')+'</option>';}).join('')+'</select></label>'+
-    '<div class="chips" role="tablist">'+[['picks','Board'],['log','Changes'+(nlog?' ('+nlog+')':'')],['chatter','Chatter'],['report','Report card']].map(([k,l])=>'<a role="tab" class="chipa" aria-selected="'+(k===tab)+'" href="#/board/'+wk+'/'+k+'">'+l+'</a>').join('')+'</div></div>';
+    '<div class="chips" role="tablist">'+[['picks','Board'],['log','Changes'+(nlog?' ('+nlog+')':'')],['report','Report card']].map(([k,l])=>'<a role="tab" class="chipa" aria-selected="'+(k===tab)+'" href="#/board/'+wk+'/'+k+'">'+l+'</a>').join('')+'</div></div>';
 }
 function vBoard(wkArg,tabArg){
-  needBoard();needBuzz();
+  needBoard();
   let h='<section class="hero"><div><h1>Matchup board</h1><p class="sub">The week’s best schematic matchups and the props they should move: defense against his position, man/zone fit, where he’s thrown to, target and pass/run funnels, pass rush, red zone, game script, weather and injuries. Rebuilt every day; every add and removal is logged with the reason. Picks lock at kickoff, get graded when the week ends, and the grading retunes the model. <a href="#/glossary/board">How it works</a>.</p></div></section>';
   if(!BD)return h+'<p class="empty">Loading the board…</p>';
   if(!BD.weeks||!Object.keys(BD.weeks).length)return h+'<p class="empty">The board hasn’t been built yet. It appears after the next data refresh.</p>';
@@ -3303,7 +3297,6 @@ function vBoard(wkArg,tabArg){
   h+='<p class="count">'+(w.mode==='backtest'?'<b>Backtest.</b> Built after the fact using only games before week '+wk+' (availability uses who actually played; a few team rates use the full season). ':'')+
     (w.updated?'Updated '+esc(bdTime(w.updated))+'. ':'')+act.length+' picks'+(rem.length?', '+rem.length+' removed during the week':'')+'. Lines: '+(books?'sportsbook where available, estimated otherwise':'estimated (his matchup-neutral expectation; connect a free odds key for sportsbook lines)')+'.</p>';
   if(tab==='log')return h+bdLog(w);
-  if(tab==='chatter')return h+bdChatter(w);
   if(tab==='report')return h+bdReport(wk,w);
   /* picks */
   const ks=[...new Set(act.map(([k,e])=>e.k))];
@@ -3379,51 +3372,6 @@ function bdHome(){
 }
 
 
-/* ======================================================================
-   Chatter: prop talk about this week's players from X (when a key is set)
-   and Bluesky. Only posts that name the player AND mention a prop.
-   ====================================================================== */
-let BZ=null,BZ_P=null;
-function needBuzz(){
-  if(BZ||BZ_P)return;
-  BZ_P=fetch('nfl_buzz.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
-    .then(j=>{BZ=j;}).catch(e=>{console.warn(e);BZ={players:{},summary:{}};}).then(()=>render(true));
-}
-const BZK={recyd:'Rec yds',rec:'Receptions',ryd:'Rush yds',pyd:'Pass yds',ptd:'Pass TDs',td:'TD',tgt:'Targets',other:'General'};
-function agoTxt(iso){const d=new Date((iso||'').replace('Z',':00Z'));if(isNaN(d))return '';const m=Math.round((Date.now()-d)/60000);
-  return m<60?m+'m ago':m<1440?Math.round(m/60)+'h ago':Math.round(m/1440)+'d ago';}
-function bzLean(s){if(!s)return '';const parts=Object.entries(s.k||{}).filter(([k,v])=>v.n).sort((a,b)=>b[1].n-a[1].n);
-  return parts.map(([k,v])=>'<span class="gtag">'+esc(BZK[k]||k)+': '+v.n+(v.over||v.under?' · '+v.over+' over / '+v.under+' under':'')+'</span>').join(' ');}
-function bzPost(x){
-  const tag=(x.k?(BZK[x.k]||x.k):'')+(x.side?' '+x.side:'')+(isNum(x.line)?' '+x.line:'');
-  return '<li class="bzp"><div class="bzh"><span class="bzsrc '+x.src+'">'+(x.src==='x'?'X':'Bluesky')+'</span><b>'+esc(x.nm||x.by||'')+'</b> <span class="mut small">@'+esc(x.by||'')+' · '+agoTxt(x.ts)+(x.reply?' · reply':'')+'</span>'+(tag.trim()?'<span class="gtag">'+esc(tag.trim())+'</span>':'')+'</div><p>'+esc(x.t)+'</p><a class="small" href="'+esc(x.url)+'" target="_blank" rel="noopener noreferrer">Open on '+(x.src==='x'?'X':'Bluesky')+'</a></li>';
-}
-function bzSection(p){
-  needBuzz();
-  let h='<h2>What people are saying</h2><p class="lede">Public posts from the last week that name him and mention a prop (a line, over/under, yards, catches, TDs). Posts that only say his name are left out. Unfiltered otherwise: these are opinions, not picks. <a href="#/glossary/chatter">How it works</a>.</p>';
-  if(!BZ)return h+'<p class="empty">Loading…</p>';
-  const L=(BZ.players||{})[p.id]||[],S=(BZ.summary||{})[p.id];
-  if(!L.length)return h+'<p class="empty">No prop talk about him in the last week'+(BZ.watch?' (the bot watches this week’s board players and each team’s main skill players)':'')+'.</p>';
-  return h+'<p class="small" style="margin:6px 0">'+L.length+' posts · '+bzLean(S)+'</p><ul class="bzl">'+L.slice(0,8).map(bzPost).join('')+'</ul>'+(L.length>8?'<details class="tview"><summary>'+(L.length-8)+' more</summary><ul class="bzl">'+L.slice(8).map(bzPost).join('')+'</ul></details>':'');
-}
-/* board: crowd lean vs board lean */
-function bzCrowd(e){
-  if(!BZ||!BZ.summary)return null;const s=BZ.summary[e.pid];if(!s)return null;
-  const v=(s.k||{})[e.k]||null;return {n:s.n,k:v};
-}
-function bdChatter(w){
-  needBuzz();if(!BZ)return '<p class="empty">Loading chatter…</p>';
-  const run=BZ.run||{},x=run.x||{},bs=run.bsky||{};
-  let h='<p class="lede">What people are saying about this week’s board players, next to what the board says. Only posts that name the player and mention a prop count. Updated '+esc(bdTime(BZ.updated))+'.</p>'+
-    '<p class="small mut">X: '+esc(x.status||'off')+(x.read?' · '+x.read+' posts read this run':'')+'. Bluesky: '+esc(bs.status||'off')+(bs.read?' · '+bs.read+' posts read this run':'')+'.</p>';
-  const act=Object.values(w.board||{}).filter(e=>e.status!=='removed').sort((a,b)=>b.edge-a.edge);
-  const rows=act.map(e=>{const c=bzCrowd(e),L=((BZ.players||{})[e.pid]||[]).filter(x=>!x.k||x.k===e.k||(x.k==='yds'));
-    const v=c&&c.k,crowd=v&&(v.over||v.under)?(v.over>v.under?'over':v.under>v.over?'under':'split'):null;
-    const agree=crowd&&crowd!=='split'?(crowd===e.side?'<span class="eff up">Agrees</span>':'<span class="eff dn">Disagrees</span>'):'';
-    return '<tr><td><a href="#/player/'+e.pid+'">'+esc(e.n)+'</a> <span class="mut small">'+e.t+'</span></td><td>'+esc(sideTxt(e))+'</td><td class="num">'+(c?c.n:0)+'</td><td>'+(v?v.n+' on this prop'+(v.over||v.under?': '+v.over+' over, '+v.under+' under':''):'<span class="mut small">—</span>')+'</td><td>'+agree+'</td><td class="small">'+(L[0]?esc(L[0].t.slice(0,120))+(L[0].t.length>120?'…':''):'')+'</td></tr>';}).join('');
-  h+='<div class="scroll"><table><thead><tr><th>Player</th><th>Board</th><th class="num">Posts</th><th>Crowd on this prop</th><th></th><th>Latest</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
-  return h;
-}
 
 /* ======================================================================
    Ladders: alt-line rungs for every player, priced from the simulator's
@@ -3473,8 +3421,8 @@ function ldSneaky(p){
   if(BD&&BD.weeks){const reps=Object.values(BD.weeks).map(w=>w.report).filter(Boolean).sort((a,b)=>b.wk-a.wk);
     const r=reps[0];if(r&&(r.sneaky||[]).some(x=>x.key.split('|')[0]===p.id))tags.push('Sneaky hit last week');}
   const onBoard=BD&&bdWeek(BD.cur)&&Object.values(bdWeek(BD.cur).board||{}).some(e=>e.pid===p.id&&e.status!=='removed');
-  const chat=BZ&&BZ.summary?((BZ.summary[p.id]||{}).n||0):null;
-  return {tags:tags,onBoard:onBoard,chat:chat};
+  const w=BD&&bdWeek(BD.cur),inTop=!!(w&&w.per_game&&Object.values(w.per_game).some(l=>l.some(e=>e.pid===p.id)));
+  return {tags:tags,onBoard:onBoard,inTop:inTop};
 }
 function ldWhy(p,g,k,pr,rungs){
   const out=[],opp=oppOf(g,p.t),on=nick(opp),pos=p.p,ss=p.ss||{};
@@ -3513,7 +3461,7 @@ function ldCard(p,g,k,pr,rows,compact){
   const rungs=ldRungs(p,k,arr),sc=ldScore(rungs,ldCeil(arr)),why=ldWhy(p,g,k,pr,rungs),sn=ldSneaky(p);
   const tags=[];
   if(sn.tags.length)tags.push('<span class="ltag sn">'+sn.tags[0]+'</span>');
-  if(!sn.onBoard&&sn.chat===0&&sc.lift>=1.2)tags.push('<span class="ltag sn" title="Not on the board and nobody is posting about him">Under the radar</span>');
+  if(!sn.onBoard&&!sn.inTop&&sc.lift>=1.2)tags.push('<span class="ltag sn" title="Not on the matchup board or in any game\u2019s best five">Under the radar</span>');
   if(why.some(w=>w.t==='trade'))tags.push('<span class="ltag tr">Trade</span>');
   if(why.some(w=>w.t==='role'&&w.up))tags.push('<span class="ltag up">More volume</span>');
   if(why.some(w=>w.t==='env'&&w.up))tags.push('<span class="ltag up">Shootout</span>');
@@ -3527,9 +3475,9 @@ function ldCard(p,g,k,pr,rows,compact){
     (why.length?'<ul class="lwhy">'+why.slice(0,compact?3:6).map(w=>'<li class="'+(w.up?'up':'dn')+'">'+w.s+'</li>').join('')+'</ul>':'<p class="small mut">Nothing unusual in the matchup: the rungs come from his own play and the game script.</p>')+'</article>';
 }
 function vLadders(){
-  needScript();needBoard();needBuzz();
+  needScript();needBoard();
   const wk=(BD&&BD.cur)||[...new Set(GAMES.filter(g=>!isFinal(g)).map(g=>g.wk))].sort((a,b)=>a-b)[0];
-  let h='<section class="hero"><div><h1>Ladders</h1><p class="sub">Alt-line rungs for every player this week (60+, 80+, 100+…), each priced from the <a href="#/glossary/simulator">simulator</a>’s 8,000 games, with the fair odds to compare against your book’s alt lines. Players are ranked by their ceiling (what they reach in their best 15% of simulated games), nudged by how much this matchup lifts them over their own games, with the reasons: volume and injuries, trades, explosive plays allowed, man/zone and field-zone fit, the game total, weather, and sneaky tags for players nobody is talking about. <a href="#/glossary/ladder">How it works</a>.</p></div></section>';
+  let h='<section class="hero"><div><h1>Ladders</h1><p class="sub">Alt-line rungs for every player this week (60+, 80+, 100+…), each priced from the <a href="#/glossary/simulator">simulator</a>’s 8,000 games, with the fair odds to compare against your book’s alt lines. Players are ranked by their ceiling (what they reach in their best 15% of simulated games), nudged by how much this matchup lifts them over their own games, with the reasons: volume and injuries, trades, explosive plays allowed, man/zone and field-zone fit, the game total, weather, and sneaky tags for players the board isn\u2019t on. <a href="#/glossary/ladder">How it works</a>.</p></div></section>';
   if(!wk)return h+'<p class="empty">No games left this season.</p>';
   const gs=GAMES.filter(g=>g.wk===wk&&!isFinal(g)).sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:(a.time||'')<(b.time||'')?-1:1);
   h+='<div class="row" style="margin-top:16px;gap:10px;align-items:flex-end"><div class="chips" role="group" aria-label="Stat">'+Object.keys(LDN).map(k=>'<button data-ldk="'+k+'" aria-pressed="'+(LDS.k===k)+'">'+LDN[k]+'</button>').join('')+'</div>'+
