@@ -836,6 +836,18 @@ function derive(p){
     s.run_tkl=v.run[0];s.stuffs=v.run[2];s.run_y=v.run[0]?v.run[1]/v.run[0]:null;}
   else if(isDef(p)){s.inv_wr=0;s.inv_te=0;s.inv_rb=0;s.run_tkl=0;s.stuffs=0;}
 }
+/* Who starts at QB: the schedule's listed starter for that game, then the depth chart's QB1,
+   then (only if neither exists) whoever has thrown the most. "Most attempts" alone lags trades,
+   benchings and injuries. */
+function nmKey(n){return String(n||'').toLowerCase().replace(/[.'\u2019]/g,'').replace(/\s+(jr|sr|ii|iii|iv|v)$/,'').trim();}
+function expQB(t,g){
+  const qs=(BY_TEAM[t]||[]).filter(p=>p.p==='QB');if(!qs.length)return null;
+  const n=g?(g.home===t?g.hqb:g.aqb):null;
+  if(n){const m=qs.find(p=>nmKey(p.n)===nmKey(n));if(m)return m;}
+  const d1=qs.filter(p=>p.dc===1);if(d1.length)return d1[0];
+  return qs.slice().sort((a,b)=>((b.ss&&b.ss.att)||0)-((a.ss&&a.ss.att)||0))[0];
+}
+function benchQB(p,g){if(p.p!=='QB'||!g)return false;const s=expQB(p.t,g);return !!s&&s.id!==p.id;}
 function qualifies(p){
   if(!p.ss||p.g<2)return false;const s=p.ss;
   switch(p.p){case'QB':return s.att>=15;case'RB':return s.car>=5||s.tgt>=3;case'WR':case'TE':return s.tgt>=3;
@@ -1963,7 +1975,7 @@ function vOutlook(gid){
   const use=OL.g?gs.filter(g=>g.id===OL.g):gs,left=olWarm(use);
   if(left)return h+'<p class="empty" id="olProg">Simulating game '+(use.length-left+1)+' of '+use.length+'…</p>';
   const outs=[];
-  const rows=PLAYERS.filter(p=>p.p===pos&&qualifies(p)).map(p=>{const g=use.find(x=>x.home===p.t||x.away===p.t);if(!g)return null;
+  const rows=PLAYERS.filter(p=>p.p===pos&&(qualifies(p)||(pos==='QB'&&p.ss&&use.some(x=>(x.home===p.t||x.away===p.t)&&expQB(p.t,x)===p)))).map(p=>{const g=use.find(x=>x.home===p.t||x.away===p.t);if(!g||benchQB(p,g))return null;
     const pr=simProj(p,g);if(!pr)return null;if(pr.out||injOut(p,g)){outs.push(p);return null;}return {p:p,g:g,pr:pr,mu:pjMatchup(p,pr)};}).filter(Boolean);
   const cell=(r,k)=>k==='td'?r.pr.td:(r.pr.k[k]||{}).m;
   const val=r=>OL.sort==='n'?r.p.n:OL.sort==='boost'?(r.mu||0):(cell(r,OL.sort)||-1);
@@ -2331,7 +2343,7 @@ function propResearch(n){
   const wk=propWeek();if(!wk)return '';
   const rows=[];
   OFF_POS.forEach(pos=>PLAYERS.filter(p=>p.p===pos&&qualifies(p)).forEach(p=>{
-    const g=GAMES.find(x=>x.wk===wk&&!isFinal(x)&&(x.home===p.t||x.away===p.t));if(!g)return;
+    const g=GAMES.find(x=>x.wk===wk&&!isFinal(x)&&(x.home===p.t||x.away===p.t));if(!g||benchQB(p,g))return;
     const pr=project(p,g),x=pr.keys[MAIN_PROP[pos]];if(x)rows.push({p:p,g:g,o:pr.opp,k:MAIN_PROP[pos],x:x});}));
   if(!rows.length)return '';
   const li=r=>'<li><span>'+plink(r.p)+'<small>'+flag(r.p.t,'sm')+' '+(r.g.home===r.p.t?'vs ':'at ')+r.o+', avg '+pfmt(r.k,r.x.base)+'</small></span><span class="v">'+pfmt(r.k,r.x.proj)+' '+fct(r.x.f,r.k)+'</span></li>';
@@ -2392,7 +2404,7 @@ function fantasyWeek(){
 function fantasyRows(pos,wk){
   const ps=pos==='FLEX'?['RB','WR','TE']:[pos];
   return PLAYERS.filter(p=>ps.indexOf(p.p)>=0&&qualifies(p)).map(p=>{
-    const g=GAMES.find(x=>x.wk===wk&&!isFinal(x)&&(x.home===p.t||x.away===p.t));if(!g)return null;
+    const g=GAMES.find(x=>x.wk===wk&&!isFinal(x)&&(x.home===p.t||x.away===p.t));if(!g||benchQB(p,g))return null;
     const fp=fpProj(p,g);return isNum(fp.proj)?{p:p,g:g,fp:fp}:null;}).filter(Boolean).sort((a,b)=>b.fp.proj-a.fp.proj);
 }
 /* Short block for This week and the Props page footer */
@@ -2502,7 +2514,7 @@ function propPick(p,g,k){
 function bpWeekPicks(wk){
   const out=[];
   PLAYERS.filter(p=>OFF_POS.indexOf(p.p)>=0&&qualifies(p)).forEach(p=>{
-    const g=GAMES.find(x=>x.wk===wk&&!isFinal(x)&&(x.home===p.t||x.away===p.t));if(!g||injOut(p,g))return;
+    const g=GAMES.find(x=>x.wk===wk&&!isFinal(x)&&(x.home===p.t||x.away===p.t));if(!g||injOut(p,g)||benchQB(p,g))return;
     (BP_KEYS[p.p]||[]).forEach(k=>{const q=propPick(p,g,k);if(q)out.push(q);});
   });
   return out.sort((a,b)=>b.score-a.score||b.proj-a.proj);
@@ -2697,16 +2709,18 @@ function simSide(t,opp,g){
   const T0=SS.teams[t]||{pr:SS.league.pr,plays:62,tpd:.86,apd:.9},R=simRoster(t,g).filter(r=>!r.out);
   const pf=passFunnelFx(opp),T=pf?Object.assign({},T0,{pr:T0.pr.map(x=>clampF(x+pf.shift,.15,.92))}):T0;
   const prs=pressFx(opp),rz=rzFx(opp),rzf=rz?rz.f:1;
-  const qbs=R.filter(r=>r.p.p==='QB'&&r.x.qb).sort((a,b)=>((b.p.ss&&b.p.ss.att)||0)-((a.p.ss&&a.p.ss.att)||0)),qb=qbs[0]||null;
+  const st=expQB(t,g),qbs=R.filter(r=>r.p.p==='QB'&&r.x.qb).sort((a,b)=>(b.p===st)-(a.p===st)||((b.p.ss&&b.p.ss.att)||0)-((a.p.ss&&a.p.ss.att)||0)),qb=(qbs[0]&&(!st||qbs[0].p===st||injOut(st,g)))?qbs[0]:null;
   if(!SS_LGY){const poolA=[];Object.keys(SS.players).forEach(id=>{const q=SS.players[id].qb;if(q)for(let i=0;i<Math.min(80,q.ay.length);i++)poolA.push(q.ay[i]);});SS_LGY=simYpa(poolA)||6.5;}
   let qbOwn=1;if(qb){const n=qb.x.qb.ay.length,y=simYpa(qb.x.qb.ay);if(y)qbOwn=Math.min(1.15,Math.max(.8,1+(y/SS_LGY-1)*n/(n+200)));}
+  /* the listed starter has no recent passing to replay: treat him as a backup-level passer, not as the QB who threw the most */
+  const unproven=st&&!(qb&&qb.p===st)&&!injOut(st,g);if(unproven)qbOwn=.9;
   const qbFac=qbOwn*(prs?prs.f:1);
   /* the defense's target funnel tilts the split between positions; user-typed shares stay as typed */
   const fun={};['WR','TE','RB'].forEach(pos=>{fun[pos]=funnelFx(opp,pos);});
   const rt=R.filter(r=>r.t>0),free=rt.filter(r=>!r.fixt);
   const before=free.reduce((s,r)=>s+r.t,0),tilt=free.map(r=>r.t*(fun[r.p.p]?fun[r.p.p].f:1)),after=tilt.reduce((s,v)=>s+v,0);
   free.forEach((r,i)=>{r.ts=after?tilt[i]*before/after:r.t;});rt.filter(r=>r.fixt).forEach(r=>{r.ts=r.t;});
-  const mx={pf:pf,prs:prs,rz:rz,fun:fun,qbOwn:qbOwn,qb:qb?qb.p.id:null,p:{}};
+  const mx={pf:pf,prs:prs,rz:rz,fun:fun,qbOwn:qbOwn,qb:qb?qb.p.id:null,unproven:unproven?st.id:null,p:{}};
   const recv=rt.map(r=>{const pos=r.p.p,thin=Math.max(0,(60-r.x.ty.length)/60)*.5;
     const comp=r.x.ty.length?r.x.ty.filter(v=>v!==-99).length/r.x.ty.length:.62,catches=r.x.rtd[1]*comp;
     const dpos=pos==='QB'?'RB':pos,df=perOppFac(opp,dpos,'recyd','tgt'),cv=pos==='RB'?null:covFx(r.x,opp),zn=pos==='RB'?null:zoneFx(r.x,opp);
@@ -2952,6 +2966,7 @@ function pjFactors(p,g,pr){
     rows.push({g:'Efficiency',l:'Man or zone',e:fxTag(c.f),t:on+' played man coverage on '+Math.round(c.man*100)+'% of '+c.s+' dropbacks (league '+Math.round(c.lm*100)+'%)'+(sh?', most often '+sh:'')+'. He gains '+c.yM.toFixed(1)+' yards per target against man ('+c.nM+' targets) and '+c.yZ.toFixed(1)+' against zone ('+c.nZ+'). Coverage charts come out after each season, so a new coordinator can change this.'});}
   if(x.zone&&x.zone.best){const z=x.zone.best;rows.push({g:'Efficiency',l:'Where he’s thrown to',e:fxTag(x.zone.f),
     t:'His most common target is '+ZN[z.z]+(isNum(z.dy)&&z.n>=10?', where '+on+' allow '+z.dy.toFixed(1)+' yards per target this season and last (league '+z.ly.toFixed(1)+')':'')+'. '+Math.round(x.zone.deep*100)+'% of his targets are 15+ yards downfield. The effect compares his whole target map with theirs.'});}
+  if(m&&m.unproven&&pos!=='QB'){const qp=BY[m.unproven];if(qp)rows.push({g:'Efficiency',l:'His quarterback',e:fxTag(.9),t:esc(qp.n)+' is the listed starter but has no recent passing to replay, so throws use a backup-level profile (10% fewer yards per attempt than average).'});}
   if(m&&m.qb&&(pos==='WR'||pos==='TE'||pos==='RB'||pos==='QB')){const qp=BY[m.qb];
     if(qp&&isNum(m.qbOwn))rows.push({g:'Efficiency',l:pos==='QB'?'His passing':'His quarterback',e:fxTag(m.qbOwn),t:(pos==='QB'?'His':esc(qp.n)+'’s')+' yards per attempt in his play-by-play since '+(HIST[0]||SEASON)+' compared with the league, shrunk toward average when the sample is small.'});}
   {const sx=SS.players[p.id],ss=p.ss||{},avgY=a=>{const v=a.map(y=>y===-99||y===null?0:y);return v.length?v.reduce((s,y)=>s+y,0)/v.length:null;};
@@ -2977,6 +2992,7 @@ function projSection(p,g,title){
   let h='<h2>'+(title||'Next game projection')+'</h2><p class="lede">Week '+g.wk+' '+(g.home===p.t?'vs ':'at ')+esc(fullName(opp))+', '+esc(kick(g))+'. The <a href="#/glossary/simulator">simulator</a> plays this game 8,000 times from the betting lines, '+esc(nick(p.t))+'’ play calling in every score situation, his share of the work, and his real plays this season (padded from last season only when thin), adjusted for how this defense plays. Projection is the average; the range is what happens in the middle 60% of games.</p>';
   if(!SS)return h+'<p class="empty">Loading play-by-play…</p>';
   if(injOut(p,g))return h+'<p class="empty">He’s listed '+esc(p.inj.st)+' for week '+g.wk+', so the simulator sits him out. <a href="'+simU+'">Put him back in the simulator</a>.</p>';
+  if(benchQB(p,g)){const s=expQB(p.t,g);return h+'<p class="empty">'+esc(s.n)+' is the expected starter for week '+g.wk+' ('+((g.home===p.t?g.hqb:g.aqb)?'listed on the schedule':'depth chart QB1')+'), so there\u2019s no passing projection for '+esc(p.n)+'. <a href="'+simU+'">Simulate the game</a>.</p>';}
   const pr=simProj(p,g);
   if(!pr)return h+'<p class="empty">Not enough play-by-play for this matchup yet.</p>';
   if(pr.out)return h+'<p class="empty">He isn’t in the simulated lineup (no games this season). <a href="'+simU+'">Put him in</a>.</p>';
@@ -3123,7 +3139,7 @@ function gpTeamPlayers(t,opp,g){
   const ps=(BY_TEAM[t]||[]).filter(p=>OFF_POS.indexOf(p.p)>=0&&p.ss&&p.g>0);
   const out=ps.filter(p=>injOut(p,g));
   const act=ps.filter(p=>!injOut(p,g));
-  const qb=act.filter(p=>p.p==='QB').sort((a,b)=>(b.ss.att||0)-(a.ss.att||0))[0];
+  const st=expQB(t,g),qb=st&&!injOut(st,g)?st:act.filter(p=>p.p==='QB').sort((a,b)=>(b.ss.att||0)-(a.ss.att||0))[0];
   const rbs=act.filter(p=>p.p==='RB'&&(p.ss.car||0)>=3).sort((a,b)=>(b.ss.car||0)-(a.ss.car||0)).slice(0,2);
   const pc=act.filter(p=>(p.p==='WR'||p.p==='TE'||p.p==='RB')&&(p.ss.tgt||0)>=2.5).sort((a,b)=>(b.ss.tgt||0)-(a.ss.tgt||0)).slice(0,5);
   const rk=(p,r)=>'<span class="role">'+p.p+r+'</span>';
@@ -3133,7 +3149,7 @@ function gpTeamPlayers(t,opp,g){
     return '<td class="n">'+(L?(L.book?'':'<i title="Estimated line: his median">~</i>')+L.v:'—')+'</td><td class="n hit '+(h?(h.r>=.6?'g':h.r<.45?'b':''):'')+'">'+(h?Math.round(h.r*100)+'%<small>'+h.o+'/'+h.n+'</small>':'—')+'</td><td class="n od '+odefC(r)+'">'+(r?ord(r):'—')+'</td>';};
   const name=(p,tag)=>'<td class="pn"><a href="#/player/'+p.id+'">'+esc(p.n)+'</a> '+tag+(p.inj&&p.inj.wk===g.wk&&p.inj.st?' <span class="injb '+p.inj.st.toLowerCase()+'">'+esc(p.inj.st[0])+'</span>':'')+'</td>';
   let h='<div class="gpt"><div class="gptt">'+flag(t,'sm')+'<b>'+esc(nick(t)).toUpperCase()+'</b><span>'+(out.length?'Out: '+out.map(p=>esc(lastName(p.n))+' ('+p.p+')').join(', '):'')+'</span></div><div class="scroll"><table class="gpp">';
-  if(qb){const gp=playerGames(qb).filter(x=>x.s===SEASON).length,ss=qb.ss;roleN.QB=0;
+  if(qb){const gp=playerGames(qb).filter(x=>x.s===SEASON).length,ss=qb.ss||{};roleN.QB=0;
     h+='<thead><tr><th class="sec">Quarterback</th><th>GP</th><th>Att/G</th><th>Yds/G</th><th>TD/G</th><th>Int/G</th><th>Cmp%</th><th>Line</th><th>Hit rate</th><th>Odef</th></tr></thead><tbody><tr>'+name(qb,rk(qb,role(qb)))+
       '<td class="n m">'+gp+'</td><td class="n">'+fx(ss.att,1)+'</td><td class="n">'+fx(ss.pyd,1)+'</td><td class="n">'+fx(ss.ptd,2)+'</td><td class="n">'+fx(ss.int,2)+'</td><td class="n">'+(ss.att?fx(ss.cmp/ss.att*100,1):'—')+'</td>'+lineCells(qb,'pyd','QB')+'</tr></tbody>';}
   if(rbs.length){roleN.RB=0;h+='<thead><tr><th class="sec">Running game</th><th>GP</th><th>Att/G</th><th>Yds/G</th><th>YPC</th><th>TD</th><th></th><th>Line</th><th>Hit rate</th><th>Odef</th></tr></thead><tbody>'+
@@ -3201,14 +3217,14 @@ function csCell(def,off,pos,k,label,per){
 }
 function csCard(g){
   const A=g.away,H=g.home;
-  const pick=(t,pos,key)=>(BY_TEAM[t]||[]).filter(p=>p.p===pos&&p.ss&&p.g>0&&!injOut(p,g)).sort((a,b)=>(b.ss[key]||0)-(a.ss[key]||0))[0];
+  const pick=(t,pos,key)=>{if(pos==='QB'){const s=expQB(t,g);if(s&&!injOut(s,g))return s;}return (BY_TEAM[t]||[]).filter(p=>p.p===pos&&p.ss&&p.g>0&&!injOut(p,g)).sort((a,b)=>(b.ss[key]||0)-(a.ss[key]||0))[0];};
   const groups=[['QB','att',[['pyd','Pass yds'],['att','Attempts'],['cmp','Comps']]],['RB','car',[['ryd','Rush yds'],['ryd','YPC','car'],['rec','Receptions']]],['WR','tgt',[['recyd','Rec yds'],['rec','Receptions'],['tgt','Targets']]],['TE','tgt',[['recyd','Rec yds'],['rec','Receptions'],['tgt','Targets']]]];
   let h='<section class="gp cs" aria-label="Matchup cheat sheet"><div class="gphd"><span>GAME SCRIPT · WEEK '+g.wk+' · MATCHUP CHEAT SHEET</span></div><div class="gptitle">'+flag(A,'lg')+'<h2>'+A+' <i>@</i> '+H+'</h2>'+flag(H,'lg')+'<span class="gpven">'+esc(kick(g))+(spreadTxt(g)?'<br>'+esc(spreadTxt(g))+(isNum(g.total)?' · O/U '+g.total:''):'')+'</span></div>'+
     '<div class="cssec"><b>Script funnel</b> where each defense pushes the offense · schedule-adjusted · #1 = stingiest</div>'+funnelRow(A,H)+funnelRow(H,A);
   groups.forEach(([pos,key,cells])=>{
     h+='<div class="cssec"><b>'+pos+'</b> allowed per game · rank<span class="cshd">'+cells.map(c=>'<em>'+c[1]+'</em>').join('')+'</span></div>';
     [[A,H],[H,A]].forEach(([off,def])=>{const p=pick(off,pos,key);if(!p)return;const L=gpLine(p,MAIN[pos],g.wk);
-      const sub=pos==='QB'?fx(p.ss.pyd,1)+' yds · '+fx(p.ss.att,1)+' att · '+fx(p.ss.cmp,1)+' comp':pos==='RB'?fx(p.ss.ryd,1)+' yds · '+fx(p.ss.car,1)+' car · '+fx(p.ss.rec,1)+' rec':fx(p.ss.recyd,1)+' yds · '+fx(p.ss.rec,1)+' rec · '+fx(p.ss.tgt,1)+' tgt';
+      const sub=!p.ss?'No games yet this season (expected starter)':pos==='QB'?fx(p.ss.pyd,1)+' yds · '+fx(p.ss.att,1)+' att · '+fx(p.ss.cmp,1)+' comp':pos==='RB'?fx(p.ss.ryd,1)+' yds · '+fx(p.ss.car,1)+' car · '+fx(p.ss.rec,1)+' rec':fx(p.ss.recyd,1)+' yds · '+fx(p.ss.rec,1)+' rec · '+fx(p.ss.tgt,1)+' tgt';
       h+='<div class="csrow"><div class="csp">'+flag(off,'sm')+'<div><a href="#/player/'+p.id+'">'+esc(p.n)+'</a><small>'+sub+(L?' · line '+(L.book?'':'~')+L.v:'')+'</small></div></div><div class="cscells">'+cells.map(c=>csCell(def,off,pos,c[0],c[1],c[2])).join('')+'</div></div>';});
   });
   h+='<div class="gpft"><span>Each cell: what that defense allows the position per game, '+rtxt()+', ranked (#1 = allows the least). <b class="b">HARD</b> = ranks 1–8, <b class="g">SOFT</b> = 25–32. Under it: what this offense gets at that position per game this season, and its rank (#1 = most). Funnels adjust yards per carry and per attempt for the offenses each defense has faced.</span></div></section>';

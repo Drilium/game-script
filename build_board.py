@@ -267,6 +267,26 @@ class Ctx:
 
 
 # ---------------------------------------------------------------- one player's props for one game
+def exp_qb(ctx, t, g):
+    """Starting QB for this game: the schedule's listed starter, then depth-chart QB1, then most attempts."""
+    qs = [p for p in ctx.by_team[t] if p["p"] == "QB"]
+    if not qs: return None
+    n = g.get("hqb") if g["home"] == t else g.get("aqb")
+    if n:
+        m = next((p for p in qs if _norm_name(p["n"]) == _norm_name(n)), None)
+        if m: return m
+    d1 = [p for p in qs if p.get("dc") == 1]
+    if d1: return d1[0]
+    return max(qs, key=lambda p: (p.get("ss") or {}).get("att", 0))
+
+
+def _ypa(ctx, p):
+    q = (ctx.S.get("players", {}).get(p["id"]) or {}).get("qb") if p else None
+    if not q or len(q.get("ay", [])) < 60: return None
+    a = q["ay"]
+    return sum(0 if v == -99 else v for v in a) / len(a)
+
+
 def _games_before(ctx, p, W):
     """His games before week W this season (with his current team) and last season. Two seasons back is out."""
     out = []
@@ -426,13 +446,21 @@ def factors(ctx, p, k, g, W, mode, avail, wx):
             m = 1 + (1 / (1 - 0.85 * min(total, 0.6)) - 1) * frac
             if m > 1.005:
                 F["injury"] = (math.log(m), f"Out: {', '.join(out_names)}. He played alongside them in {frac * 100:.0f}% of his games, so that part of his sample gets the extra {'targets' if vk == 'tgt' else 'carries'}.")
-    # quarterback change (receivers)
-    if k in ("rec", "recyd") and avail is not None:
-        uq = ctx.usual_qb(t, W)
-        starter = next((m_ for m_ in ctx.by_team[t] if m_["n"] == uq), None)
-        if starter and not avail.get(starter["id"], True):
-            m = 0.88 if k == "recyd" else 0.94
-            F["qb_change"] = (math.log(m), f"{uq} is out, so a backup starts at quarterback. Backups average about 12% fewer yards per target.")
+    # quarterback change (receivers): this game's starter vs the one who has started most games
+    if k in ("rec", "recyd"):
+        uq = ctx.usual_qb(t, W); st = exp_qb(ctx, t, g)
+        if uq and st and _norm_name(st["n"]) != _norm_name(uq):
+            usual = next((m_ for m_ in ctx.by_team[t] if _norm_name(m_["n"]) == _norm_name(uq)), None)
+            ys, yu = _ypa(ctx, st), _ypa(ctx, usual)
+            if ys and yu:
+                r = _clamp(ys / yu, 0.8, 1.1)
+                m = r if k == "recyd" else r ** 0.5
+                why = f"{st['n']} starts at quarterback instead of {uq} (who started the most games so far). {st['n']} averages {ys:.1f} yards per attempt in his recent play-by-play vs {yu:.1f} for {uq}."
+            else:
+                m = 0.88 if k == "recyd" else 0.94
+                why = f"{st['n']} starts at quarterback instead of {uq} (who started the most games so far). With little recent passing to go on, the usual drop for a backup applies (about 12% fewer yards per target)."
+            if abs(m - 1) >= 0.005:
+                F["qb_change"] = (math.log(m), why)
     # his own status
     if mode == "live" and p.get("inj") and p["inj"].get("wk") == W and p["inj"].get("st") == "Questionable":
         F["own_status"] = (math.log(0.94), f"He’s Questionable ({p['inj'].get('i') or 'injury'}; {p['inj'].get('pr') or 'practice status unknown'}). Limited snaps are a real risk.")
@@ -479,7 +507,11 @@ def candidates(ctx, W, mode, model, wxs, lines, avail_fn, now=None):
                 if len(cur) < 2 or len(games) < 4: continue
                 cv = lambda k: _mean([_val(h, k) for h in cur]) or 0
                 pos = p["p"]
-                if (pos == "QB" and (cv("att") < 20 or len(cur) < 3)) or (pos == "RB" and cv("car") < 5 and cv("tgt") < 3) or (pos in ("WR", "TE") and cv("tgt") < 3): continue
+                if pos == "QB":
+                    st = exp_qb(ctx, t, g)
+                    if not st or st["id"] != p["id"]: continue        # props only for the starter
+                    if sum(1 for h in games if _val(h, "att") >= 10) < 3: continue
+                elif (pos == "RB" and cv("car") < 5 and cv("tgt") < 3) or (pos in ("WR", "TE") and cv("tgt") < 3): continue
                 for k in PROPS[pos]:
                     if pos == "QB" and k == "ryd" and cv("ryd") < 15: continue
                     if pos == "RB" and k in ("rec", "recyd") and cv("tgt") < 2.5: continue
@@ -991,6 +1023,9 @@ def build_board(data, states, allowed, now=None, odds_key=None):
             i = p.get("inj") or {}
             if i.get("wk") == live and i.get("st") in ("Out", "Doubtful"):
                 why = f"Ruled {i['st']} ({i.get('i') or 'injury'}) on the week {live} injury report."
+            elif c is None and p.get("p") == "QB" and (lambda st: st and st["id"] != p["id"])(exp_qb(ctx, p["t"], next((g for g in ctx.games if g["id"] == e["gid"]), {"home": p["t"]}))):
+                st = exp_qb(ctx, p["t"], next(g for g in ctx.games if g["id"] == e["gid"]))
+                why = f"Not the starter: {st['n']} is listed to start at quarterback (schedule / depth chart)."
             elif c is None:
                 why = "No longer qualifies (role or availability changed)."
             elif c["edge"] < MIN_EDGE:

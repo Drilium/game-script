@@ -965,6 +965,36 @@ def build(season):
         print(f"  injury reports: {len(inj)} players")
     except Exception as e:
         print(f"  (injury reports unavailable: {e})")
+    # Official depth charts (nflverse, refreshed daily): each player's spot as of each team's latest
+    # snapshot. QB1 and the schedule's listed starter decide who the site treats as the starting QB,
+    # instead of "most attempts", which lags trades, benchings and injuries.
+    depth_dt = None
+    try:
+        print(f"Fetching depth_charts_{season}.csv ...")
+        dc_rows = fetch_csv(f"depth_charts/depth_charts_{season}.csv")
+        latest = {}
+        for row in dc_rows:
+            t = row.get("team")
+            if t and (row.get("dt") or "") > latest.get(t, ""): latest[t] = row["dt"]
+        spot = {}
+        for row in dc_rows:
+            t, pid, pos = row.get("team"), row.get("gsis_id"), row.get("pos_abb")
+            if not pid or row.get("dt") != latest.get(t) or pos not in ("QB", "RB", "WR", "TE", "FB"):
+                continue
+            rank = int(num(row.get("pos_rank")) or 9)
+            slot = int(num(row.get("pos_slot")) or 1) if pos == "WR" else None
+            cur = spot.get(pid)
+            if cur is None or rank < cur["r"]:
+                spot[pid] = {"pos": pos, "r": rank, "slot": slot, "t": t}
+        for p in players:
+            s = spot.get(p["id"])
+            if s and s["t"] == p["t"]:
+                p["dc"] = s["r"]
+                if s["slot"]: p["dcs"] = s["slot"]
+        depth_dt = max(latest.values()) if latest else None
+        print(f"  depth charts: {len(spot)} skill players, latest {depth_dt}")
+    except Exception as e:
+        print(f"  (depth charts unavailable: {e})")
     # attach longest reception / run to every game line we show
     for p in players:
         for line in p["hist"]:
@@ -986,7 +1016,7 @@ def build(season):
 
     teams_meta = build_team_meta({g["home"] for g in games} | {g["away"] for g in games})
 
-    out = {"season": season, "hist_seasons": hist_seasons, "recent": {"pm": 3, "dm": DEF_PRIOR_GAMES}, "generated": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%MZ"),
+    out = {"season": season, "hist_seasons": hist_seasons, "recent": {"pm": 3, "dm": DEF_PRIOR_GAMES}, "depth_dt": depth_dt, "generated": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%MZ"),
            "players": players, "games": games, "past_games": past_games,
            "defense_allowed": defense_allowed, "team_scheme": scheme["team"],
            "team_stats": team_stats, "teams": teams_meta, "script": script}
