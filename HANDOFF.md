@@ -597,6 +597,23 @@ look impossible but are just what a team has to do to win.
 - Best props, Prop research and Fantasy still use the quicker
   average-based `project()`; the glossary explains both.
 
+## Ladders page (2026-11-07)
+
+`#/ladders` (nav "Ladders") and a "Ladders" section on every offensive
+player's page. Rungs per stat (`LDR`: pass yds, pass TDs, rush yds, rec
+yds, receptions, touchdowns) priced from the simulator's 8,000 games for
+the player's next game; each rung shows chance, fair American odds (no
+vig) and how many of his games this season cleared it. Ranked by ceiling
+(85th percentile of simulated outcomes) x a small lift factor (sim chance
+of his ladder top vs his own hit rate, capped). Reasons (`ldWhy`):
+projected volume vs season (teammates out), trades (`tradeInfo` infers a
+player's former team from his game logs; `departed` lists teammates who
+left), explosive plays allowed (DA `x20`, `lru`), his deep-target share and
+25+ yard plays, man/zone and field-zone fit, game total, forecast wind,
+Questionable status. Tags: Under the radar (not on the board and zero
+chatter), Sneaky hit last week (report card), Trade, More volume,
+Shootout, Risk. Games are simulated progressively (`olWarm`).
+
 ## Props page: best 5 props in every game (2026-11-07)
 
 `per_game_top()` in build_board.py keeps the five best props per game for

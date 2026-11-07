@@ -444,6 +444,21 @@ details.tview table{margin-top:8px;font-size:13.5px}
 .pgr{font-weight:900;color:var(--mute);width:14px;padding-top:12px}.pgl .bside{min-width:70px;padding:4px 8px}.pgl .bside b{font-size:18px}
 .pgb{flex:1;min-width:0}.pgb a{color:var(--ink)}.pgn{display:flex;gap:12px;flex-wrap:wrap;font-size:13px;margin:3px 0}.pgn .g{color:var(--good);font-weight:800}
 .pgw{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}.pgw .eff{min-width:0;font-size:11.5px}
+.lgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,400px),1fr));gap:14px;margin-top:12px}
+.lcard{background:var(--surface);border:1px solid var(--edge);border-radius:12px;padding:12px 14px;box-shadow:var(--lift)}
+.lcard header{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}.lcard header a{color:var(--ink)}
+.ltype{font-size:10.5px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--turf);white-space:nowrap}
+.ltags{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}.ltag{font-size:10.5px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;border-radius:6px;padding:2px 7px;background:var(--sunken);color:var(--ink2)}
+.ltag.sn{background:var(--a-bg);color:var(--a)}.ltag.tr{background:rgba(214,158,46,.2);color:var(--ink)}.ltag.up{background:var(--turf-bg);color:var(--turf)}.ltag.rk{background:rgba(194,53,46,.14);color:var(--bad)}
+.lrungs{margin-top:10px;border:1px solid var(--rule2);border-radius:10px;overflow:hidden}
+.lrh,.lr{display:grid;grid-template-columns:64px 1fr 76px 78px;align-items:center;gap:8px;padding:5px 10px}
+.lrh{font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:800;color:var(--mute);background:var(--sunken)}
+.lr{border-top:1px solid var(--rule)}.lr.top{background:var(--turf-bg)}
+.lrr{font-weight:900;font-size:16px}.lrp{position:relative;height:20px;background:var(--sunken);border-radius:5px;overflow:hidden}
+.lrp i{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,rgba(61,220,132,.35),rgba(61,220,132,.75))}.lrp b{position:relative;padding-left:7px;font-size:12px;line-height:20px}
+.lro{font-weight:800;text-align:right}.lrhh{text-align:right;color:var(--ink2);font-size:13px}
+.lwhy{margin:6px 0 0;padding-left:0;list-style:none}.lwhy li{margin:5px 0;line-height:1.45;padding-left:16px;position:relative;font-size:13.5px}
+.lwhy li::before{content:"";position:absolute;left:2px;top:.55em;width:7px;height:7px;border-radius:2px;background:var(--good)}.lwhy li.dn::before{background:var(--bad)}
 /* ---------- matchup board ---------- */
 .chips a.chipa[aria-selected="true"]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
 .bgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,460px),1fr));gap:14px;margin-top:12px}
@@ -635,6 +650,7 @@ details.tview>summary{font-weight:800;text-transform:uppercase;letter-spacing:.0
       <a href="#/board" data-nav="board">Board</a>
       <a href="#/sim" data-nav="sim">Simulator</a>
       <a href="#/props" data-nav="props">Props</a>
+      <a href="#/ladders" data-nav="ladders">Ladders</a>
       <a href="#/outlook" data-nav="outlook">Projections</a>
       <a href="#/fantasy" data-nav="fantasy">Fantasy</a>
       <a href="#/leaders" data-nav="leaders">Leaders</a>
@@ -1642,6 +1658,7 @@ function vPlayer(p){
   if(offp)h+=band('pro','Player props','His next-game projection and what moves it, whether his last game was a fluke, and how often he clears a line.');
   if(offp&&ng&&p.ss)h+=projSection(p,ng);
   if(offp&&p.ss)h+=lastGameBox(p,ng);
+  if(offp&&ng)h+=ldPlayer(p,ng);
   if(offp)h+=bzSection(p);
   if(!def)h+=gameSection(p);
   if(offp){needScript();h+=stateTable(p);}
@@ -2116,6 +2133,7 @@ const GLOSS=[
  ['one-on-one','Matchups and projections','Likely one-on-one','A pairing by playing time and role: a team’s receivers ranked by targets against the other team’s corners ranked by snaps, the top tight end against the top safety, the lead back against the busiest linebacker, and the QB against the top pass rusher.','A sensible guess at who will meet most often, not a confirmed assignment. Slot and wide alignment and coverage aren’t in free data.','Rule set on this site.',[]],
  ['projection','Matchups and projections','Projection','On player pages and the Projections page: his next game played out 8,000 times by the simulator, using the betting lines, his team\u2019s play calling in each score situation, his share of the work (handed out again when teammates are out), his real plays since 2024 and the schematic matchups with this defense. The projection is the average of those games; the range is the middle 60%. Best props, Prop research and Fantasy use a quicker average-based estimate: his per-game average (this season blended with every game since 2024), adjusted for what this defense allows at his position and the betting market\u2019s team total.','A starting point for your own judgment, not a betting pick. Read the factor table on his page to see what is pushing it up or down.','Calculated on this site.',[]],
  ['board','Matchups and projections','Matchup board','Each week\u2019s best schematic matchups and the props they should move. Every qualifying player\u2019s passing yards, passing TDs, rushing yards, receptions and receiving yards are scored on the matchup factors (defense against his position, man/zone fit, field zones, target and pass/run funnels, pass rush, red zone), game script, the weather forecast and injuries. The board keeps the 30 biggest edges, at most five per game and two per player. It is rebuilt every day and after every game window; each add, removal and update is logged with its reason, and picks lock at kickoff.','Chance is how often the model expects the pick to win; \u201cline alone\u201d is what that side wins with no matchup at all, plus the house cut. Edge is the gap. Without a sportsbook key the line is estimated as his matchup-neutral expectation, so the board measures the matchup itself rather than a hot start. When a free The Odds API key is added as ODDS_API_KEY, real lines and prices replace the estimates.','nflverse play-by-play, charting, schedules and injury reports; Open-Meteo forecasts; optional The Odds API lines.',[]],
+ ['ladder','Matchups and projections','Ladders','Betting several alt lines of the same prop at rising thresholds (60+, 80+, 100+ yards). Each rung\u2019s chance is the share of the simulator\u2019s 8,000 games where he reaches it; fair odds are that chance turned into an American price with no house cut. Players are ranked by their ceiling (what they reach in their best 15% of simulated games), nudged up or down a little by how much more often the simulator reaches his ladder top (the highest rung still at 15% or better) than he did in his own games this season. The reasons cover projected volume and teammates out, trades (joined a new team, or a teammate left), explosive plays the defense allows (20+ yard catches, longest runs), his own big-play rate, man/zone and field-zone fit, the game total, weather and injury risk. \u201cUnder the radar\u201d means he isn\u2019t on the matchup board and nobody is posting about him; \u201cSneaky hit last week\u201d comes from the report card.','A book price longer than the fair odds is the value side. Higher rungs swing on one big play, so size them small.','Calculated on this site from the simulator, nflverse stats and schedules.',[]],
  ['chatter','Matchups and projections','Chatter','Public posts about this week\u2019s players that mention a prop: a line or number, over/under, a stat (yards, catches, TDs), alt, ladder or parlay. A post that only says the player\u2019s name is left out; otherwise nothing is filtered yet. The bot watches the matchup board\u2019s players first, then each team\u2019s main skill players, and keeps a week of posts. X posts appear when an X API key is connected (X charges per post read, so the bot runs on a monthly budget); Bluesky posts are free and always on.','Crowd lean is a count of over vs under posts, not a probability. When it disagrees with the board, read why on the player\u2019s page.','X API recent search (optional, paid), Bluesky public search.',[]],
  ['report-card','Matchups and projections','Report card and self-learning','After every game is final, the board is graded: hits, misses, near misses (lost by a catch, a few yards or half a TD), pushes and players who didn\u2019t play, plus the picks removed during the week, \u201csneaky looks\u201d it ranked below the cut that cleared big, and \u201cblind spots\u201d where a confident lean went badly the other way. Each one gets a diagnosis from the box score: volume or efficiency, snaps, blowout, quarterback change, teammates, wind. Then the model re-fits on every graded week: a weight for each matchup factor, a bias for each prop type and a confidence slope, each pulled toward its starting value so one odd week can\u2019t swing it.','Judge it against \u201cexpected\u201d, the hits its lines alone would produce. Beating that over many weeks is the only proof of an edge; the weeks before the board existed are backtests and say so.','Calculated on this site.',[]],
  ['schematic','Matchups and projections','Schematic matchups','How this defense plays, against how this player wins. Man or zone: how often they played man last season, against his yards per target versus man and zone. Where he\u2019s thrown to: his targets by area of the field (short or deep; left, middle or right) against the yards they give up in each area. Who gets targeted: the share of throws they let go to his position. Pass or run funnel: how often offenses throw against them. Pass rush and red zone: pressure rate and touchdown rate on red-zone trips. Each one is compared with the league and only part of the gap is applied.','Each factor is a matchup effect on top of the defense\u2019s overall quality, so they don\u2019t double count. Most move a projection a few percent; together they can move it 10% or more.','nflverse play-by-play 2024 to now, participation charting for coverage (completed seasons only), FTN charting for pressure and box counts.',[]],
@@ -3407,6 +3425,148 @@ function bdChatter(w){
   return h;
 }
 
+/* ======================================================================
+   Ladders: alt-line rungs for every player, priced from the simulator's
+   8,000 games, with the reasons he can climb (role, matchup, explosives,
+   game environment, injuries, trades) and sneaky tags.
+   ====================================================================== */
+const LDK={QB:['pyd','ptd','ryd'],RB:['ryd','recyd','rec','td'],WR:['recyd','rec','td'],TE:['recyd','rec','td']};
+const LDR={pyd:[150,175,200,225,250,275,300,325,350,400],ptd:[1,2,3,4],ryd:[10,20,30,40,50,60,70,80,100,120,150],
+  recyd:[20,30,40,50,60,70,80,100,120,150,175],rec:[2,3,4,5,6,7,8,9,10,12],td:[1,2,3]};
+const LDN={pyd:'Pass yds',ptd:'Pass TDs',ryd:'Rush yds',recyd:'Rec yds',rec:'Receptions',td:'Touchdowns'};
+const LDV={pyd:'att',ptd:'att',ryd:'car',recyd:'tgt',rec:'tgt',td:null};
+const LDS={k:'recyd',pos:'',g:'',q:'',all:false};
+function fairOdds(p){if(!(p>0&&p<1))return '—';const o=p>=.5?-Math.round(100*p/(1-p)):Math.round(100*(1-p)/p);return (o>0?'+':'')+o;}
+function ldSim(pr,k){const P=pr.P;if(k==='td'){const a=P.rectd,b=P.rtd,n=a.length,o=new Float32Array(n);for(let i=0;i<n;i++)o[i]=(a[i]||0)+(b[i]||0);return o;}return P[k];}
+function ldHist(p,k){
+  const gs=playerGames(p).filter(x=>x.s===SEASON),val=x=>k==='td'?(weekVal(x,'rectd')||0)+(weekVal(x,'rtd')||0):weekVal(x,k);
+  return gs.map(val).filter(isNum);
+}
+/* rungs worth showing: from where it's still likely to where it's a real long shot */
+function ldRungs(p,k,arr){
+  const n=arr.length,P=r=>{let c=0;for(let i=0;i<n;i++)if(arr[i]>=r)c++;return c/n;};
+  const all=LDR[k].map(r=>({r:r,p:P(r)}));
+  let lo=all.findIndex(x=>x.p<=.85);if(lo<0)lo=all.length-1;lo=Math.max(0,lo-(lo>0&&all[lo].p<.5?1:0));
+  let hi=all.length-1;while(hi>lo&&all[hi].p<.04)hi--;
+  const rs=all.slice(lo,Math.min(hi+1,lo+6));
+  const h=ldHist(p,k);rs.forEach(x=>{x.h=h.length?h.filter(v=>v>=x.r).length:null;x.hn=h.length;});
+  return rs;
+}
+/* trades: games this season played for a team other than his current one */
+const LDT={};
+function tradeInfo(p){
+  if(p.id in LDT)return LDT[p.id];
+  let prev=null,last=0;
+  (p.wk||[]).forEach(w=>{const g=GAMES.find(x=>x.wk===w.w&&(x.home===w.opp||x.away===w.opp));if(!g)return;
+    const other=g.home===w.opp?g.away:g.home;if(other!==p.t){prev=other;last=Math.max(last,w.w);}});
+  return LDT[p.id]=prev?{from:prev,after:last}:null;
+}
+function departed(t){
+  if(LDT['dep|'+t])return LDT['dep|'+t];
+  const out=PLAYERS.filter(q=>OFF_POS.indexOf(q.p)>=0&&q.t!==t&&q.ss).map(q=>({q:q,tr:tradeInfo(q)})).filter(x=>x.tr&&x.tr.from===t)
+    .map(x=>{const ws=(x.q.wk||[]).filter(w=>w.w<=x.tr.after),tg=ws.length?ws.reduce((s,w)=>s+(w.tgt||0),0)/ws.length:0,car=ws.length?ws.reduce((s,w)=>s+(w.car||0),0)/ws.length:0;return {q:x.q,after:x.tr.after,tgt:tg,car:car};})
+    .filter(x=>x.tgt>=4||x.car>=8);
+  return LDT['dep|'+t]=out;
+}
+function ldSneaky(p){
+  const tags=[];
+  if(BD&&BD.weeks){const reps=Object.values(BD.weeks).map(w=>w.report).filter(Boolean).sort((a,b)=>b.wk-a.wk);
+    const r=reps[0];if(r&&(r.sneaky||[]).some(x=>x.key.split('|')[0]===p.id))tags.push('Sneaky hit last week');}
+  const onBoard=BD&&bdWeek(BD.cur)&&Object.values(bdWeek(BD.cur).board||{}).some(e=>e.pid===p.id&&e.status!=='removed');
+  const chat=BZ&&BZ.summary?((BZ.summary[p.id]||{}).n||0):null;
+  return {tags:tags,onBoard:onBoard,chat:chat};
+}
+function ldWhy(p,g,k,pr,rungs){
+  const out=[],opp=oppOf(g,p.t),on=nick(opp),pos=p.p,ss=p.ss||{};
+  const vk=LDV[k];
+  if(vk&&pr.k[vk]&&isNum(ss[vk])&&ss[vk]>0){const v=pr.k[vk].m,d=v/ss[vk]-1;
+    if(Math.abs(d)>=.08){const ro=simRoster(p.t,g),outs=ro.filter(r=>r.out&&r.p.g>0&&r.p.id!==p.id&&r.p.p!=='QB'&&baseShare(r.x,vk==='car'?'c':'t')>=.08);
+      out.push({t:'role',up:d>0,s:'Volume: '+v.toFixed(1)+' '+(vk==='tgt'?'targets':vk==='car'?'carries':'attempts')+' projected vs '+ss[vk].toFixed(1)+' a game this season'+(outs.length&&d>0?', with '+outs.slice(0,2).map(r=>esc(r.p.n)+(r.inj?' ('+esc(r.inj.st)+')':'')).join(' and ')+' out':'')+'.'});}}
+  const tr=tradeInfo(p);if(tr)out.push({t:'trade',up:true,s:'New team: joined '+esc(nick(p.t))+' after week '+tr.after+' (from '+tr.from+'). His role here is still being set, which books price slowly.'});
+  const dep=departed(p.t);
+  if(dep.length&&pos!=='QB')out.push({t:'trade',up:true,s:'Trade fallout: '+dep.slice(0,2).map(x=>esc(x.q.n)+' ('+(x.tgt>=4?x.tgt.toFixed(1)+' targets':x.car.toFixed(1)+' carries')+' a game) left after week '+x.after).join('; ')+'. Those looks get redistributed.'});
+  if(k==='recyd'||k==='rec'){const d=DA[opp]&&DA[opp][pos],l=lgAvg(pos,'x20');
+    if(d&&isNum(d.x20)&&l){const r=d.x20/l;if(r>=1.15||r<=.85)out.push({t:'match',up:r>1,s:on+' allow '+d.x20.toFixed(1)+' catches of 20+ yards a game to '+(ROLE_NAME[pos]||pos)+' (league '+l.toFixed(1)+'), '+rtxt()+'.'});}
+    const deep=((SS&&SS.players[p.id])||{}).deep;if(isNum(deep)&&k==='recyd'){const lg=pos==='TE'?.12:pos==='RB'?.03:.2;if(deep>=lg*1.3)out.push({t:'stat',up:true,s:Math.round(deep*100)+'% of his targets travel 15+ yards (typical '+(ROLE_NAME[pos]||pos)+' '+Math.round(lg*100)+'%): one catch can clear two rungs.'});}
+    const lr=(p.wk||[]).map(w=>w.lr).filter(isNum);if(lr.length>=3&&k==='recyd'){const big=lr.filter(x=>x>=25).length;if(big)out.push({t:'stat',up:true,s:'A catch of 25+ yards in '+big+' of '+lr.length+' games this season (longest '+Math.max(...lr)+').'});}}
+  if(k==='ryd'&&pos==='RB'){const d=DA[opp]&&DA[opp].RB,l=lgAvg('RB','lru');if(d&&isNum(d.lru)&&l&&Math.abs(d.lru/l-1)>=.1)out.push({t:'match',up:d.lru>l,s:on+'’s longest run allowed averages '+d.lru.toFixed(1)+' yards a game (league '+l.toFixed(1)+').'});
+    const lru=(p.wk||[]).map(w=>w.lru).filter(isNum);if(lru.length>=3){const big=lru.filter(x=>x>=20).length;if(big)out.push({t:'stat',up:true,s:'A run of 20+ yards in '+big+' of '+lru.length+' games this season.'});}}
+  const x=pr.mx&&pr.mx.p[p.id]||{};
+  if(x.cov&&Math.abs(x.cov.f-1)>=.02)out.push({t:'match',up:x.cov.f>1,s:'Man/zone fit '+sgnPct(x.cov.f)+': '+on+' play man '+Math.round(x.cov.man*100)+'% of the time; he gets '+x.cov.yM.toFixed(1)+' yards a target vs man, '+x.cov.yZ.toFixed(1)+' vs zone.'});
+  if(x.zone&&Math.abs(x.zone.f-1)>=.02)out.push({t:'match',up:x.zone.f>1,s:'Where he’s thrown to '+sgnPct(x.zone.f)+' against where '+on+' give up yards.'});
+  if(isNum(g.total)){const ip=impliedPts(g,p.t);if(g.total>=48||(isNum(ip)&&ip>=26))out.push({t:'env',up:true,s:'Shootout setup: total '+g.total+(isNum(ip)?', '+esc(nick(p.t))+' implied for '+ip.toFixed(1):'')+'. More plays, more ceiling.'});
+    else if(g.total<=40)out.push({t:'env',up:false,s:'Low total ('+g.total+'): fewer plays and points to go around.'});}
+  const wx=gameWx(g);if(wx&&wx.wind>=15&&(k==='pyd'||k==='recyd'))out.push({t:'env',up:false,s:'Forecast wind '+wx.wind+' mph: deep balls are the first thing to go.'});
+  if(p.inj&&p.inj.wk===g.wk&&p.inj.st==='Questionable')out.push({t:'risk',up:false,s:'Questionable ('+esc(p.inj.i||'injury')+'): a limited snap count caps the top rungs.'});
+  return out;
+}
+function ldCeil(arr){const s=Float32Array.from(arr).sort();return {med:s[s.length>>1],c85:s[Math.floor(s.length*.85)]};}
+function ldScore(rungs,ceil){
+  /* rank by how high he can go (what he reaches in his best 15% of simulated games), nudged by how much
+     this matchup lifts his ladder top over his own games; the lift alone can't carry a player */
+  const top=rungs.filter(x=>x.p>=.15).slice(-1)[0]||rungs[0];if(!top)return {s:0};
+  const hp=top.hn?(top.h+1)/(top.hn+2):.3,lift=top.p/Math.max(hp,.05);
+  return {s:(ceil?ceil.c85:top.r)*(1+.15*Math.max(-.5,Math.min(1,lift-1))),top:top,lift:lift,ceil:ceil};
+}
+function ldCard(p,g,k,pr,rows,compact){
+  const arr=ldSim(pr,k);if(!arr)return '';
+  const rungs=ldRungs(p,k,arr),sc=ldScore(rungs,ldCeil(arr)),why=ldWhy(p,g,k,pr,rungs),sn=ldSneaky(p);
+  const tags=[];
+  if(sn.tags.length)tags.push('<span class="ltag sn">'+sn.tags[0]+'</span>');
+  if(!sn.onBoard&&sn.chat===0&&sc.lift>=1.2)tags.push('<span class="ltag sn" title="Not on the board and nobody is posting about him">Under the radar</span>');
+  if(why.some(w=>w.t==='trade'))tags.push('<span class="ltag tr">Trade</span>');
+  if(why.some(w=>w.t==='role'&&w.up))tags.push('<span class="ltag up">More volume</span>');
+  if(why.some(w=>w.t==='env'&&w.up))tags.push('<span class="ltag up">Shootout</span>');
+  if(why.some(w=>w.t==='risk'))tags.push('<span class="ltag rk">Risk</span>');
+  return '<article class="lcard"><header><div><a href="#/player/'+p.id+'"><b>'+esc(p.n)+'</b></a> <span class="mut small">'+p.p+' · '+flag(p.t,'sm')+' '+p.t+' '+(g.home===p.t?'vs':'at')+' '+flag(oppOf(g,p.t),'sm')+' '+oppOf(g,p.t)+' · '+esc(shortKick(g))+'</span></div><span class="ltype">'+LDN[k]+'</span></header>'+
+    (tags.length?'<div class="ltags">'+tags.join(' ')+'</div>':'')+
+    '<div class="lrungs" role="table" aria-label="Ladder rungs"><div class="lrh" role="row"><span>Rung</span><span>Chance</span><span>Fair odds</span><span>This season</span></div>'+
+    rungs.map(x=>'<div class="lr'+(sc.top&&x.r===sc.top.r?' top':'')+'" role="row"><span class="lrr">'+x.r+'+</span><span class="lrp"><i style="width:'+Math.round(x.p*100)+'%"></i><b>'+Math.round(x.p*100)+'%</b></span><span class="lro">'+fairOdds(x.p)+'</span><span class="lrhh">'+(x.hn?x.h+'/'+x.hn:'—')+'</span></div>').join('')+'</div>'+
+    (sc.ceil?'<p class="small" style="margin:8px 0 0">Middle outcome <b>'+fmtN(Math.round(sc.ceil.med*10)/10)+'</b> \u00b7 ceiling (his best 15% of games) <b>'+fmtN(Math.round(sc.ceil.c85*10)/10)+'</b></p>':'')+
+    (sc.top?'<p class="small" style="margin:4px 0 4px"><b>Ladder top: '+sc.top.r+'+ ('+Math.round(sc.top.p*100)+'%, fair '+fairOdds(sc.top.p)+')</b>'+(isNum(sc.lift)&&sc.top.hn?' · '+(sc.lift>=1.1?'more often than his own games ('+sc.top.h+' of '+sc.top.hn+')':sc.lift<=.9?'less often than his own games ('+sc.top.h+' of '+sc.top.hn+')':'about as often as his own games'):'')+'.</p>':'')+
+    (why.length?'<ul class="lwhy">'+why.slice(0,compact?3:6).map(w=>'<li class="'+(w.up?'up':'dn')+'">'+w.s+'</li>').join('')+'</ul>':'<p class="small mut">Nothing unusual in the matchup: the rungs come from his own play and the game script.</p>')+'</article>';
+}
+function vLadders(){
+  needScript();needBoard();needBuzz();
+  const wk=(BD&&BD.cur)||[...new Set(GAMES.filter(g=>!isFinal(g)).map(g=>g.wk))].sort((a,b)=>a-b)[0];
+  let h='<section class="hero"><div><h1>Ladders</h1><p class="sub">Alt-line rungs for every player this week (60+, 80+, 100+…), each priced from the <a href="#/glossary/simulator">simulator</a>’s 8,000 games, with the fair odds to compare against your book’s alt lines. Players are ranked by their ceiling (what they reach in their best 15% of simulated games), nudged by how much this matchup lifts them over their own games, with the reasons: volume and injuries, trades, explosive plays allowed, man/zone and field-zone fit, the game total, weather, and sneaky tags for players nobody is talking about. <a href="#/glossary/ladder">How it works</a>.</p></div></section>';
+  if(!wk)return h+'<p class="empty">No games left this season.</p>';
+  const gs=GAMES.filter(g=>g.wk===wk&&!isFinal(g)).sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:(a.time||'')<(b.time||'')?-1:1);
+  h+='<div class="row" style="margin-top:16px;gap:10px;align-items:flex-end"><div class="chips" role="group" aria-label="Stat">'+Object.keys(LDN).map(k=>'<button data-ldk="'+k+'" aria-pressed="'+(LDS.k===k)+'">'+LDN[k]+'</button>').join('')+'</div>'+
+    '<label class="fld">Game<select id="ldG" class="sel"><option value="">All games</option>'+gs.map(g=>'<option value="'+g.id+'"'+(LDS.g===g.id?' selected':'')+'>'+g.away+' at '+g.home+'</option>').join('')+'</select></label>'+
+    '<label class="fld">Player<input id="ldQ" class="inp" placeholder="Filter by name" value="'+esc(LDS.q)+'"></label></div>';
+  if(!SS)return h+'<p class="empty">Loading play-by-play…</p>';
+  const use=LDS.g?gs.filter(g=>g.id===LDS.g):gs,left=olWarm(use);
+  if(left)return h+'<p class="empty" id="olProg">Simulating game '+(use.length-left+1)+' of '+use.length+'…</p>';
+  const k=LDS.k,rows=[];
+  PLAYERS.filter(p=>(LDK[p.p]||[]).indexOf(k)>=0&&p.ss&&p.g>=2).forEach(p=>{
+    const g=use.find(x=>x.home===p.t||x.away===p.t);if(!g||injOut(p,g)||benchQB(p,g))return;
+    if(LDS.q&&p.n.toLowerCase().indexOf(LDS.q.toLowerCase())<0)return;
+    const pr=simProj(p,g);if(!pr||pr.out)return;
+    const arr=ldSim(pr,k);if(!arr)return;
+    const ce=ldCeil(arr),med=ce.med;
+    if(k!=='td'&&med<{pyd:120,ptd:.5,ryd:12,recyd:12,rec:1.5}[k])return;
+    const rungs=ldRungs(p,k,arr),sc=ldScore(rungs,ce);if(!sc.top)return;
+    rows.push({p:p,g:g,pr:pr,s:sc.s});
+  });
+  rows.sort((a,b)=>b.s-a.s);
+  const show=LDS.all||LDS.q||LDS.g?rows:rows.slice(0,24);
+  h+='<p class="count">'+rows.length+' players with a '+LDN[k].toLowerCase()+' ladder in week '+wk+(show.length<rows.length?', best '+show.length+' shown':'')+'. Chance = share of simulated games at or above the rung. Fair odds have no house cut: a book price longer than fair is the value side. “This season” = how many of his games cleared it.</p>';
+  h+='<div class="lgrid">'+show.map(r=>ldCard(r.p,r.g,k,r.pr)).join('')+'</div>';
+  if(show.length<rows.length)h+='<p style="margin-top:12px"><button class="btn" data-ldall="1">Show all '+rows.length+' players</button></p>';
+  return h;
+}
+/* player page: his ladders for the next game */
+function ldPlayer(p,g){
+  if(!g||OFF_POS.indexOf(p.p)<0)return '';
+  let h='<h2>Ladders</h2><p class="lede">Alt-line rungs for week '+g.wk+', priced from 8,000 simulated games, with fair odds and the reasons he can climb. <a href="#/ladders">Every player’s ladders</a>.</p>';
+  if(!SS)return h+'<p class="empty">Loading…</p>';
+  if(injOut(p,g)||benchQB(p,g))return h+'<p class="empty">Not expected to play a full role in week '+g.wk+'.</p>';
+  const pr=simProj(p,g);if(!pr||pr.out)return h+'<p class="empty">Not enough play-by-play for a ladder yet.</p>';
+  const ks=(LDK[p.p]||[]).filter(k=>{const a=ldSim(pr,k);if(!a)return false;const s=Float32Array.from(a).sort(),m=s[s.length>>1];return k==='td'||m>={pyd:120,ptd:.5,ryd:12,recyd:12,rec:1.5}[k];}).slice(0,3);
+  return h+'<div class="lgrid">'+ks.map(k=>ldCard(p,g,k,pr,null,true)).join('')+'</div>';
+}
+
 /* ---------- situational views on player and team pages ---------- */
 function stateTable(p){
   if(!SS)return '<p class="empty">Loading play-by-play…</p>';
@@ -3539,6 +3699,7 @@ function render(keep){
   else if(v==='best'){html=vBest();title='Best props';nav='board';}
   else if(v==='sim'){html=vSim(r[1],r[2]);title='Game simulator';}
   else if(v==='board'){html=vBoard(r[1],r[2]);title='Matchup board';}
+  else if(v==='ladders'){html=vLadders();title='Ladders';}
   else if(v==='leaders'){html=vLeaders(r[1],r[2]);title='Stat leaders';}
   else if(v==='glossary'){html=vGlossary(r[1]);title='Glossary';}
   else if(v==='allowed'){html=vAllowed(r[1],r[2],r[3]);title=(r[1]||'')+' defense vs '+(r[2]||'')+'s';nav='teams';}
@@ -3633,6 +3794,8 @@ document.addEventListener('click',e=>{
     let a=CMP.pa,b=CMP.pb;const src=np||(!a&&DUEL.of?BY[DUEL.of]:null);
     if(src&&src.id!==a){a=src.id;if(!b||b===a||!BY[b]||pk(BY[b])!==pk(BY[a]))b=suggestRival(BY[a])||b;}
     location.hash='#/compare/players/'+(a||'')+'/'+(b||'');return;}
+  if(t.dataset.ldk){LDS.k=t.dataset.ldk;LDS.all=false;render(true);const x=document.querySelector('[data-ldk="'+LDS.k+'"]');if(x)x.focus();return;}
+  if(t.dataset.ldall){LDS.all=true;render(true);return;}
   if(t.dataset.bdk!==undefined){BV.k=t.dataset.bdk;render(true);const b=document.querySelector('[data-bdk="'+BV.k+'"]');if(b)b.focus();return;}
   if(t.dataset.olpos){OL.pos=t.dataset.olpos;OL.sort=null;OL.dir=-1;render(true);const b=document.querySelector('[data-olpos="'+OL.pos+'"]');if(b)b.focus();return;}
   if(t.dataset.olsort){const k=t.dataset.olsort;if(OL.sort===k)OL.dir=-OL.dir;else{OL.sort=k;OL.dir=k==='n'?1:-1;}render(true);const b=document.querySelector('[data-olsort="'+k+'"]');if(b)b.focus();return;}
@@ -3668,6 +3831,8 @@ document.addEventListener('change',e=>{
   else if(id==='bdWk'){location.hash='#/board/'+e.target.value;}
   else if(id==='bdG'){BV.g=e.target.value;render(true);refocus();}
   else if(id==='pgG'){PG.g=e.target.value;render(true);refocus();}
+  else if(id==='ldG'){LDS.g=e.target.value;render(true);refocus();}
+  else if(id==='ldQ'){LDS.q=e.target.value.trim();render(true);refocus();}
   else if(id==='ftWk'){FT.wk=+e.target.value;render(true);refocus();}
   else if(id==='bpWk'){BP.wk=+e.target.value;render(true);refocus();}
   else if(id==='bpStat'){BP.stat=e.target.value;render(true);refocus();}
