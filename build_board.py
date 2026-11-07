@@ -582,6 +582,26 @@ def select(cands):
     return keep
 
 
+def per_game_top(cands, model, n=5):
+    """The best n props in each game by the numbers (same score as the board, at most two per player)."""
+    by = defaultdict(list)
+    for c in cands.values():
+        if c["edge"] >= 0 and c["p"] >= 0.5: by[c["gid"]].append(c)
+    out = {}
+    for gid, cs in by.items():
+        cs.sort(key=lambda c: -c["sc"]); per_p, keep = defaultdict(int), []
+        for c in cs:
+            if per_p[c["pid"]] >= 2: continue
+            e = {k: c[k] for k in ("pid", "n", "t", "opp", "pos", "k", "side", "line", "lsrc", "proj", "p", "be", "edge", "hits")}
+            if c.get("odds"): e["odds"] = c["odds"]
+            e["reasons"] = [r for r in top_reasons(c, 4, model) if r["helps"]][:3] or top_reasons(c, 2, model)
+            e["head"] = headline(c, model)
+            keep.append(e); per_p[c["pid"]] += 1
+            if len(keep) >= n: break
+        out[gid] = keep
+    return out
+
+
 # ---------------------------------------------------------------- explanations
 def _signed(c, f):
     """Effect of a factor on the side we lean, in percent of the projection."""
@@ -796,8 +816,15 @@ def grade_week(ctx, W, wk_board, cand, model):
         if x["r"] in ("hit", "miss", "near"): by_k[x["k"]][0 if x["r"] == "hit" else 1] += 1
     rem = defaultdict(int)
     for x in removed: rem[x["r"]] += 1
+    pgr, pg_items = defaultdict(int), []
+    for gid, lst in (wk_board.get("per_game") or {}).items():
+        for e in lst:
+            act, h, r = res(e)
+            pgr[r] += 1
+            pg_items.append({"gid": gid, "n": e["n"], "k": e["k"], "side": e["side"], "line": e["line"], "act": act, "r": r, "p": e["p"]})
     return {"wk": W, "record": dict(rec), "exp_hits": round(exp_hits, 1), "by_k": {k: v for k, v in by_k.items()}, "picks": picks, "removed": removed, "removed_record": dict(rem),
-            "sneaky": sneaky[:10], "blind": blind[:8], "n_cand": len(rows)}, rows
+            "sneaky": sneaky[:10], "blind": blind[:8], "n_cand": len(rows),
+            "per_game_record": dict(pgr), "per_game": pg_items}, rows
 
 
 def fit(rows, prev=None):
@@ -1067,6 +1094,10 @@ def build_board(data, states, allowed, now=None, odds_key=None):
             B[key] = _entry(c, model, ts, why)
             log.append({"ts": ts, "kind": "add", "key": key, "n": c["n"], "k": c["k"], "side": c["side"], "line": c["line"], "txt": why})
         L["cand"] = new
+        # best five per game (games already under way keep their pre-kickoff list)
+        pg = dict(wb.get("per_game") or {})
+        pg.update({gid: v for gid, v in per_game_top({k: c for k, c in new.items() if c["gid"] not in started}, model).items()})
+        wb["per_game"] = pg
         wb["updated"] = ts
         # where this week's picks lean on what the model learned
         wb["learned"] = sorted([{"key": k_, "n": e["n"], "k": e["k"], "side": e["side"], "line": e["line"], "p": e["p"], "p0": e["p0"]}

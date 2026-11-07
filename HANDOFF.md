@@ -597,6 +597,22 @@ look impossible but are just what a team has to do to win.
 - Best props, Prop research and Fantasy still use the quicker
   average-based `project()`; the glossary explains both.
 
+## Props page: best 5 props in every game (2026-11-07)
+
+`per_game_top()` in build_board.py keeps the five best props per game for
+the live week from the full candidate set (same score as the board,
+edge >= 0, chance >= 50%, max two per player) in `weeks[cur].per_game`;
+games already under way keep their pre-kickoff list. Grading adds
+`per_game_record` / `per_game` to each week's report. The Props page shows
+one card per game (filterable), each pick with side, line, projection,
+chance vs line alone, edge, this-season hit count, the reasons, and an "On
+the board" tag. The watchlist tool now sits under it.
+
+**Starting QBs (same day):** the schedule's listed starter, then depth-chart
+QB1 (`depth_charts_{season}.csv`, players carry `dc`/`dcs`), decide the
+starter everywhere (`expQB`/`benchQB` in index.html, `exp_qb` in
+build_board.py). "Most attempts" had 7 teams wrong after trades/injuries.
+
 ## Props on recent form + chatter bot (2026-11-06)
 
 **Recent form (Dre: "only helpful to look at general data from 2024; base

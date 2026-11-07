@@ -436,6 +436,14 @@ details.tview table{margin-top:8px;font-size:13.5px}
 .bzp{background:var(--surface);border:1px solid var(--edge);border-radius:10px;padding:10px 12px;box-shadow:var(--lift)}
 .bzh{display:flex;align-items:center;gap:6px;flex-wrap:wrap}.bzp p{margin:6px 0 4px;line-height:1.45;white-space:pre-wrap;word-break:break-word}
 .bzsrc{font-size:10px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;border-radius:5px;padding:1px 6px;background:var(--sunken);color:var(--ink)}.bzsrc.x{background:#000;color:#fff;border:1px solid #333}.bzsrc.bsky{background:#1185fe;color:#fff}
+.pggrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,520px),1fr));gap:14px;margin-top:12px}
+.pgcard{background:var(--surface);border:1px solid var(--edge);border-radius:12px;padding:12px 14px;box-shadow:var(--lift)}
+.pgcard header{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;border-bottom:1px solid var(--rule2);padding-bottom:8px}
+.pgm{display:flex;align-items:center;gap:6px;color:var(--ink);text-decoration:none;font-weight:900;letter-spacing:.03em}.pgm i{font-style:normal;color:var(--mute);font-weight:700}
+.pgl{list-style:none;margin:0;padding:0}.pgl li{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--rule)}.pgl li:last-child{border-bottom:0}
+.pgr{font-weight:900;color:var(--mute);width:14px;padding-top:12px}.pgl .bside{min-width:70px;padding:4px 8px}.pgl .bside b{font-size:18px}
+.pgb{flex:1;min-width:0}.pgb a{color:var(--ink)}.pgn{display:flex;gap:12px;flex-wrap:wrap;font-size:13px;margin:3px 0}.pgn .g{color:var(--good);font-weight:800}
+.pgw{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}.pgw .eff{min-width:0;font-size:11.5px}
 /* ---------- matchup board ---------- */
 .chips a.chipa[aria-selected="true"]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
 .bgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,460px),1fr));gap:14px;margin-top:12px}
@@ -3447,7 +3455,37 @@ function teamStateSection(t){
   return h;
 }
 
+
+/* ---------- props page: the best five props in every game ---------- */
+const PG={g:''};
+function pgGame(g,list,boardKeys){
+  const sp=spreadTxt(g);
+  return '<article class="pgcard"><header><a href="#/game/'+g.id+'" class="pgm">'+flag(g.away,'sm')+'<b>'+g.away+'</b><i>@</i><b>'+g.home+'</b>'+flag(g.home,'sm')+'</a><span class="mut small">'+esc(shortKick(g))+(sp?' · '+esc(sp):'')+(isNum(g.total)?' · O/U '+g.total:'')+'</span></header>'+
+    (list.length?'<ol class="pgl">'+list.map((e,i)=>{const on=boardKeys.has(e.pid+'|'+e.k);
+      return '<li><span class="pgr">'+(i+1)+'</span><span class="bside '+e.side+'"><small>'+(e.side==='over'?'OVER':'UNDER')+'</small><b>'+e.line+'</b></span>'+
+        '<div class="pgb"><div><a href="#/player/'+e.pid+'"><b>'+esc(e.n)+'</b></a> <span class="mut small">'+e.pos+' · '+e.t+'</span> <span class="small">'+esc(BKL[e.k])+'</span>'+(on?' <span class="bst">On the board</span>':'')+(e.lsrc==='book'?' <span class="lsrc book">Book</span>':'')+'</div>'+
+        '<div class="pgn"><span>Proj <b>'+(e.k==='ptd'?e.proj.toFixed(2):e.proj.toFixed(1))+'</b></span><span>Chance <b>'+pctS(e.p)+'</b></span><span class="mut">Line alone '+pctS(e.be)+'</span><span class="'+(e.edge>=.03?'g':'mut')+'">Edge +'+(e.edge*100).toFixed(1)+'%</span>'+(e.hits?'<span class="mut">This season '+e.hits[0]+'/'+e.hits[1]+'</span>':'')+'</div>'+
+        '<div class="pgw">'+(e.reasons||[]).map(r=>'<span class="eff '+(r.helps?'up':'dn')+'" title="'+esc(r.t)+'">'+esc(r.l)+' '+(r.e>0?'+':'−')+Math.abs(r.e).toFixed(0)+'%</span>').join(' ')+'</div>'+
+        (e.edge<.03?'<div class="small mut">Lean only: the numbers barely separate it from the line.</div>':'')+'</div></li>';}).join('')+'</ol>':'<p class="empty">No props with an edge in this game yet.</p>')+'</article>';
+}
+function pgSection(){
+  needBoard();
+  let h='<h2>Best 5 props in every game</h2>';
+  if(!BD)return h+'<p class="empty">Loading…</p>';
+  const w=bdWeek(BD.cur);if(!w||!w.per_game)return h+'<p class="empty">The per-game lists appear after the next data refresh.</p>';
+  const boardKeys=new Set(Object.entries(w.board||{}).filter(([k,e])=>e.status!=='removed').map(([k])=>k));
+  const gs=Object.keys(w.per_game).map(id=>GAMES.find(g=>g.id===id)).filter(Boolean).sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:(a.time||'')<(b.time||'')?-1:1);
+  h+='<p class="lede">Week '+BD.cur+', by the numbers: every qualifying player’s props in each game, scored by the same model as the <a href="#/board">matchup board</a> (recent form, the matchup, game script, weather and injuries), ranked by edge with at most two per player. Chance is how often the pick should win; “line alone” is what that side wins with no matchup. Hover a reason for the detail. Updated '+esc(bdTime(w.updated))+'.</p>'+
+    '<label class="fld" style="margin-top:6px">Game<select id="pgG" class="sel"><option value="">All games</option>'+gs.map(g=>'<option value="'+g.id+'"'+(PG.g===g.id?' selected':'')+'>'+g.away+' at '+g.home+'</option>').join('')+'</select></label>'+
+    '<div class="pggrid">'+gs.filter(g=>!PG.g||g.id===PG.g).map(g=>pgGame(g,w.per_game[g.id]||[],boardKeys)).join('')+'</div>';
+  const R=Object.values(BD.weeks||{}).map(x=>x.report).filter(r=>r&&r.per_game_record);
+  if(R.length){const t={hit:0,miss:0,near:0};R.forEach(r=>{['hit','miss','near'].forEach(k=>t[k]+=(r.per_game_record[k]||0));});
+    h+='<p class="small mut" style="margin-top:8px">Track record of these per-game lists: '+t.hit+'–'+(t.miss+t.near)+' over '+R.length+' graded week'+(R.length>1?'s':'')+'. Each week’s list is graded with the <a href="#/board/'+R[R.length-1].wk+'/report">report card</a>.</p>';}
+  return h;
+}
+
 function vProps(){
+  needBoard();
   const since=HIST[0]||SEASON;
   const rows=WATCH.map((e,i)=>({e,i,p:BY[e.id]})).filter(x=>x.p).map(x=>{
     const k=x.e.stat,all=playerGames(x.p).map(w=>({s:w.s,y:weekVal(w,k)})).filter(q=>isNum(q.y)),cur=all.filter(q=>q.s===SEASON);
@@ -3460,6 +3498,8 @@ function vProps(){
     '<label class="fld" style="flex:1;min-width:160px">Stat<select id="propStat" class="sel" disabled><option>Pick a player first</option></select></label>'+
     '<label class="fld" style="width:120px">Line<input id="propLine" class="inp" type="number" step="0.5" min="0" placeholder="e.g. 4.5"></label>'+
     '<button class="btn solid" id="propAdd">Add to watchlist</button></div><p class="small" id="propMsg" role="status" style="margin-top:8px;color:var(--bad)"></p></div>';
+  h+=pgSection();
+  h+='<h2>Your watchlist</h2>';
   if(!rows.length)return h+'<p class="empty" style="margin-top:18px">Your watchlist is empty. Add a player, a stat and the line you’re looking at, and it will show here with his hit rate this season and since '+since+', and every game against that line.</p>'+propResearch(8);
   h+='<div class="key" style="margin-top:18px"><span><span class="sw ylk"></span>Yellow line = the prop line</span><span><span class="sw sA"></span>Game over the line</span><span><span class="sw" style="background:var(--miss)"></span>Game under</span><span>Each dot is one game since '+since+'</span></div>';
   h+='<div class="scroll"><table><thead><tr><th>Player</th><th>Stat</th><th class="num">Line</th><th class="num">Avg this season</th><th class="num">Avg since '+since+'</th><th>Every game</th><th class="num">Over this season</th><th class="num">Over since '+since+'</th><th class="num">Next game projection</th><th>Read</th><th><span class="sr">Remove</span></th></tr></thead><tbody>'+
@@ -3627,6 +3667,7 @@ document.addEventListener('change',e=>{
   else if(id==='olG'){OL.g=e.target.value;render(true);refocus();}
   else if(id==='bdWk'){location.hash='#/board/'+e.target.value;}
   else if(id==='bdG'){BV.g=e.target.value;render(true);refocus();}
+  else if(id==='pgG'){PG.g=e.target.value;render(true);refocus();}
   else if(id==='ftWk'){FT.wk=+e.target.value;render(true);refocus();}
   else if(id==='bpWk'){BP.wk=+e.target.value;render(true);refocus();}
   else if(id==='bpStat'){BP.stat=e.target.value;render(true);refocus();}
