@@ -11,7 +11,7 @@ to refresh the data. Usage:
     python3 build_data.py [season]
 Defaults to the current season inferred from today's date.
 """
-import csv, json, sys, io, gzip, urllib.request
+import csv, json, sys, io, gzip, os, urllib.request
 from collections import defaultdict
 from datetime import date, datetime, timezone
 
@@ -235,7 +235,7 @@ POS_STATS = {
     "QB": {"chart": "passing_yards", "fields": {
         "attempts": "att", "completions": "cmp", "passing_yards": "pyd",
         "passing_tds": "ptd", "passing_interceptions": "int",
-        "passing_epa": "pepa", "rushing_yards": "ryd", "carries": "car"}},
+        "passing_epa": "pepa", "rushing_yards": "ryd", "carries": "car", "rushing_tds": "rtd"}},
     "RB": {"chart": "rushing_yards", "fields": {
         "carries": "car", "rushing_yards": "ryd", "rushing_tds": "rtd",
         "targets": "tgt", "receptions": "rec", "receiving_yards": "recyd"}},
@@ -664,6 +664,8 @@ def build(season):
     snap_rows = fetch_csv(f"snap_counts/snap_counts_{season}.csv")
     print("Fetching games.csv (full schedule + closing lines) ...")
     game_rows = fetch_csv("schedules/games.csv")
+    global GAME_ROWS
+    GAME_ROWS = game_rows
 
     hist_seasons = list(range(season - HIST_SEASONS_BACK, season))
     hist_stat_rows = {}
@@ -761,7 +763,7 @@ def build(season):
                     for full, short in spec["fields"].items():
                         if full in w:
                             line[short] = round(w[full], 1)
-                for k in ("sacks", "int", "pd", "qbh", "tfl"):
+                for k in ("sacks", "int", "pd", "qbh", "tfl", "ff"):
                     if "d_" + k in w:
                         line[k] = round(w["d_" + k], 1)
                 line["v"] = round(w.get(wk_field, w.get("tkl", 0)), 1)
@@ -1050,3 +1052,13 @@ if __name__ == "__main__":
     except Exception as e:
         import traceback; traceback.print_exc()
         print(f"Matchup board skipped: {e}")
+    # Futures (password-locked page): only built when the FUTURES_PASS secret is set; the file is encrypted with it.
+    if os.environ.get("FUTURES_PASS"):
+        try:
+            from build_futures import build_futures
+            build_futures(data, GAME_ROWS, os.environ["FUTURES_PASS"], odds_key=os.environ.get("ODDS_API_KEY") or None)
+        except Exception as e:
+            import traceback; traceback.print_exc()
+            print(f"Futures skipped: {e}")
+    else:
+        print("Futures skipped: no FUTURES_PASS secret set.")

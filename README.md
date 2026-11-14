@@ -83,6 +83,19 @@ Without a key, the board uses estimated lines. To use real lines:
    repository secret**, name `ODDS_API_KEY`, paste the key.
 The next run picks it up. Weather forecasts (Open-Meteo) need no key.
 
+## Optional: the locked Futures page
+
+`#/futures` (not in the nav) shows season-long futures odds. Its data file is
+encrypted with a password that exists only as a GitHub secret:
+1. **Settings -> Secrets and variables -> Actions -> New repository secret**,
+   name `FUTURES_PASS`, value = your password (use a long passphrase: the
+   encrypted file is public, so a weak password could be guessed offline).
+2. **Actions -> Refresh NFL data and publish the site -> Run workflow**, or wait
+   for the next scheduled refresh.
+Open `#/futures` and enter the password. To change it, update the secret and
+run the workflow again. With `ODDS_API_KEY` set, Super Bowl prices are pulled
+once a day (1 credit).
+
 ## Local development
 
 ```

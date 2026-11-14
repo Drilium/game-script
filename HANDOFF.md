@@ -597,6 +597,97 @@ look impossible but are just what a team has to do to win.
 - Best props, Prop research and Fantasy still use the quicker
   average-based `project()`; the glossary explains both.
 
+## Futures page, password-locked (2026-11-14)
+
+Dre asked for a hidden, password-protected page for NFL futures:
+- awards: MVP, OPOY, DPOY, OROY, DROY, CPOY, Coach of the Year;
+- stat leaders and milestones;
+- Super Bowl, conference and division winners;
+- win totals and to-make-the-playoffs.
+
+It should run on data, future matchups and player projections, plus trends
+(an efficient offense with a defense that has bad days; harder schedules early).
+
+- **Route:** `#/futures/<tab>`. It is not in the nav on purpose.
+  - Tabs: overview, teams, divisions, wins, playoffs, awards, leaders, method.
+- **Password:** never stored in the site or repo.
+  - `build_futures.py` runs only when the `FUTURES_PASS` environment variable
+    (a GitHub Actions secret) is set.
+  - It writes `nfl_futures.json` as an envelope:
+    `{v, kdf, it, salt, nonce, ct, tag, gen}`.
+  - Encryption:
+    - PBKDF2-HMAC-SHA256 at 600k iterations gives 64 bytes, split into an
+      encryption key and a MAC key;
+    - the gzipped JSON is XORed with an HMAC-SHA256 counter keystream
+      (block i = HMAC(k_enc, nonce ‖ i as 8-byte big-endian));
+    - the tag is HMAC(k_mac, salt ‖ nonce ‖ ct).
+  - Why this scheme: Python's standard library has no AES, and this decrypts with
+    WebCrypto alone (PBKDF2 + HMAC + DecompressionStream).
+  - The salt is kept between builds while the password is unchanged, so "keep
+    unlocked on this device" (the derived key in local/sessionStorage) keeps working.
+  - Changing the secret invalidates saved keys.
+  - Without the secret, the page shows setup instructions.
+- **Team ratings:** points vs an average team on a neutral field.
+  - A weighted ridge fit on margins capped at ±24.
+  - Settings: decay .95/week, last season as prior weight .25, lam 8.
+  - Ratings built from past spreads predicted worse (game-level log loss 0.647 vs
+    0.637; the closing line itself is 0.599). Season backtest: a market weight of
+    0 beat .2, .5 and .8. So `mkt_w = 0`, and the market rating is shown for
+    comparison only.
+  - Posted spreads are used directly for the games they cover.
+  - HFA is estimated: about 0.7 points in 2025-26 data.
+- **Season sim:** 10,000 seasons.
+  - Each season draws per-team rating errors: SD = 1.4 × 13.5/√(games + 12),
+    about 4 points at midseason. The 1.4 multiplier was set by the backtest.
+  - Tiebreakers: win %, then head-to-head among the tied, then division %, then
+    conference %, then a coin flip. Common games and strength of victory are not
+    modeled.
+  - Seeding: 7 per conference, then the full bracket with home field to the better
+    seed and a neutral Super Bowl.
+- **Backtest** (in the payload, shown on the method tab; rerun only when
+  `RATING` or `RATING_SD_MULT` changes):
+  - Brier score of playoff and division odds at weeks 6/10/14 of 2020-2025, vs a
+    record-only coin-flip baseline.
+  - Playoffs 0.126 vs 0.130; division 0.116 vs 0.123. Modest.
+  - 2025 was worse than the baseline (CAR, CHI and JAX made it; DET and KC
+    missed). This is stated on the page.
+- **Players:** `player_projections` uses the recent-form rule (this season + last
+  season counted as 3 games).
+  - Thin samples are shrunk toward a typical starter: 2 pseudo-games on offense,
+    4 on defense, which has no history in the data.
+  - Each remaining game gets an opponent factor: half the defense-allowed ratio,
+    clamped .8-1.2. For defenders, the opponent's sacks and turnovers per game.
+  - Only the listed or depth-chart starting QB is projected.
+  - `PlayerSim` plays injury events (rate per game by position, about 3 games
+    lost each) and treats players absent from the last 2 team games as likely
+    still out.
+  - Each player's stats share one correlated draw.
+- **Awards** are scored inside each simulated season, so they move with that
+  season's team wins and seeds. There is voter-noise softmax per award.
+  - The weights are hand-set from voting habits, since there is no free voting
+    data. They are not backtested, and the page says so.
+  - Coach of the Year = wins above a preseason proxy (last season's ridge
+    ratings × .67) plus playoff, division and 1-seed bonuses.
+- **Trends** (`team_notes`): ranked, signed notes per team.
+  - Pythagorean (2.37) vs actual wins, one-score record, turnover margin.
+  - Offense vs defense EPA ranks, with "offense carries them", "defense carries
+    them", "balanced", "struggling".
+  - Game-to-game points volatility and 30+ allowed games.
+  - Schedule played vs remaining (rank by current ratings), and model wins vs
+    current pace.
+- **Betting tools:**
+  - Every market row has a "Book odds" input (localStorage `gs_fut_odds`)
+    showing implied %, edge in points, EV per $1 and ¼ Kelly.
+  - The overview ranks every bet priced.
+  - Win totals take a line plus over and under prices.
+  - With `ODDS_API_KEY`, Super Bowl outright prices are fetched at most once per
+    UTC day and prefill that column.
+  - Daily snapshots (`hist`, up to 200) drive the movers and sparklines.
+- **Workflow:** passes `FUTURES_PASS`, commits and publishes `nfl_futures.json`
+  if it exists. It adds about 40-55 s per run.
+- `build_data.py` now also keeps QB rush TDs (`rtd`) and defensive forced
+  fumbles (`ff`) in each weekly line.
+
 ## Backfield split on game and RB pages (2026-11-14)
 
 Dre asked for split backfields to show up on game pages and player pages, with
