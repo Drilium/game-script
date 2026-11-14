@@ -515,6 +515,21 @@ table.gpp{width:100%;border-collapse:collapse;min-width:660px;background:transpa
 .gpp td.pn a{font-weight:800;color:#fff;text-decoration:none}.gpp td.pn a:hover{text-decoration:underline}.gpp .role{font-size:10px;color:#7f8b85;font-weight:700}
 .gpp td.hit{font-weight:900;font-size:15px;line-height:1.05}.gpp td.hit small{display:block;font-size:10px;color:#7f8b85;font-weight:600}.gpp td.od{font-weight:900}
 .gpft{margin-top:16px;border-top:1px solid #2a3530;padding-top:8px;font-size:11px;color:#9aa7a0;line-height:1.5}
+.bflede{font-size:12.5px;color:#c3ccc7;margin:10px 0 0;max-width:80ch}.bft{margin-top:20px}.bft .gptt .pill{margin-left:4px}
+.bfbar{display:grid;grid-template-columns:52px 1fr;gap:8px;align-items:center;margin-top:6px}.bfbar small{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#9aa7a0;font-weight:800}
+.bfseg{display:flex;height:22px;border-radius:6px;overflow:hidden;background:#26302b}.bfseg i{display:flex;align-items:center;justify-content:center;min-width:2px;border-right:1px solid #0f1512;overflow:hidden}
+.bfseg i:last-child{border-right:0}.bfseg b{font-size:10.5px;font-weight:900;color:#0b0f0d;white-space:nowrap;padding:0 4px}
+.bfdot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:0}
+table.bfp{min-width:860px}.bfp td.n small,.bfg td small{display:block;font-size:10px;color:#7f8b85;font-weight:600}.bfp .up{color:#3ddc84;font-size:10px}.bfp .dn{color:#ff7a3d;font-size:10px}
+.gpp tr.hl td{background:rgba(61,220,132,.08)}.gpp tr.oth td{color:#9aa7a0}
+table.bfg{border-collapse:separate;border-spacing:3px;margin-top:10px;background:transparent;min-width:0}
+.bfg th{font-size:10px;letter-spacing:.06em;color:#9aa7a0;font-weight:800;text-align:center;padding:2px 4px;background:transparent;border:0;position:static;text-transform:uppercase}.bfg th:first-child{text-align:left}
+.bfg th small{display:block;font-size:9.5px;color:#7f8b85;font-weight:700}
+.bfg td{text-align:center;padding:4px 6px;border:0;border-radius:5px;color:#fff;min-width:42px;background:#151d19}.bfg td b{font-size:13px;font-weight:900}.bfg td small{color:#e8efe9;opacity:.75}
+.bfg td.pn{background:transparent;text-align:left;font-weight:800;white-space:nowrap;color:#e8efe9}.bfg td.na{color:#5a6862;background:#121916}
+.bfnote{color:#9aa7a0;margin:4px 0 0}.bfx{margin-top:10px;background:#151d19;border:1px solid #2a3530;border-radius:10px;padding:9px 12px;font-size:12.5px;color:#e8efe9;line-height:1.5}.bfx b{color:#3ddc84}.bfx .mut,.bfx.mut{color:#9aa7a0}
+.bfproj{margin-top:12px;border:1px solid #2f8a57;border-radius:10px;padding:10px 12px;background:rgba(61,220,132,.05)}.bfproj p{color:#c3ccc7;margin:4px 0}
+.bfph{display:flex;flex-wrap:wrap;gap:8px;align-items:baseline}.bfph b{font-size:14px;font-weight:900;color:#fff}.bfph span{font-size:12px;color:#c3ccc7}.bfph a.dl{color:#3ddc84;font-weight:800}
 .cssec{margin-top:18px;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:#9aa7a0;display:flex;align-items:center;gap:8px;flex-wrap:wrap}.cssec b{color:#3ddc84;font-weight:900;font-size:13px}
 .cshd{margin-left:auto;display:grid;grid-template-columns:repeat(3,152px);gap:8px}.cshd em{font-style:normal;text-align:center}
 .fnrow{display:grid;grid-template-columns:140px 1fr;gap:12px;align-items:center;background:#151d19;border:1px solid #2a3530;border-radius:10px;padding:10px 12px;margin-top:8px}
@@ -1404,7 +1419,7 @@ function vGame(id){
     '<a class="side" href="#/team/'+A+'"><span class="tmrow">'+flag(A,'lg')+esc(fullName(A))+'</span><span class="ab">'+A+'</span><span class="rec">'+record(A)+'</span></a>'+
     '<div class="mid">Week '+g.wk+'<br>'+(f?'<span class="score">'+g.as+'–'+g.hs+'</span>Final':'<span class="score">at</span>'+kick(g))+'</div>'+
     '<a class="side r" href="#/team/'+H+'"><span class="tmrow">'+flag(H,'lg')+esc(fullName(H))+'</span><span class="ab">'+H+'</span><span class="rec">'+record(H)+'</span></a></section>';
-  h+=gpCard(g)+csCard(g);
+  h+=gpCard(g)+bfCard(g)+csCard(g);
   const sp=spreadTxt(g);
   h+='<h2>Game details</h2><dl class="lines">'+(sp?'<div><dt>'+glab(f?'Closing spread':'Spread',null,'spread')+'</dt><dd>'+esc(sp)+'</dd></div>':'')+(isNum(g.total)?'<div><dt>'+glab(f?'Closing total':'Total',null,'total')+'</dt><dd>'+g.total+'</dd></div>':'')+
     (isNum(g.aml)?'<div><dt>'+glab('Moneyline',null,'moneyline')+'</dt><dd>'+A+' '+(g.aml>0?'+':'')+g.aml+', '+H+' '+(g.hml>0?'+':'')+g.hml+'</dd></div>':'')+
@@ -1653,6 +1668,7 @@ function vPlayer(p){
   const offp=!def&&OFF_POS.indexOf(p.p)>=0;
   if(offp)h+=band('pro','Player props','His next-game projection and what moves it, whether his last game was a fluke, and how often he clears a line.');
   if(offp&&ng&&p.ss)h+=projSection(p,ng);
+  if(p.p==='RB'&&!def)h+=bfPlayer(p,ng);
   if(offp&&p.ss)h+=lastGameBox(p,ng);
   if(offp&&ng)h+=ldPlayer(p,ng);
   if(!def)h+=gameSection(p);
@@ -2716,7 +2732,12 @@ function simRoster(t,g){
     const whole=ps.reduce((s,r)=>s+(r.p.p==='QB'&&k==='t'?0:baseShare(r.x,k)),0);
     /* the whole roster's share (out players included) is what the active group splits, so an injury redistributes volume instead of losing it */
     const target=Math.min(k==='t'?.98:.99,Math.max(k==='t'?.85:.9,whole)),fixedSum=fixed.reduce((a,r)=>a+shO[r.p.id][k],0);
-    const raw=free.map(r=>r.p.p==='QB'&&k==='t'?0:baseShare(r.x,k)),rawSum=raw.reduce((a,b)=>a+b,0);
+    const raw=free.map(r=>r.p.p==='QB'&&k==='t'?0:baseShare(r.x,k));
+    /* backfields: keep the running backs' usual total, but divide it by this season's roles, leaning toward the latest games */
+    if(k==='c'){const ix=free.map((r,i)=>r.p.p==='RB'?i:-1).filter(i=>i>=0),W=ix.length>=2?bfWeights(t,ix.map(i=>free[i].p.id)):null;
+      if(W){const kn=ix.filter(i=>free[i].p.id in W),pool=kn.reduce((a,i)=>a+raw[i],0);
+        kn.forEach(i=>{free[i].bf={was:raw[i],w:W[free[i].p.id]};raw[i]=pool*W[free[i].p.id];});}}
+    const rawSum=raw.reduce((a,b)=>a+b,0);
     const room=Math.max(0,target-fixedSum);
     free.forEach((r,i)=>{r[k]=rawSum?raw[i]*room/rawSum:0;});
     fixed.forEach(r=>{r[k]=shO[r.p.id][k];r['fix'+k]=true;});
@@ -2975,6 +2996,10 @@ function pjFactors(p,g,pr){
   const mine=ro.find(r=>r.p.id===p.id);
   if(outs.length&&mine){const bt=baseShare(mine.x,'t'),bc=baseShare(mine.x,'c'),k=pos==='RB'?'c':'t',b0=k==='t'?bt:bc,nowS=mine[k];
     rows.push({g:'Volume',l:'Teammates out',e:b0?fxTag(nowS/b0):'',t:outs.map(r=>esc(r.p.n)+' ('+r.p.p+(r.inj?', '+esc(r.inj.st):', not playing')+')').join(', ')+' '+(outs.length>1?'are':'is')+' out. Their usage is handed to everyone else in proportion to their normal roles: '+(pos==='QB'?'':'his share of '+(k==='t'?'targets':'carries')+' goes from '+Math.round(b0*100)+'% to '+Math.round(nowS*100)+'%.')});}
+  if(pos==='RB'&&mine&&mine.bf){const B=bfData(p.t),me=B.backs.find(y=>y.id===p.id),mates=ro.filter(r=>r.bf&&r.p.id!==p.id&&!r.out).sort((a,b)=>b.c-a.c);
+    if(me)rows.push({g:'Volume',l:'Backfield split',e:fxTag(mine.bf.was?mine.bf.w*ro.filter(r=>r.bf).reduce((a,r)=>a+r.bf.was,0)/mine.bf.was:1),
+      t:'He has '+bfPct(me.sh)+' of '+esc(me.p.t===p.t?nick(p.t):p.t)+'’ running back carries this season'+(me.g<B.n&&me.shp-me.sh>=.03?' ('+bfPct(me.shp)+' when active)':'')+(B.n>3?' and '+bfPct(me.rec3)+' over the last 3 games':'')+'. '+
+        'The sim gives him '+bfPct(mine.bf.w)+' of the backs’ carries'+(mates.length?', with '+mates.slice(0,2).map(r=>esc(r.p.n)+' at '+bfPct(r.bf.w)).join(' and '):'')+': half his share in games he played, half weighted toward the latest games. That’s '+bfPct(mine.c)+' of all team carries.'});}
   /* efficiency */
   if(pos==='RB'){const d=defPer(opp,'RB','ryd','car'),l=lgPer('RB','ryd','car');
     if(isNum(x.dfc)&&d&&l)rows.push({g:'Efficiency',l:'Run defense',e:fxTag(x.dfc),t:on+' allow '+d.toFixed(2)+' yards per carry to running backs, '+rtxt()+' (league '+l.toFixed(2)+'). Half of that gap is applied to each of his real runs.'});
@@ -3026,6 +3051,131 @@ function projSection(p,g,title){
   h+='<p class="small" style="margin-top:8px">'+(p.p!=='QB'?'Scores a touchdown in <b>'+pctTxt(pr.td)+'</b> of simulated games. ':'')+(isNum(mu)?'The defense moves his '+(p.p==='RB'?'yards per carry':p.p==='QB'?'yards per throw':'yards per target')+' by '+fxTag(mu)+'. ':'')+'<a href="'+simU+'">Test any line in the simulator</a>.</p>';
   h+='<h3 style="margin-top:16px">What moves the projection</h3><p class="small mut" style="margin:2px 0 8px">Effects are against the league average. <a href="#/glossary/schematic">More on schematic matchups</a>.</p>'+pjFactorTable(pjFactors(p,g,pr));
   return h;
+}
+
+/* ======================================================================
+   Backfield split: how a team divides its running back carries, game by game,
+   who is the more explosive runner, and how the simulator splits this week's work.
+   ====================================================================== */
+const BFC={},BF_DECAY=.6,BF_COL=['#3ddc84','#4aa8ff','#ffb547','#c38bff','#ff6b8a'];
+/* this season's team games and every running back's line in each (traded or released backs included, so the shares add up) */
+function bfData(t){
+  if(BFC[t])return BFC[t];
+  const rows=GAMES.filter(g=>isFinal(g)&&(g.home===t||g.away===t)).sort((a,b)=>a.wk-b.wk).map(g=>({g:g,wk:g.wk,opp:oppOf(g,t),tot:0,tt:0,by:{}}));
+  const R={},rw={};rows.forEach(r=>{rw[r.wk+'|'+r.opp]=r;});
+  PLAYERS.forEach(p=>{if(p.p!=='RB'||!p.wk)return;p.wk.forEach(w=>{const r=rw[w.w+'|'+w.opp];if(!r)return;
+    r.by[p.id]=w;r.tot+=w.car||0;r.tt+=w.tgt||0;R[p.id]=p;});});
+  const totC=rows.reduce((s,r)=>s+r.tot,0),totT=rows.reduce((s,r)=>s+r.tt,0),l3=rows.slice(-3),l3C=l3.reduce((s,r)=>s+r.tot,0);
+  const backs=Object.keys(R).map(id=>{const p=R[id],o={p:p,id:id,here:p.t===t,g:0,car:0,ryd:0,rtd:0,tgt:0,rec:0,recyd:0,lng:0,sp:[],pc:0,pt:0,rw:0,rn:0,l3:0,per:[]};
+    rows.forEach((r,i)=>{const w=r.by[id],age=rows.length-1-i;
+      if(!w){o.per.push(null);return;}
+      const c=w.car||0;o.g++;o.car+=c;o.ryd+=w.ryd||0;o.rtd+=w.rtd||0;o.tgt+=w.tgt||0;o.rec+=w.rec||0;o.recyd+=w.recyd||0;o.lng=Math.max(o.lng,w.lru||0);
+      if(isNum(w.sp))o.sp.push(w.sp);if(r.tot>0){o.pc+=c;o.pt+=r.tot;const wt=Math.pow(BF_DECAY,age);o.rw+=wt*c/r.tot;o.rn+=wt;}
+      if(i>=rows.length-3)o.l3+=c;
+      o.per.push({c:c,y:w.ryd||0,s:r.tot?c/r.tot:0,sp:w.sp});});
+    o.sh=totC?o.car/totC:0;o.shp=o.pt?o.pc/o.pt:0;o.rec3=l3C?o.l3/l3C:0;o.tsh=totT?o.tgt/totT:0;o.spm=meanOf(o.sp);
+    /* the projection's view of his role: half his share in the games he played, half weighted toward the latest ones */
+    o.w=o.rn?.5*o.shp+.5*(o.rw/o.rn):null;
+    return o;}).filter(o=>o.car>0||o.tgt>0).sort((a,b)=>b.car-a.car||b.tgt-a.tgt);
+  return BFC[t]={t:t,rows:rows,backs:backs,totC:totC,totT:totT,n:rows.length,l3C:l3C};
+}
+/* explosive runs this season: [carries, 10+, 20+, stuffed]. From play-by-play when loaded */
+function bfEx(id){
+  const x=SS&&SS.players&&SS.players[id];if(!x)return null;
+  if(x.ex)return x.ex;
+  const p=BY[id],n=p?(p.wk||[]).reduce((s,w)=>s+(w.car||0),0):0,c=(x.cy||[]).slice(0,Math.min(n,(x.cy||[]).length));
+  return c.length?[c.length,c.filter(v=>v>=10).length,c.filter(v=>v>=20).length,c.filter(v=>v<=0).length]:null;
+}
+/* how the simulator splits the running backs' share of carries: their usual group total, re-divided by this season's backfield roles */
+function bfWeights(t,ids){
+  const B=bfData(t),w={};let s=0;
+  ids.forEach(id=>{const b=B.backs.find(x=>x.id===id);if(b&&isNum(b.w)&&b.w>0){w[id]=b.w;s+=b.w;}});
+  if(Object.keys(w).length<2||!s)return null;
+  Object.keys(w).forEach(id=>{w[id]/=s;});return w;
+}
+function bfRole(sh){return sh>=.75?'Workhorse':sh>=.55?'Lead back':'Committee';}
+function bfPct(x){return isNum(x)?Math.round(x*100)+'%':'—';}
+function bfBar(list,key,lab){
+  const tot=list.reduce((s,b)=>s+(b[key]||0),0);if(!tot)return '';
+  return '<div class="bfbar"><small>'+lab+'</small><div class="bfseg">'+list.map((b,i)=>{const v=(b[key]||0)/tot;if(v<.005)return '';
+    return '<i style="width:'+(v*100).toFixed(1)+'%;background:'+(b.col||BF_COL[Math.min(i,BF_COL.length-1)])+'" title="'+esc(b.p?b.p.n:b.n)+': '+Math.round(v*100)+'%">'+(v>=.12?'<b>'+esc(b.p?lastName(b.p.n):b.n)+' '+Math.round(v*100)+'%</b>':'')+'</i>';}).join('')+'</div></div>';
+}
+/* the whole block for one team; opts.g = an upcoming game to project, opts.hl = player to highlight */
+function bfTeam(t,opts){
+  opts=opts||{};const B=bfData(t),g=opts.g&&!isFinal(opts.g)?opts.g:null,opp=g?oppOf(g,t):null;
+  if(!B.n||!B.backs.length)return '<p class="empty">No games yet this season.</p>';
+  /* current backs who matter (5%+ of carries or 8%+ of RB targets), everyone else rolled into "Others" */
+  const main=B.backs.filter(b=>b.here&&(b.sh>=.05||b.tsh>=.08)).slice(0,5),rest=B.backs.filter(b=>main.indexOf(b)<0);
+  main.forEach((b,i)=>{b.col=BF_COL[i];});
+  const oth=rest.length?{n:'Others',col:'#5a6862',car:rest.reduce((s,b)=>s+b.car,0),l3:rest.reduce((s,b)=>s+b.l3,0),gone:rest.filter(b=>!b.here)}:null;
+  const segs=main.concat(oth&&oth.car?[oth]:[]),lead=main[0];
+  let h='<div class="bft"><div class="gptt">'+flag(t,'sm')+'<b>'+esc(nick(t)).toUpperCase()+' BACKFIELD</b>'+(lead?'<em class="pill">'+bfRole(lead.sh)+'</em>':'')+'<span>'+B.n+' game'+(B.n===1?'':'s')+' · '+B.totC+' RB carries</span></div>';
+  h+=bfBar(segs,'car','Season')+(B.n>3?bfBar(segs,'l3','Last 3'):'');
+  /* table */
+  const ex={};main.forEach(b=>{ex[b.id]=bfEx(b.id);});
+  const exR=(b,i)=>{const e=ex[b.id];return e&&e[0]?e[i]/e[0]:null;};
+  h+='<div class="scroll"><table class="gpp bfp"><thead><tr><th class="sec">Back</th><th>GP</th><th title="His carries out of all the team’s running back carries this season">Carry share</th><th title="In the team’s last 3 games">Last 3</th><th>Car/G</th><th>YPC</th><th title="Share of his carries that gained 10+ yards">10+ runs</th><th title="Share of his carries that gained 20+ yards">20+ runs</th><th title="Share of his carries stopped at or behind the line">Stuffed</th><th>Long</th><th title="Carries inside the 20 this season">RZ car</th><th title="His targets out of all running back targets">RB tgt</th><th>Snap%</th></tr></thead><tbody>'+
+    main.map(b=>{const p=b.p,ss=p.ss||{},d=b.rec3-b.sh,inj=g?injFor(p,g):null,rz=SS&&SS.players[b.id]?SS.players[b.id].rz:null,e=ex[b.id];
+      return '<tr'+(opts.hl===b.id?' class="hl"':'')+'><td class="pn"><i class="bfdot" style="background:'+b.col+'"></i><a href="#/player/'+b.id+'">'+esc(p.n)+'</a>'+(inj&&inj.st?' <span class="injb '+inj.st.toLowerCase()+'">'+esc(inj.st[0])+'</span>':'')+'</td>'+
+        '<td class="n m">'+b.g+'</td><td class="n"><b>'+bfPct(b.sh)+'</b>'+(b.g<B.n&&b.shp-b.sh>=.03?'<small>'+bfPct(b.shp)+' when active</small>':'')+'</td>'+
+        '<td class="n">'+(B.n>3?bfPct(b.rec3)+(Math.abs(d)>=.06?' <span class="'+(d>0?'up':'dn')+'">'+(d>0?'▲':'▼')+'</span>':''):'—')+'</td>'+
+        '<td class="n">'+(b.g?fx(b.car/b.g,1):'—')+'</td><td class="n">'+(b.car?fx(b.ryd/b.car,2):'—')+'</td>'+
+        '<td class="n">'+(e&&e[0]>=8?bfPct(exR(b,1))+'<small>'+e[1]+'</small>':'—')+'</td><td class="n">'+(e&&e[0]>=8?bfPct(exR(b,2))+'<small>'+e[2]+'</small>':'—')+'</td><td class="n">'+(e&&e[0]>=8?bfPct(exR(b,3)):'—')+'</td>'+
+        '<td class="n">'+(b.lng||'—')+'</td><td class="n">'+(rz?rz[1]:'—')+'</td><td class="n">'+bfPct(b.tsh)+'</td><td class="n m">'+(isNum(b.spm)?Math.round(b.spm)+'%':'—')+'</td></tr>';}).join('')+
+    (oth&&oth.car?'<tr class="oth"><td class="pn"><i class="bfdot" style="background:#5a6862"></i>Others'+(oth.gone.length?' <span class="small mut">incl. '+oth.gone.slice(0,3).map(b=>esc(lastName(b.p.n))+' (now '+b.p.t+')').join(', ')+'</span>':'')+'</td><td></td><td class="n">'+bfPct(oth.car/B.totC)+'</td><td class="n">'+(B.n>3&&B.l3C?bfPct(oth.l3/B.l3C):'—')+'</td><td colspan="9"></td></tr>':'')+
+    '</tbody></table></div>';
+  /* game by game */
+  h+='<div class="scroll"><table class="bfg"><thead><tr><th>Share of RB carries</th>'+B.rows.map(r=>'<th title="'+esc(fullName(r.opp))+'">W'+r.wk+'<small>'+r.opp+'</small></th>').join('')+'</tr></thead><tbody>'+
+    main.map(b=>'<tr><td class="pn"><i class="bfdot" style="background:'+b.col+'"></i>'+esc(lastName(b.p.n))+'</td>'+b.per.map((x,i)=>{const r=B.rows[i];
+      if(!x)return '<td class="na" title="Didn’t play for '+t+' this week">—</td>';
+      return '<td style="background:'+b.col+Math.round(18+x.s*200).toString(16).padStart(2,'0').slice(0,2)+'" title="'+x.c+' carries, '+x.y+' yards'+(isNum(x.sp)?', '+x.sp+'% of snaps':'')+' of '+r.tot+' RB carries"><b>'+Math.round(x.s*100)+'</b><small>'+x.c+'/'+x.y+'</small></td>';}).join('')+'</tr>').join('')+
+    '</tbody></table></div><p class="small bfnote">Cells: his share of the running back carries that game (%), then carries/yards. — = didn’t play for '+t+'.</p>';
+  /* who is more explosive */
+  const q=main.filter(b=>ex[b.id]&&ex[b.id][0]>=20);
+  if(q.length>=2){const by=(i)=>q.slice().sort((a,b)=>exR(b,i)-exR(a,i)),e10=by(1),e20=by(2),st=q.slice().sort((a,b)=>exR(a,3)-exR(b,3));
+    const top=e10[0],nx=e10[1],gap=exR(top,1)-exR(nx,1),t20=e20[0],n20=e20[1],sa=st[0],sb=st[1];
+    const cnt=(b,i)=>ex[b.id][i]+' run'+(ex[b.id][i]===1?'':'s');
+    h+='<div class="bfx"><b>More explosive:</b> '+(gap<.02?'about even: '+esc(top.p.n)+' and '+esc(nx.p.n)+' both gain 10+ yards on roughly '+bfPct(exR(top,1))+' of carries.':esc(top.p.n)+', 10+ yards on '+bfPct(exR(top,1))+' of carries ('+cnt(top,1)+'), '+esc(lastName(nx.p.n))+' '+bfPct(exR(nx,1))+' ('+cnt(nx,1)+').')+
+      ' '+(exR(t20,2)-exR(n20,2)<.01?'Their 20+ yard rates are about the same.':(t20===top&&gap>=.02?'He also has':esc(lastName(t20.p.n))+' has')+' the higher 20+ yard rate: '+bfPct(exR(t20,2))+' ('+cnt(t20,2)+') to '+bfPct(exR(n20,2))+' ('+cnt(n20,2)+').')+
+      ' <b>Hardest to stop:</b> '+(exR(sb,3)-exR(sa,3)<.02?'even, both stuffed on about '+bfPct(exR(sa,3))+' of carries.':esc(lastName(sa.p.n))+', stuffed on '+bfPct(exR(sa,3))+' of carries ('+esc(lastName(sb.p.n))+' '+bfPct(exR(sb,3))+').')+
+      ' <span class="mut">The simulator replays each back’s own runs, so a big-play back’s range already runs higher.</span></div>';}
+  else if(main.length>=2)h+='<div class="bfx mut">Not enough carries yet (20+ each) to compare how explosive these backs are.</div>';
+  /* this week's split */
+  if(g){
+    const da=DA[opp]&&DA[opp].RB?DA[opp].RB.ryd:null,rk=isNum(da)?daRank(opp,'RB','ryd'):null;
+    if(!SS)h+='<p class="empty">Loading play-by-play for the projected split…</p>';
+    else if(simReady(g)){
+      const R=simRoster(t,g),rbs=R.filter(r=>r.p.p==='RB'&&!r.out&&r.c>.01).map(r=>({r:r,pr:simProj(r.p,g)})).filter(x=>x.pr&&!x.pr.out&&x.pr.k.car);
+      const outs=R.filter(r=>r.p.p==='RB'&&r.out&&r.p.g>0&&main.some(b=>b.id===r.p.id));
+      const sc=rbs.reduce((s,x)=>s+x.pr.k.car.m,0),sy=rbs.reduce((s,x)=>s+(x.pr.k.ryd?x.pr.k.ryd.m:0),0);
+      if(rbs.length&&sc){
+        h+='<div class="bfproj"><div class="bfph"><b>Week '+g.wk+' '+(g.home===t?'vs':'at')+' '+opp+'</b><span>'+(isNum(da)?esc(nick(opp))+' allow '+alink(opp,'RB','ryd',da.toFixed(1))+' RB rush yds a game'+(rk?' ('+ord(rk)+' fewest)':'')+', '+rtxt():'')+'</span></div>'+
+          (outs.length?'<p class="small">'+outs.map(r=>esc(r.p.n)+' ('+esc(r.inj&&r.inj.st?r.inj.st:'not playing')+')').join(', ')+' '+(outs.length>1?'are':'is')+' out; '+(outs.length>1?'their':'his')+' carries are split among the backs below in proportion to their roles.</p>':'')+
+          '<div class="scroll"><table class="gpp"><thead><tr><th class="sec">Projected split</th><th title="His slice of the running back carries in the simulated games">Carry share</th><th>Rush yds</th><th>Likely range</th><th>Carries</th><th title="'+(isNum(da)?esc(nick(opp))+'’s '+da.toFixed(1)+' allowed, times his carry share':'')+'">Slice of '+(isNum(da)?da.toFixed(0):'—')+'</th><th>Rec yds</th><th>TD</th></tr></thead><tbody>'+
+          rbs.sort((a,b)=>b.pr.k.car.m-a.pr.k.car.m).map(x=>{const k=x.pr.k,b=main.find(y=>y.id===x.r.p.id),sh=k.car.m/sc;
+            return '<tr'+(opts.hl===x.r.p.id?' class="hl"':'')+'><td class="pn"><i class="bfdot" style="background:'+(b?b.col:'#5a6862')+'"></i><a href="#/player/'+x.r.p.id+'">'+esc(x.r.p.n)+'</a></td><td class="n"><b>'+bfPct(sh)+'</b></td><td class="n"><b>'+(k.ryd?fx(k.ryd.m,1):'—')+'</b></td><td class="n m">'+(k.ryd?Math.round(k.ryd.lo)+'–'+Math.round(k.ryd.hi):'—')+'</td><td class="n">'+fx(k.car.m,1)+'</td><td class="n m">'+(isNum(da)?fx(da*sh,1):'—')+'</td><td class="n">'+(k.recyd?fx(k.recyd.m,1):'—')+'</td><td class="n">'+pctTxt(x.pr.td)+'</td></tr>';}).join('')+
+          '<tr class="oth"><td class="pn">Backfield total</td><td></td><td class="n"><b>'+fx(sy,1)+'</b></td><td></td><td class="n">'+fx(sc,1)+'</td><td class="n m">'+(isNum(da)?fx(da,1):'—')+'</td><td colspan="2"></td></tr></tbody></table></div>'+
+          '<p class="small bfnote">From 8,000 simulated games. Each back’s share is half his share in the games he’s played and half weighted toward the latest games (each game back counts '+Math.round(BF_DECAY*100)+'% as much). “Slice” is just the opponent’s usual allowance times his share; the projection also uses game script, his own runs and how this defense plays the run. <a href="#/sim/'+g.id+'">Change the split in the simulator</a>.</p></div>';}
+    }
+  }
+  return h+'</div>';
+}
+/* game page */
+function bfCard(g){
+  const f=isFinal(g);if(!f)needScript();
+  return '<section class="gp bf" aria-label="Backfield split"><div class="gphd"><span>GAME SCRIPT · BACKFIELD SPLIT</span><span>WEEK '+g.wk+'</span></div>'+
+    '<p class="bflede">How each team splits its running back carries this season and game by game, who breaks the big runs'+(f?'':', and how the simulator divides this week’s carries and the yards the defense usually allows')+'.</p>'+
+    bfTeam(g.away,{g:g})+bfTeam(g.home,{g:g})+'</section>';
+}
+/* player page (running backs) */
+function bfPlayer(p,ng){
+  if(p.p!=='RB')return '';
+  const B=bfData(p.t),me=B.backs.find(b=>b.id===p.id);if(!B.n||!me)return '';
+  const others=B.backs.filter(b=>b.here&&b.id!==p.id&&b.sh>=.05);
+  let s='He has <b>'+bfPct(me.sh)+'</b> of '+esc(nick(p.t))+'’ running back carries this season'+(me.g<B.n&&me.shp-me.sh>=.03?' ('+bfPct(me.shp)+' in the '+me.g+' games he played)':'')+(B.n>3?', '+bfPct(me.rec3)+' over the last 3 games':'')+'. ';
+  if(others.length)s+='He splits the work with '+others.slice(0,3).map(b=>'<a href="#/player/'+b.id+'">'+esc(b.p.n)+'</a> ('+bfPct(b.sh)+')').join(', ')+'.';
+  else s+='Nobody else on the roster has 5% of the carries: it’s his backfield.';
+  return '<h2>Backfield split</h2><p class="lede">'+s+'</p><section class="gp bf">'+bfTeam(p.t,{g:ng,hl:p.id})+'</section>';
 }
 
 /* ======================================================================

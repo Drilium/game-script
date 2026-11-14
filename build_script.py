@@ -316,6 +316,7 @@ def build_script(fetch_bytes, seasons, cur, roster, pos_group, drop_raw=None, sn
         deep = airs = airn = 0
         loc = [0, 0, 0]; vs = {"M": [0, 0, 0.0], "Z": [0, 0, 0.0]}; dpi_n = dpi_y = 0
         rz_t = rz_c = 0
+        ex = None                                          # this season's runs: [carries, 10+, 20+, stuffed at or behind the line]
         all_tt = all_tc = 0
         for s in sorted(seasons, reverse=True):
             X = pl[s].get(pid)
@@ -341,6 +342,9 @@ def build_script(fetch_bytes, seasons, cur, roster, pos_group, drop_raw=None, sn
             deep += X["deep"]; airs += X["airs"]; airn += X["airn"]
             if s == cur:
                 rz_t, rz_c = X["rz_t"], X["rz_c"]
+                c_ = X["cy"]
+                if c_:
+                    ex = [len(c_), sum(1 for v in c_ if v >= 10), sum(1 for v in c_ if v >= 20), sum(1 for v in c_ if v <= 0)]
         if not (tg or cr or att):
             continue
         o = {"t": team, "sh": {"t": tsh, "c": csh, "tb": tbase, "cb": cbase, "tn": tn, "cn": cn, "td": td_, "cd": cd,
@@ -353,6 +357,8 @@ def build_script(fetch_bytes, seasons, cur, roster, pos_group, drop_raw=None, sn
              "loc": [round(x / sum(loc), 3) for x in loc] if sum(loc) else None,
              "vs": {k: [v[0], v[1], round(v[2])] for k, v in vs.items()} if vs["M"][0] + vs["Z"][0] else None,
              "dpi": [dpi_n, round(dpi_y)] if dpi_n else None}
+        if ex:
+            o["ex"] = ex
         if info["p"] == "QB" and att:
             o["qb"] = {"ay": ay[:SAMPLE_N["att"]], "td": [ptd, att], "int": [pint, att], "sk": [sk, db], "scr": [scr, db],
                        "sy": sy[:SAMPLE_N["scr"]]}

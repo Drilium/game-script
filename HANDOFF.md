@@ -597,6 +597,51 @@ look impossible but are just what a team has to do to win.
 - Best props, Prop research and Fantasy still use the quicker
   average-based `project()`; the glossary explains both.
 
+## Backfield split on game and RB pages (2026-11-14)
+
+Dre asked for split backfields to show up on game pages and player pages, with
+the percentages from previous games, so projections account for both backs
+(e.g. ARI allows 103.8 RB rush yds a game: how much goes to Kyren Williams vs
+Blake Corum, and who is the more explosive runner).
+
+- **Data:** `build_script.py` now writes `ex` per player: this season's
+  designed runs as `[carries, 10+, 20+, stuffed at/behind the line]`. The site
+  falls back to this season's slice of `cy` if `ex` is missing.
+- **`bfData(t)`** (index.html) builds every team game this season and each RB's
+  line in it. Rows are matched by week + opponent, so backs who were traded or
+  released still count and the shares add to 100%. Per back it computes:
+  - season share of RB carries, the share when active, and the last-3-games share;
+  - RB target share, snap %, the longest run and red-zone carries;
+  - the projection weight `w` = half his share in games he played + half a
+    recency-weighted share (each game back counts 60%, `BF_DECAY`).
+- **Simulator change:** `simRoster` keeps the running backs' combined carry
+  share from `baseShare`, but re-divides it among the active RBs by
+  `bfWeights` (normalized `w`).
+  - User-fixed shares in the simulator are untouched, and an injured back's
+    carries still flow to the others.
+  - Reason: `baseShare` blends toward the since-2024 share, which under-rated
+    backs whose role grew this season (Corum went from about 33% to 39% of LA's
+    RB carries).
+  - Backtest on this season's games (306 back-games, predicting each back's
+    share of RB carries from prior weeks only, given who played): average miss
+    was 13.1 share points with season-to-date shares and 12.9 with this blend.
+    That is a small gain; game-to-game noise dominates. Steeper decay was about
+    the same.
+  - The matchup board (Python) is unchanged; METHOD not bumped.
+- **Game page:** `bfCard(g)` sits between the preview and the cheat sheet. For each team:
+  - role pill: Workhorse ≥75%, Lead back ≥55%, Committee below that;
+  - season and last-3 stacked bars;
+  - a table with share, last 3 (with ▲/▼ for 6+ point moves), car/g, YPC,
+    10+ / 20+ / stuffed rates, longest run, RZ carries, RB target share, snap %;
+  - a game-by-game heat grid (share %, carries/yards);
+  - an explosiveness verdict (needs 20+ carries per back);
+  - for upcoming games, the projected split: the sim's carry share, rush yards
+    and range, carries, "slice" = opponent RB rush yds allowed (linked) × share,
+    rec yds and TD %, plus the backfield total vs the allowance.
+- **Player page (RBs):** `bfPlayer(p, ng)` follows the projection with the same
+  block, his rows highlighted. The projection's factor table gains a
+  "Backfield split" row (effect = new carry share vs the old `baseShare`).
+
 ## Ladders page (2026-11-07)
 
 `#/ladders` (nav "Ladders") and a "Ladders" section on every offensive
