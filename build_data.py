@@ -1052,6 +1052,15 @@ if __name__ == "__main__":
     except Exception as e:
         import traceback; traceback.print_exc()
         print(f"Matchup board skipped: {e}")
+    # Post-game recaps: drives, run lanes / pass zones, played-to-form checks, and the board's
+    # kickoff-frozen projections vs the box score, one file per finished game.
+    try:
+        from build_recap import build_recap
+        learn = json.load(open("nfl_learn.json")) if os.path.exists("nfl_learn.json") else {"weeks": {}}
+        build_recap(iter_csv_gz(f"pbp/play_by_play_{season}.csv.gz"), data, learn)
+    except Exception as e:
+        import traceback; traceback.print_exc()
+        print(f"Recaps skipped: {e}")
     # Futures (password-locked page): only built when the FUTURES_PASS secret is set; the file is encrypted with it.
     if os.environ.get("FUTURES_PASS"):
         try:

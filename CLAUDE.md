@@ -22,6 +22,8 @@ each feature (newest sections at the top).
   - `nfl_script.json`: score-state play calling, shares, plays for the simulator.
   - `nfl_board.json`: matchup board, change log, report cards, learned model. Stateful: each run diffs against the committed copy.
   - `nfl_learn.json`: frozen weekly candidates (training data). Stateful; not published.
+  - `recaps/<game_id>.json` + `nfl_recap.json`: post-game recaps (`build_recap.py`), loaded by finished games' game pages.
+  - `nfl_futures.json`: encrypted futures data for the locked `#/futures` page (`build_futures.py`, only with the `FUTURES_PASS` secret).
 - `.github/workflows/refresh-data.yml`: runs `python3 build_data.py`
   daily and after game windows, commits the JSON, publishes to GitHub
   Pages. A push to `main` republishes.

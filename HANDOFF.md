@@ -597,6 +597,62 @@ look impossible but are just what a team has to do to win.
 - Best props, Prop research and Fantasy still use the quicker
   average-based `project()`; the glossary explains both.
 
+## Post-game recaps on game pages (2026-11-20)
+
+Dre asked for a recap on each game page after the game. It shows:
+- how projections matched what happened;
+- how teams started drives;
+- where each offense made plays, even small gains.
+
+The goal is to see which data keeps holding up as teams settle in.
+
+- **Pipeline:** `build_recap.py`, called from `build_data.py` after the board. It
+  streams this season's play-by-play again; build_script drops the cached copy
+  before then.
+  - Output: `recaps/<game_id>.json` per finished game (~19 KB, about 150 files,
+    ~3 MB) and a small index, `nfl_recap.json`.
+  - The index holds each game's line results and a per-team, per-game projection
+    accuracy series.
+  - Runtime is about 2 s.
+- **Honesty rules:**
+  - Projections are the board's candidates frozen at kickoff, from `nfl_learn.json`:
+    live weeks keep the last pre-kickoff copy; backtest weeks were built from
+    earlier games only. They are compared with the official weekly box score.
+  - The board starts in week 3, so weeks 1-2 show a note instead.
+  - Simulator ranges aren't saved before games, so they aren't graded here.
+  - "Expected" in played-to-form = the offense's season before this game plus the
+    opponent defense's before-this-game gap from league average:
+    `off_pre + def_pre - league_pre`.
+  - Neutral pass rate uses the offense only.
+  - Tolerances: EPA .10, success 6 pts, YPC .8, yards per dropback 1.2, sack and
+    explosive rates 4 pts, neutral pass rate 8 pts.
+  - Thin samples are skipped: under 8 carries, or under 10 dropbacks or neutral plays.
+- **Page:** a finished game's `#/game/<id>` opens on the Recap tab;
+  `#/game/<id>/preview` keeps the old pregame page. Recap sections (`rcView`):
+  1. result vs the spread and total, scoring by quarter, a team box (yards,
+     EPA, success, 3rd down, red zone, drives to the opponent's 40, average
+     start, points per drive, turnovers, sacks, penalties, time of possession);
+  2. projections vs actual per team: our line, projection, lean, chance, actual,
+     difference, ✓/✗, with leans right, typical % miss and bias;
+  3. played to form? (Held / Better / Worse);
+  4. a drive chart: SVG bars from start to end yard line, colored by result, with
+     the start transition and plays/yards;
+  5. where they made plays:
+     - 7 run lanes (end/tackle/guard each side, plus middle) with carries, YPC,
+       success and EPA color, plus the offense's season-before YPC and the
+       defense's allowed YPC;
+     - a 3×3 pass grid (deep 20+, intermediate 10-19, short under 10; by
+       left/middle/right) with completions/attempts, yards and TD/INT, the
+       offense's before-game share of throws and the defense's before-game EPA
+       allowed;
+  6. flow by quarter (plays, pass rate, yards, EPA, success) and big plays (20+
+     passes, 12+ runs, TDs; play descriptions);
+  7. player lines from play-by-play: inside-run share, aDOT, L/M/R targets;
+  8. our read on these teams this season: per-game bars of leans right and
+     typical miss, linking to each recap, with a last-3 vs earlier verdict
+     ("settling in" or "drifting") and recent bias.
+- **Workflow:** commits and publishes `nfl_recap.json` and `recaps/`.
+
 ## Futures page, password-locked (2026-11-14)
 
 Dre asked for a hidden, password-protected page for NFL futures:

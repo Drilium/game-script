@@ -52,6 +52,7 @@ jobs:
           git config user.email "actions@users.noreply.github.com"
           git add nfl_data.json nfl_h2h.json nfl_allowed.json nfl_script.json nfl_board.json nfl_learn.json
           if [ -f nfl_futures.json ]; then git add nfl_futures.json; fi
+          if [ -f nfl_recap.json ]; then git add nfl_recap.json recaps; fi
           if git diff --cached --quiet; then
             echo "No data changes."
           else
@@ -77,6 +78,7 @@ jobs:
           mkdir _site
           cp index.html nfl_data.json nfl_h2h.json nfl_allowed.json nfl_script.json nfl_board.json _site/
           if [ -f nfl_futures.json ]; then cp nfl_futures.json _site/; fi
+          if [ -f nfl_recap.json ]; then cp -r nfl_recap.json recaps _site/; fi
           touch _site/.nojekyll
 
       - uses: actions/configure-pages@v5

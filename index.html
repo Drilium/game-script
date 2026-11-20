@@ -515,6 +515,25 @@ table.gpp{width:100%;border-collapse:collapse;min-width:660px;background:transpa
 .gpp td.pn a{font-weight:800;color:#fff;text-decoration:none}.gpp td.pn a:hover{text-decoration:underline}.gpp .role{font-size:10px;color:#7f8b85;font-weight:700}
 .gpp td.hit{font-weight:900;font-size:15px;line-height:1.05}.gpp td.hit small{display:block;font-size:10px;color:#7f8b85;font-weight:600}.gpp td.od{font-weight:900}
 .gpft{margin-top:16px;border-top:1px solid #2a3530;padding-top:8px;font-size:11px;color:#9aa7a0;line-height:1.5}
+/* Post-game recap */
+.rctabs{margin:14px 0 4px}.rc{margin:14px 0}.rcl{font-size:12.5px;color:#c3ccc7;margin:10px 0 4px;line-height:1.5;max-width:92ch}
+.rcline{display:flex;flex-wrap:wrap;gap:8px 22px;margin:12px 0 4px;font-size:14px;color:#e8efe9}.rcline b{color:#fff}
+table.rcq{min-width:420px;margin-top:8px}table.rcbox{min-width:420px;max-width:620px;margin-top:10px}table.rcp,table.rcf{min-width:680px}table.rcpl{min-width:620px}table.rcfl{min-width:380px}
+.rch{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin:16px 0 6px;font-size:13px;color:#fff;font-weight:800}.rch span{font-size:11.5px;color:#9aa7a0;font-weight:600}
+.rcok{color:#3ddc84;font-weight:900}.rcno{color:#ff7a3d;font-weight:900}.rcp .up{color:#3ddc84}.rcp .dn{color:#ff7a3d}
+.rcpill{display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.04em;border-radius:999px;padding:2px 8px;border:1px solid}.rcpill.ok{color:#c3ccc7;border-color:#3d4a44}.rcpill.up{color:#3ddc84;border-color:#2f8a57}.rcpill.dn{color:#ff7a3d;border-color:#b4532a}
+.rcleg{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:11px;color:#c3ccc7;margin:6px 0}.rcleg i{display:inline-block;width:12px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.rcdrw{overflow-x:auto}.rcdr{width:100%;min-width:640px;height:auto;display:block}.rcdr text{font-family:inherit}.rcdr .t{font-size:10px;fill:#7f8b85}.rcdr .l{font-size:11px;fill:#e8efe9;font-weight:700}.rcdr .m{font-size:10.5px;fill:#9aa7a0}.rcdr .r{font-size:10.5px;fill:#c3ccc7}
+.rcmaps{display:grid;grid-template-columns:1.15fr 1fr;gap:18px;align-items:start}.rcsub{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:#9aa7a0;font-weight:800;margin-bottom:6px}
+.rclanes{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}.rcln{text-align:center;min-width:0}.rcbarw{height:80px;display:flex;align-items:flex-end;justify-content:center}.rcbar{width:100%;border-radius:5px 5px 2px 2px;display:flex;align-items:flex-start;justify-content:center;padding-top:3px;border:1px solid #2a3530}.rcbar b{font-size:11px;color:#fff;font-weight:900;text-shadow:0 1px 2px rgba(0,0,0,.6)}
+.rclnl{font-size:10px;color:#e8efe9;font-weight:800;margin-top:4px;line-height:1.2}.rclnv{font-size:10.5px;color:#c3ccc7;line-height:1.3;margin-top:2px}.rclnp{font-size:9.5px;color:#7f8b85;line-height:1.3;margin-top:3px;border-top:1px solid #222c27;padding-top:3px}
+.rczones{display:grid;grid-template-columns:54px repeat(3,1fr);gap:4px}.rczh{font-size:10px;color:#9aa7a0;text-align:center;font-weight:800;text-transform:uppercase}.rczr{font-size:10px;color:#9aa7a0;font-weight:800;text-transform:uppercase;display:flex;align-items:center}
+.rcz{border:1px solid #2a3530;border-radius:7px;padding:6px;text-align:center;min-height:62px;display:flex;flex-direction:column;justify-content:center;gap:1px}.rcz b{font-size:14px;color:#fff}.rcz span{font-size:11px;color:#e8efe9}.rcz small{font-size:9.5px;color:#c3ccc7;opacity:.85;margin-top:2px}
+.rcsplit{display:grid;grid-template-columns:1fr 1fr;gap:18px}.rcsplit>div,.rcmaps>div{min-width:0}.rcbig li{overflow-wrap:anywhere}.rcbig{list-style:none;margin:0;padding:0}.rcbig li{font-size:12px;color:#e8efe9;padding:5px 0;border-bottom:1px solid #1d2622}.rcbig li span{display:block;color:#9aa7a0;font-size:11.5px;margin-top:2px}
+.rctr{display:flex;align-items:flex-end;gap:4px;height:96px;margin-top:6px}.rctr a{flex:1;max-width:34px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;text-decoration:none;gap:2px}.rctr i{display:block;width:100%;border-radius:3px 3px 0 0;background:#5a6862}.rctr i.g{background:#3ddc84}.rctr i.b{background:#ff7a3d}
+.rctr em{display:block;width:40%;background:#4aa8ff;border-radius:2px}.rctr small{font-size:9.5px;color:#9aa7a0}.rctr a.cur small{color:#fff;font-weight:900}.rctr a.cur i{outline:2px solid #fff}
+@media (max-width:760px){.rcmaps,.rcsplit{grid-template-columns:1fr}.rclanes{gap:3px}.rclnl{font-size:9px}}
+
 /* Futures (locked page) */
 .lockb{font-size:11px;letter-spacing:.1em;text-transform:uppercase;border:1px solid var(--line,#5a6862);border-radius:999px;padding:2px 9px;vertical-align:middle;margin-left:6px;font-weight:800}
 .fulock{max-width:520px}.fulock label{display:block;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#9aa7a0;font-weight:800;margin:14px 0 6px}
@@ -1436,13 +1455,16 @@ function vWeek(){
 }
 
 /* ---------- Game / matchup ---------- */
-function vGame(id){
+function vGame(id,sub){
   const g=GAMES.find(x=>x.id===id);if(!g)return notFound('That game');
   const A=g.away,H=g.home,f=isFinal(g);
   let h='<section class="board" aria-label="'+esc(fullName(A)+' at '+fullName(H))+'">'+
     '<a class="side" href="#/team/'+A+'"><span class="tmrow">'+flag(A,'lg')+esc(fullName(A))+'</span><span class="ab">'+A+'</span><span class="rec">'+record(A)+'</span></a>'+
     '<div class="mid">Week '+g.wk+'<br>'+(f?'<span class="score">'+g.as+'–'+g.hs+'</span>Final':'<span class="score">at</span>'+kick(g))+'</div>'+
     '<a class="side r" href="#/team/'+H+'"><span class="tmrow">'+flag(H,'lg')+esc(fullName(H))+'</span><span class="ab">'+H+'</span><span class="rec">'+record(H)+'</span></a></section>';
+  if(f){const pv=sub==='preview';
+    h+='<div class="chips rctabs" role="tablist"><a role="tab" class="chipa" aria-selected="'+(!pv)+'" href="#/game/'+g.id+'">Recap</a><a role="tab" class="chipa" aria-selected="'+pv+'" href="#/game/'+g.id+'/preview">Before the game</a></div>';
+    if(!pv)return h+rcView(g);}
   h+=gpCard(g)+bfCard(g)+csCard(g);
   const sp=spreadTxt(g);
   h+='<h2>Game details</h2><dl class="lines">'+(sp?'<div><dt>'+glab(f?'Closing spread':'Spread',null,'spread')+'</dt><dd>'+esc(sp)+'</dd></div>':'')+(isNum(g.total)?'<div><dt>'+glab(f?'Closing total':'Total',null,'total')+'</dt><dd>'+g.total+'</dd></div>':'')+
@@ -3437,6 +3459,149 @@ document.addEventListener('input',e=>{
 document.addEventListener('change',e=>{if(e.target.classList&&e.target.classList.contains('fo-wt'))render(true);});
 
 /* ======================================================================
+   Post-game recap (game page, finished games). Data: recaps/<gid>.json and
+   nfl_recap.json, built by build_recap.py from play-by-play and the board's
+   projections frozen at kickoff.
+   ====================================================================== */
+const RC={g:{},idx:null,loading:{},err:{}};
+function rcLoad(gid){
+  if(!RC.g[gid]&&!RC.loading[gid]&&!RC.err[gid]){RC.loading[gid]=1;
+    fetch('recaps/'+gid+'.json',{cache:'no-cache'}).then(r=>{if(!r.ok)throw new Error(r.status);return r.json();})
+      .then(d=>{RC.g[gid]=d;}).catch(e=>{RC.err[gid]=String(e.message||e);}).then(()=>{RC.loading[gid]=0;if(location.hash.indexOf(gid)>=0)render(true);});}
+  if(!RC.idx&&!RC.loading.idx){RC.loading.idx=1;fetch('nfl_recap.json',{cache:'no-cache'}).then(r=>r.ok?r.json():null).then(d=>{RC.idx=d||{teams:{},games:{}};})
+    .catch(()=>{RC.idx={teams:{},games:{}};}).then(()=>{RC.loading.idx=0;if(location.hash.indexOf(gid)>=0)render(true);});}
+}
+const RC_K={pyd:'Pass yds',ptd:'Pass TD',ryd:'Rush yds',rec:'Receptions',recyd:'Rec yds'};
+const RC_RES={'Touchdown':['TD','#3ddc84'],'Field goal':['FG','#4aa8ff'],'Missed field goal':['Missed FG','#7f8b85'],'Punt':['Punt','#5a6862'],'Turnover':['Turnover','#ff6b4a'],
+  'Turnover on downs':['Downs','#ff9f43'],'End of half':['End of half','#3a4540'],'Opp touchdown':['Pick-six/fumble TD','#ff3b3b'],'Safety':['Safety','#ff3b3b']};
+function rcPct(x,d){return isNum(x)?(x*100).toFixed(d||0)+'%':'—';}
+function rcSign(x,d){return isNum(x)?(x>0?'+':'')+x.toFixed(d===undefined?2:d):'—';}
+function rcEpaCol(v,n){if(!isNum(v)||!n)return 'transparent';const a=Math.min(.85,.14+Math.abs(v)*.7);return v>=0?'rgba(61,220,132,'+a.toFixed(2)+')':'rgba(255,107,74,'+a.toFixed(2)+')';}
+function rcClock(s){const m=Math.floor(s/60),x=s%60;return m+':'+(x<10?'0':'')+x;}
+function rcYl(v){if(!isNum(v))return '—';v=Math.round(v);return v===50?'50':v<50?'own '+v:'opp '+(100-v);}
+
+function rcView(g){
+  rcLoad(g.id);
+  const d=RC.g[g.id];
+  if(!d)return RC.err[g.id]?'<p class="empty">No play-by-play recap for this game yet (it appears after the next data refresh once nflverse posts the game).</p>':'<p class="empty">Loading the recap…</p>';
+  const H=d.home,A=d.away,TH=d.teams[H],TA=d.teams[A];
+  if(!TH||!TA)return '<p class="empty">This game’s play-by-play is incomplete.</p>';
+  let h='';
+  /* 1. result vs the line */
+  const marg=d.hs-d.as,tot=d.hs+d.as;
+  let line='';
+  if(isNum(d.spread)){const fav=d.spread>0?H:A,fs=Math.abs(d.spread),fm=fav===H?marg:-marg,cov=fm-fs;
+    line+='<span><b>'+fav+' −'+fs+'</b>: '+(fm>fs?'covered by '+fx(cov,1):fm===fs?'push':(fm>0?'won by '+fm+' but didn’t cover':'lost outright')+' ('+fx(-cov,1)+' short)')+'</span>';}
+  if(isNum(d.total))line+='<span><b>Total '+d.total+'</b>: '+(tot>d.total?'over by '+fx(tot-d.total,1):tot<d.total?'under by '+fx(d.total-tot,1):'push')+'</span>';
+  const qn=Math.max(TA?d.q[A].length:4,d.q[H].length);
+  h+='<section class="gp rc"><div class="gphd"><span>GAME SCRIPT · RECAP</span><span>WEEK '+d.wk+' · FINAL</span></div>'+
+    '<div class="rcline">'+line+'</div>'+
+    '<div class="scroll"><table class="gpp rcq"><thead><tr><th class="sec">Team</th>'+Array.from({length:qn},(_,i)=>'<th>'+(i<4?'Q'+(i+1):'OT')+'</th>').join('')+'<th>Final</th></tr></thead><tbody>'+
+    [A,H].map(t=>'<tr><td class="pn">'+flag(t,'sm')+' <b>'+esc(nick(t))+'</b></td>'+Array.from({length:qn},(_,i)=>'<td class="n">'+(d.q[t][i]===undefined?'—':d.q[t][i])+'</td>').join('')+'<td class="n"><b>'+(t===H?d.hs:d.as)+'</b></td></tr>').join('')+'</tbody></table></div>';
+  /* team box */
+  const S=t=>d.teams[t].sum,rows=[['Total yards',t=>S(t).yds],['Plays',t=>S(t).plays],['Yards per play',t=>fx(S(t).ypp,1)],['EPA per play',t=>rcSign(S(t).epa)],['Success rate',t=>rcPct(S(t).succ)],
+    ['Yards per carry',t=>fx(S(t).ypc,1)],['Yards per dropback',t=>fx(S(t).ypa,1)],['3rd down',t=>S(t).third[0]+' of '+S(t).third[1]],['Red zone TDs',t=>S(t).rz[0]+' of '+S(t).rz[1]],
+    ['Drives reaching opp 40',t=>S(t).opp40+' of '+S(t).drives],['Avg drive start',t=>rcYl(S(t).start)],['Points per drive',t=>fx(S(t).ppd,2)],['Turnovers',t=>S(t).to],['Sacks taken',t=>S(t).sk_taken],
+    ['Penalties',t=>S(t).pen[0]+' for '+S(t).pen[1]],['Time of possession',t=>rcClock(S(t).top)]];
+  h+='<div class="scroll"><table class="gpp rcbox"><thead><tr><th class="sec"></th><th>'+flag(A,'xs')+' '+A+'</th><th>'+flag(H,'xs')+' '+H+'</th></tr></thead><tbody>'+
+    rows.map(([l,f])=>'<tr><td class="pn">'+l+'</td><td class="n">'+f(A)+'</td><td class="n">'+f(H)+'</td></tr>').join('')+'</tbody></table></div></section>';
+
+  /* 2. projections vs actual */
+  const P=d.proj||[];
+  h+='<section class="gp rc"><div class="gphd"><span>PROJECTIONS VS WHAT HAPPENED</span><span>LOCKED AT KICKOFF</span></div>';
+  if(!P.length)h+='<p class="rcl">The matchup board wasn’t running yet for this week (it starts in week 3), so there are no frozen projections to compare.</p>';
+  else{
+    h+='<p class="rcl">These are the matchup board’s numbers as they stood at kickoff, compared with the box score. “Our line” is the board’s estimated line unless it says book. “Lean” is the side the model favored; ✓ means the result landed on that side.</p>';
+    [A,H].forEach(t=>{const rs=P.filter(r=>r.t===t),ac=d.acc[t];if(!rs.length)return;
+      h+='<h4 class="rch">'+flag(t,'sm')+' '+esc(nick(t))+'<span>'+ac.hit+' of '+ac.dec+' leans right · typical miss '+rcPct(ac.err)+' of the projection · '+(Math.abs(ac.bias)<.05?'no lean high or low':(ac.bias<0?'projected too high by '+rcPct(-ac.bias):'projected too low by '+rcPct(ac.bias))+' on average')+'</span></h4>'+
+        '<div class="scroll"><table class="gpp rcp"><thead><tr><th class="sec">Player</th><th>Stat</th><th>Our line</th><th>Projected</th><th>Lean</th><th>Chance</th><th>Actual</th><th>vs projection</th><th></th></tr></thead><tbody>'+
+        rs.map(r=>{const df=r.act-r.proj;return '<tr><td class="pn"><a href="#/player/'+r.pid+'">'+esc(r.n)+'</a></td><td>'+RC_K[r.k]+'</td><td class="n m">'+r.line+(r.src==='book'?' <small>book</small>':'')+'</td><td class="n">'+fx(r.proj,1)+'</td><td class="n">'+(r.side==='over'?'Over':'Under')+'</td><td class="n m">'+rcPct(r.p)+'</td><td class="n"><b>'+fmtN(r.act)+'</b></td><td class="n '+(Math.abs(r.err)<.2?'':df>0?'up':'dn')+'">'+(df>0?'+':'')+fx(df,1)+'</td><td class="n">'+(r.hit===null?'<span class="mut">push</span>':r.hit?'<span class="rcok">✓</span>':'<span class="rcno">✗</span>')+'</td></tr>';}).join('')+'</tbody></table></div>';});
+  }
+  h+='</section>';
+
+  /* 3. played to form? */
+  const N=d.notes||[];
+  if(N.length){
+    h+='<section class="gp rc"><div class="gphd"><span>DID THEY PLAY TO FORM?</span><span>SEASON BEFORE THIS GAME VS THIS GAME</span></div>'+
+      '<p class="rcl">Expected = the offense’s season before this game, adjusted for how the defense it faced did before this game (their gap from league average is added). One game is a small sample, so a single miss means little; the same miss game after game is the signal.</p>';
+    [A,H].forEach(t=>{const o=t===H?A:H,ns=N.filter(n=>n.t===t);if(!ns.length)return;
+      const held=ns.filter(n=>n.held).length;
+      h+='<h4 class="rch">'+flag(t,'sm')+' '+esc(nick(t))+' offense vs '+esc(nick(o))+' defense<span>'+held+' of '+ns.length+' held</span></h4><div class="scroll"><table class="gpp rcf"><thead><tr><th class="sec">Measure</th><th>'+t+' offense before</th><th>'+o+' defense allowed before</th><th>Expected</th><th>This game</th><th>Verdict</th></tr></thead><tbody>'+
+        ns.map(n=>{const pc=['succ','sack','expl','npr'].indexOf(n.k)>=0,fm=v=>pc?rcPct(v,1):n.k==='epa'?rcSign(v):fx(v,1);
+          return '<tr><td class="pn">'+n.label.charAt(0).toUpperCase()+n.label.slice(1)+'</td><td class="n m">'+fm(n.off)+'</td><td class="n m">'+(n.def===null?'—':fm(n.def))+'</td><td class="n">'+fm(n.exp)+'</td><td class="n"><b>'+fm(n.act)+'</b></td><td class="n">'+(n.held?'<span class="rcpill ok">Held</span>':n.dir>0?'<span class="rcpill up">Better</span>':'<span class="rcpill dn">Worse</span>')+'</td></tr>';}).join('')+'</tbody></table></div>';});
+    h+='</section>';
+  }
+
+  /* 4. drives */
+  h+='<section class="gp rc"><div class="gphd"><span>EVERY DRIVE</span><span>WHERE IT STARTED, WHERE IT ENDED</span></div><p class="rcl">Each bar runs from where the drive started to where it ended, left to right toward the opponent’s end zone. Color is how it ended.</p>'+
+    '<div class="rcleg">'+['Touchdown','Field goal','Missed field goal','Punt','Turnover','Turnover on downs','Safety','End of half'].map(k=>'<span><i style="background:'+RC_RES[k][1]+'"></i>'+RC_RES[k][0]+'</span>').join('')+'</div>'+
+    [A,H].map(t=>rcDrives(t,d.teams[t])).join('')+'</section>';
+
+  /* 5. where they made plays */
+  h+='<section class="gp rc"><div class="gphd"><span>WHERE THEY MADE PLAYS</span><span>RUN LANES AND PASS ZONES</span></div><p class="rcl">Green = gained on the down (positive EPA per play), orange = lost ground. Below each lane or zone: the same offense’s season before this game, and what this defense allowed there before this game.</p>'+
+    [A,H].map(t=>rcMaps(t,t===H?A:H,d.teams[t])).join('')+'</section>';
+
+  /* 6. flow by quarter + big plays */
+  h+='<section class="gp rc"><div class="gphd"><span>HOW THE GAME FLOWED</span><span>BY QUARTER</span></div><div class="rcsplit">'+[A,H].map(t=>{const x=d.teams[t];
+    return '<div><h4 class="rch">'+flag(t,'sm')+' '+esc(nick(t))+'</h4><div class="scroll"><table class="gpp rcfl"><thead><tr><th class="sec">Qtr</th><th>Plays</th><th>Pass rate</th><th>Yards</th><th>EPA/play</th><th>Success</th></tr></thead><tbody>'+
+      x.byq.map(q=>'<tr><td class="pn">'+(q.q<5?'Q'+q.q:'OT')+'</td><td class="n">'+q.pl+'</td><td class="n">'+rcPct(q.pass/q.pl)+'</td><td class="n">'+q.yds+'</td><td class="n" style="background:'+rcEpaCol(q.epa,1)+'">'+rcSign(q.epa)+'</td><td class="n">'+rcPct(q.succ)+'</td></tr>').join('')+'</tbody></table></div>'+
+      '<h4 class="rch" style="margin-top:12px">Big plays</h4>'+(x.big.length?'<ul class="rcbig">'+x.big.map(b=>'<li><b>Q'+b.q+' '+esc(b.clk)+'</b> · '+b.yds+' yds · EPA '+rcSign(b.epa,1)+'<span>'+esc(b.d.replace(/^\(\d+:\d+\)\s*/,''))+'</span></li>').join('')+'</ul>':'<p class="rcl">None of 20+ (passes) or 12+ (runs).</p>')+'</div>';}).join('')+'</div></section>';
+
+  /* 7. player lines */
+  h+='<section class="gp rc"><div class="gphd"><span>PLAYER LINES</span><span>FROM PLAY-BY-PLAY</span></div><div class="rcsplit">'+[A,H].map(t=>{const ps=d.teams[t].players;
+    return '<div><h4 class="rch">'+flag(t,'sm')+' '+esc(nick(t))+'</h4><div class="scroll"><table class="gpp rcpl"><thead><tr><th class="sec">Player</th><th>Passing</th><th>Rushing</th><th title="Share of designed runs between the guards">Inside</th><th>Receiving</th><th title="Average air yards per target">aDOT</th><th title="Targets to the left, middle, right">L / M / R</th></tr></thead><tbody>'+
+      ps.map(p=>'<tr><td class="pn"><a href="#/player/'+p.id+'">'+esc(p.name)+'</a> <small>'+esc(p.pos||'')+'</small></td><td class="n">'+(p.att?p.cmp+'/'+p.att+', '+p.pyd+(p.int?', '+p.int+' INT':''):'')+'</td><td class="n">'+(p.car?p.car+'-'+p.ryd:'')+'</td><td class="n m">'+(p.in+p.out?rcPct(p.in/(p.in+p.out)):'')+'</td><td class="n">'+(p.tgt?p.rec+'/'+p.tgt+', '+p.recyd:'')+'</td><td class="n m">'+(p.tgt?fx(p.ay/p.tgt,1):'')+'</td><td class="n m">'+(p.tgt?p.L+' / '+p.M+' / '+p.R:'')+'</td></tr>').join('')+'</tbody></table></div></div>';}).join('')+'</div></section>';
+
+  /* 8. our read on these teams this season */
+  h+=rcTrend(d,[A,H]);
+  return h;
+}
+function rcDrives(t,x){
+  const D=x.drives,rh=24,top=22,W=960,fx0=200,fx1=750,sx=v=>fx0+(fx1-fx0)*Math.max(0,Math.min(100,v))/100,H=top+D.length*rh+8;
+  let s='<svg class="rcdr" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+esc(nick(t))+' drive chart">';
+  for(let y=0;y<=100;y+=10){const X=sx(y);s+='<line x1="'+X+'" x2="'+X+'" y1="'+(top-4)+'" y2="'+(H-6)+'" stroke="'+(y===50?'#3d4a44':'#222c27')+'" stroke-width="1"/>'+(y%20===0||y===50?'<text x="'+X+'" y="'+(top-8)+'" text-anchor="middle" class="t">'+(y===0?'own goal':y===100?'opp goal':y<50?y:y===50?'50':100-y)+'</text>':'');}
+  s+='<rect x="'+sx(80)+'" y="'+(top-4)+'" width="'+(sx(100)-sx(80))+'" height="'+(H-top-2)+'" fill="rgba(61,220,132,.05)"/>';
+  D.forEach((r,i)=>{const y=top+i*rh,st=isNum(r.st)?r.st:0,en=isNum(r.en)?r.en:st,c=(RC_RES[r.res]||['?','#5a6862'])[1],a=Math.min(st,en),b=Math.max(st,en);
+    s+='<text x="6" y="'+(y+15)+'" class="l">Q'+r.q+' '+esc(r.clk||'')+'</text><text x="76" y="'+(y+15)+'" class="m">'+esc((r.how||'').replace(/\bFg\b/,'FG').replace('Downs','On downs'))+'</text>'+
+      '<rect x="'+sx(a)+'" y="'+(y+5)+'" width="'+Math.max(3,sx(b)-sx(a))+'" height="'+(rh-10)+'" rx="3" fill="'+c+'"'+(en<st?' fill-opacity=".55"':'')+'/>'+
+      '<circle cx="'+sx(st)+'" cy="'+(y+rh/2)+'" r="3" fill="#e8efe9"/>'+
+      '<text x="'+(fx1+10)+'" y="'+(y+15)+'" class="r">'+esc((RC_RES[r.res]||[r.res])[0])+' · '+r.pl+' pl, '+r.yds+' yds</text>';});
+  s+='</svg>';
+  const S=x.sum;
+  return '<h4 class="rch">'+flag(t,'sm')+' '+esc(nick(t))+'<span>'+S.drives+' drives · average start '+rcYl(S.start)+' · '+S.opp40+' reached the opponent’s 40 · '+S.rz[0]+' TDs on '+S.rz[1]+' red-zone trips · '+fx(S.ppd,2)+' points a drive</span></h4><div class="rcdrw">'+s+'</div>';
+}
+function rcMaps(t,o,x){
+  const ln={'L-end':'Left end','L-tackle':'Left tackle','L-guard':'Left guard','mid':'Middle','R-guard':'Right guard','R-tackle':'Right tackle','R-end':'Right end'};
+  const lanes=['L-end','L-tackle','L-guard','mid','R-guard','R-tackle','R-end'],mx=Math.max(1,...lanes.map(k=>(x.lanes[k]||[0])[0]));
+  const ypc=a=>a&&a[0]?fx(a[1]/a[0],1):'—';
+  let h='<h4 class="rch">'+flag(t,'sm')+' '+esc(nick(t))+' offense<span>vs '+esc(nick(o))+' defense · season before = '+x.pre_g+' games</span></h4><div class="rcmaps"><div><div class="rcsub">Runs by lane</div><div class="rclanes">'+
+    lanes.map(k=>{const a=x.lanes[k],n=a?a[0]:0,epa=n?a[3]/n:null;
+      return '<div class="rcln"><div class="rcbarw"><div class="rcbar" style="height:'+Math.round(8+n/mx*70)+'px;background:'+(n?rcEpaCol(epa,n):'#1b2420')+'"><b>'+n+'</b></div></div>'+
+        '<div class="rclnl">'+ln[k]+'</div><div class="rclnv">'+(n?ypc(a)+' ypc<br>'+rcPct(a[2]/n)+' succ':'no carries')+'</div><div class="rclnp">before '+ypc(x.lanes_pre[k])+'<br>def '+ypc(x.lanes_dpre[k])+'</div></div>';}).join('')+'</div></div>';
+  const zt=Object.values(x.zones_pre||{}).reduce((s,v)=>s+v[0],0),dzt=Object.values(x.zones_dpre||{}).reduce((s,v)=>s+v[0],0);
+  h+='<div><div class="rcsub">Throws by zone (air yards: short under 10, intermediate 10–19, deep 20+)</div><div class="rczones"><div></div><div class="rczh">Left</div><div class="rczh">Middle</div><div class="rczh">Right</div>'+
+    ['deep','int','short'].map(dp=>'<div class="rczr">'+({deep:'Deep',int:'Interm.',short:'Short'})[dp]+'</div>'+['left','middle','right'].map(l=>{const k=dp+'-'+l,a=x.zones[k],n=a?a[0]:0,pr=(x.zones_pre||{})[k],dpr=(x.zones_dpre||{})[k];
+      return '<div class="rcz" style="background:'+(n?rcEpaCol(a[4]/n,n):'#151d19')+'">'+(n?'<b>'+a[1]+'/'+n+'</b><span>'+a[2]+' yds'+(a[5]?' · '+a[5]+' TD':'')+(a[6]?' · '+a[6]+' INT':'')+'</span>':'<span class="mut">—</span>')+
+        '<small>before '+(pr&&zt?rcPct(pr[0]/zt)+' of throws':'—')+(dpr&&dzt?' · def '+rcSign(dpr[3]/dpr[0])+'/att':'')+'</small></div>';}).join('')).join('')+'</div></div></div>';
+  return h;
+}
+function rcTrend(d,ts){
+  const I=RC.idx;if(!I)return '';
+  let h='<section class="gp rc"><div class="gphd"><span>OUR READ ON THESE TEAMS THIS SEASON</span><span>FROZEN PROJECTIONS, GAME BY GAME</span></div><p class="rcl">How the board’s kickoff projections for each team’s players have held up all season. If the leans keep landing and the misses shrink, the data on that team is settling in; a steady lean high or low means the model has the team wrong. Click a week for that game’s recap.</p><div class="rcsplit">';
+  ts.forEach(t=>{const L=(I.teams[t]||[]);
+    if(!L.length){h+='<div><h4 class="rch">'+flag(t,'sm')+' '+esc(nick(t))+'</h4><p class="rcl">No graded games yet.</p></div>';return;}
+    const tot=L.reduce((s,x)=>({h:s.h+x.hit,n:s.n+x.dec}),{h:0,n:0}),l3=L.slice(-3).reduce((s,x)=>({h:s.h+x.hit,n:s.n+x.dec,e:s.e+x.err*x.n,c:s.c+x.n,b:s.b+x.bias*x.n}),{h:0,n:0,e:0,c:0,b:0}),
+      er=L.slice(0,-3).reduce((s,x)=>({h:s.h+x.hit,n:s.n+x.dec,e:s.e+x.err*x.n,c:s.c+x.n}),{h:0,n:0,e:0,c:0});
+    const mxE=Math.max(.5,...L.map(x=>x.err||0));
+    h+='<div><h4 class="rch">'+flag(t,'sm')+' '+esc(nick(t))+'<span>'+tot.h+' of '+tot.n+' leans right ('+rcPct(tot.h/Math.max(1,tot.n))+')</span></h4>'+
+      '<div class="rctr">'+L.map(x=>'<a href="#/game/'+x.gid+'" class="'+(x.gid===d.gid?'cur':'')+'" title="Week '+x.wk+' vs '+x.opp+': '+x.hit+' of '+x.dec+' leans right, typical miss '+rcPct(x.err)+'"><i style="height:'+Math.round(6+(x.dec?x.hit/x.dec:0)*54)+'px" class="'+(x.dec&&x.hit/x.dec>=.6?'g':x.dec&&x.hit/x.dec<.45?'b':'')+'"></i><em style="height:'+Math.round((x.err||0)/mxE*24)+'px"></em><small>W'+x.wk+'</small></a>').join('')+'</div>'+
+      '<p class="rcl">Bars: share of leans right. Thin marks: typical miss. '+(L.length>3&&er.c?'Last 3 games: '+rcPct(l3.h/Math.max(1,l3.n))+' right, typical miss '+rcPct(l3.e/Math.max(1,l3.c))+' (earlier: '+rcPct(er.h/Math.max(1,er.n))+', '+rcPct(er.e/Math.max(1,er.c))+'). '+
+        (l3.e/Math.max(1,l3.c)<er.e/Math.max(1,er.c)-.05?'<b class="rcok">Settling in:</b> recent misses are smaller.':l3.e/Math.max(1,l3.c)>er.e/Math.max(1,er.c)+.05?'<b class="rcno">Drifting:</b> recent misses are bigger.':'About as accurate as earlier.')+' ':'')+
+        (l3.c&&Math.abs(l3.b/l3.c)>=.1?'Recently projecting '+(l3.b<0?'too high':'too low')+' by about '+rcPct(Math.abs(l3.b/l3.c))+'.':'')+'</p></div>';});
+  return h+'</div></section>';
+}
+
+/* ======================================================================
    Was anything unusual about a game? Teammates out, snaps, script, QB, weather.
    ====================================================================== */
 const GN_C={};
@@ -4039,7 +4204,7 @@ function notFound(what){return '<section class="hero"><div><h1>Not found</h1><p 
 function render(keep){
   const r=location.hash.replace(/^#\/?/,'').split('/');let v=r[0]||'',html,title='Game Script',nav=v;
   if(v===''||v==='week'||(v==='game'&&!r[1])){html=vWeek();title='Week '+HW;nav='week';}
-  else if(v==='game'){html=vGame(r[1]);const g=GAMES.find(x=>x.id===r[1]);title=g?g.away+' at '+g.home:'Game';nav='week';}
+  else if(v==='game'){html=vGame(r[1],r[2]);const g=GAMES.find(x=>x.id===r[1]);title=g?g.away+' at '+g.home:'Game';nav='week';}
   else if(v==='teams'){html=vTeams();title='Teams';}
   else if(v==='team'){html=vTeam(r[1]);title=fullName(r[1]);nav='teams';}
   else if(v==='players'){html=vPlayers();title='Players';}
