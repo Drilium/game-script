@@ -597,6 +597,38 @@ look impossible but are just what a team has to do to win.
 - Best props, Prop research and Fantasy still use the quicker
   average-based `project()`; the glossary explains both.
 
+## Easier navigation: section bar, folding, compact cards (2026-11-20)
+
+Dre found the long top-down scroll tedious and easy to get lost in. He wants
+easy access to the data and insights.
+
+- **Section bar (`pageNav`, runs after every render):** builds a sticky "Sections
+  on this page" bar under the header from the page's own top-level `h2`s and
+  `.gp` card headers. New sections join automatically.
+  - An `h2` group runs to the next `h2`; the first `.gp` right after an `h2`
+    joins that group; other `.gp` cards are their own group.
+  - It needs 3+ groups. Skipped on the glossary, which has its own table of
+    contents.
+  - The current section is highlighted as you scroll (`pnSpy`). Clicking a chip
+    opens that section if it's folded, smooth-scrolls (respecting
+    prefers-reduced-motion) and focuses its heading.
+- **Folding:** every section heading is a button (keyboard Enter/Space,
+  aria-expanded).
+  - Folded sections stay folded per page type and title before any colon
+    (localStorage `gs_fold`), so "Next matchup: X" folds the same on every player
+    page.
+  - "Collapse all / Expand all" sits in the bar.
+- **Keys:** `j` / `k` jump to the next / previous section. `/` still focuses search.
+- **Small screens:** the 130 px header slides away on scroll down and returns on
+  scroll up (`hdr-hid`). The section bar then sits at the top.
+- **Compact cards (Board, Ladders):** `body.dense`, on by default, toggled with
+  "Compact view" (localStorage `gs_dense`).
+  - Cards keep the pick and numbers; the reasons (`.xmore`) open per card with
+    "Why ▸".
+  - Board height: 10.6 → 4.9 screens on desktop and 29.5 → 14.9 on mobile.
+- **Accessibility:** a "Skip to main content" link is the first Tab stop, with
+  focus outlines on the new controls.
+
 ## Post-game recaps on game pages (2026-11-20)
 
 Dre asked for a recap on each game page after the game. It shows:

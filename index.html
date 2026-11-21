@@ -515,6 +515,28 @@ table.gpp{width:100%;border-collapse:collapse;min-width:660px;background:transpa
 .gpp td.pn a{font-weight:800;color:#fff;text-decoration:none}.gpp td.pn a:hover{text-decoration:underline}.gpp .role{font-size:10px;color:#7f8b85;font-weight:700}
 .gpp td.hit{font-weight:900;font-size:15px;line-height:1.05}.gpp td.hit small{display:block;font-size:10px;color:#7f8b85;font-weight:600}.gpp td.od{font-weight:900}
 .gpft{margin-top:16px;border-top:1px solid #2a3530;padding-top:8px;font-size:11px;color:#9aa7a0;line-height:1.5}
+/* Page navigator, folding sections, compact cards, skip link */
+.skip{position:absolute;left:8px;top:-60px;z-index:60;background:#F2CC00;color:#101A15;font-weight:800;padding:8px 14px;border-radius:6px;text-decoration:none}.skip:focus{top:8px}
+.pnav{position:sticky;top:var(--toph,0px);z-index:15;margin:14px -16px 6px;padding:0 16px;background:var(--bg,#0b100e);border-bottom:1px solid var(--rule,#24302b);transition:top .2s}
+.pnav-in{display:flex;align-items:center;gap:8px;min-height:44px}
+.pnl{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;flex:1;padding:6px 0;mask-image:linear-gradient(90deg,#000 92%,transparent);-webkit-mask-image:linear-gradient(90deg,#000 92%,transparent)}.pnl::-webkit-scrollbar{display:none}
+.pnl a{flex:none;font-size:12.5px;font-weight:700;color:var(--ink2,#b9c4be);text-decoration:none;padding:6px 10px;border-radius:999px;border:1px solid transparent;white-space:nowrap}
+.pnl a:hover{color:var(--ink,#fff);background:rgba(127,139,133,.12)}.pnl a[aria-current="true"]{color:#101A15;background:#3ddc84;border-color:#3ddc84}.pnl a.f{opacity:.55;text-decoration:line-through;text-decoration-thickness:1px}
+.pnl a:focus-visible,.pnb:focus-visible,.pshead:focus-visible,.xbtn:focus-visible{outline:2px solid #F2CC00;outline-offset:2px}
+.pnb{flex:none;font:inherit;font-size:12px;font-weight:700;color:var(--ink2,#b9c4be);background:transparent;border:1px solid var(--rule,#2a3530);border-radius:6px;padding:5px 9px;cursor:pointer}.pnb:hover{color:var(--ink,#fff)}
+.psec{scroll-margin-top:calc(var(--toph,0px) + var(--pnh,0px) + 10px)}
+.pshead{cursor:pointer;position:relative}.pshead:hover .pschev{opacity:1}
+.pschev{display:inline-block;width:18px;height:18px;margin-left:8px;vertical-align:middle;opacity:.55;transition:transform .15s;background:no-repeat center/10px url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%239aa7a0' stroke-width='1.6'/%3E%3C/svg%3E")}
+.psec.fold .pschev{transform:rotate(-90deg)}
+.psec.fold:not(.psgp)>*:not(.pshead){display:none}
+.psec.psgp.fold>*:not(.pshead){display:none}.psec.psgp.fold>.pshead{margin-bottom:0;border-bottom:0}
+.psec.fold>.pshead::after{content:"Collapsed — click to open";font-size:11px;font-weight:600;color:var(--ink2,#9aa7a0);margin-left:10px;letter-spacing:0;text-transform:none}
+.gphd.pshead{display:flex;align-items:center;justify-content:flex-start}.gphd.pshead>span:nth-child(2){margin-left:auto}.gphd.pshead .pschev{margin-left:8px;flex:none}
+.xbtn{display:none;font:inherit;font-size:12px;font-weight:700;color:#3ddc84;background:transparent;border:0;padding:6px 0 0;cursor:pointer}
+body.dense .xcard .xbtn{display:inline-block}body.dense .xcard:not(.open) .xmore{display:none}
+@media (max-width:760px){.top{transition:transform .2s ease}body.hdr-hid .top{transform:translateY(-100%)}body.hdr-hid .pnav{top:0}.pnav{margin:10px -16px 4px}.pnl a{font-size:12px;padding:6px 9px}}
+@media (prefers-reduced-motion:reduce){.top,.pnav,.pschev{transition:none}}
+
 /* Post-game recap */
 .rctabs{margin:14px 0 4px}.rc{margin:14px 0}.rcl{font-size:12.5px;color:#c3ccc7;margin:10px 0 4px;line-height:1.5;max-width:92ch}
 .rcline{display:flex;flex-wrap:wrap;gap:8px 22px;margin:12px 0 4px;font-size:14px;color:#e8efe9}.rcline b{color:#fff}
@@ -694,6 +716,7 @@ details.tview>summary{font-weight:800;text-transform:uppercase;letter-spacing:.0
 </style>
 </head>
 <body>
+<a class="skip" href="#/" data-skip>Skip to main content</a>
 <header class="top">
   <div class="top-in">
     <a class="brand" href="#/" aria-label="Game Script home">
@@ -3602,6 +3625,124 @@ function rcTrend(d,ts){
 }
 
 /* ======================================================================
+   Page navigator: a sticky "sections on this page" bar with scroll tracking,
+   foldable sections (remembered per page type), j / k to move between
+   sections, and a compact view for card lists (Board, Ladders).
+   Built after every render from the page's own headings, so new sections
+   join automatically.
+   ====================================================================== */
+const PN={g:[],kind:'',lastY:0,lock:null};
+let DENSE=(()=>{try{const v=localStorage.getItem('gs_dense');return v===null?true:v==='1';}catch(e){return true;}})();
+function pnFolds(){try{return JSON.parse(localStorage.getItem('gs_fold')||'{}');}catch(e){return {};}}
+function pnSaveFolds(o){try{localStorage.setItem('gs_fold',JSON.stringify(o));}catch(e){}}
+function pnLabel(t){
+  t=t.replace(/^GAME SCRIPT\s*·\s*/,'').replace(/\s+/g,' ').trim();
+  if(t&&t===t.toUpperCase())t=t.charAt(0)+t.slice(1).toLowerCase();
+  t=t.split(':')[0].trim();
+  return t.length>34?t.slice(0,32)+'…':t;
+}
+function pnKey(t){return PN.kind+'|'+t.split(':')[0].toLowerCase().replace(/[^a-z ]/g,'').replace(/\s+/g,' ').trim();}
+function pageNav(kind){
+  PN.g=[];PN.kind=kind;document.body.classList.toggle('dense',DENSE);
+  if(kind==='glossary')return;
+  const box=app.querySelector('#fut')||app,kids=[...box.children],groups=[];let cur=null;
+  kids.forEach(el=>{
+    if(el.tagName==='H2'){cur={h2:true,head:el,els:[el]};groups.push(cur);return;}
+    const hd=el.classList&&el.classList.contains('gp')?el.querySelector(':scope>.gphd'):null;
+    if(hd){if(cur&&cur.h2&&!cur.gp){cur.els.push(el);cur.gp=true;return;}
+      cur={h2:false,head:hd,box:el,els:[el]};groups.push(cur);return;}
+    if(cur&&cur.h2)cur.els.push(el);
+    else if(cur&&!cur.h2)cur=null;
+  });
+  if(groups.length<3)return;
+  const folds=pnFolds();
+  groups.forEach((G,i)=>{
+    let w=G.box;
+    if(G.h2){w=document.createElement('div');w.className='psec';G.head.parentNode.insertBefore(w,G.head);G.els.forEach(e=>w.appendChild(e));}
+    else w.classList.add('psec','psgp');
+    w.id='sec-'+(i+1);G.w=w;
+    G.title=(G.h2?G.head.textContent:(G.head.querySelector('span')||G.head).textContent).trim();
+    G.key=pnKey(G.title);
+    const h=G.head;h.classList.add('pshead');h.setAttribute('tabindex','0');h.setAttribute('role','button');
+    if(!h.querySelector('.pschev'))h.insertAdjacentHTML('beforeend','<span class="pschev" aria-hidden="true"></span>');
+    const f=!!folds[G.key];w.classList.toggle('fold',f);h.setAttribute('aria-expanded',String(!f));
+    h.setAttribute('aria-label',G.title+(f?', collapsed. Press to expand':', press to collapse'));
+  });
+  PN.g=groups;
+  const anyOpen=groups.some(G=>!G.w.classList.contains('fold'));
+  const nav=document.createElement('nav');nav.className='pnav';nav.setAttribute('aria-label','Sections on this page');
+  nav.innerHTML='<div class="pnav-in"><div class="pnl">'+groups.map((G,i)=>'<a href="#'+location.hash.slice(1)+'" data-pn="'+i+'"'+(G.w.classList.contains('fold')?' class="f"':'')+'>'+esc(pnLabel(G.title))+'</a>').join('')+'</div>'+
+    '<button type="button" class="pnb" data-pnall="'+(anyOpen?'fold':'open')+'" title="'+(anyOpen?'Collapse every section to its heading':'Open every section')+'. Tip: press j / k to jump between sections">'+(anyOpen?'Collapse all':'Expand all')+'</button></div>';
+  groups[0].w.parentNode.insertBefore(nav,groups[0].w);
+  pnMeasure();
+}
+function pnMeasure(){const n=document.querySelector('.pnav');document.documentElement.style.setProperty('--pnh',(n?n.offsetHeight:0)+'px');}
+function pnOffset(){const r=getComputedStyle(document.documentElement);return (document.body.classList.contains('hdr-hid')?0:parseFloat(r.getPropertyValue('--toph'))||0)+(parseFloat(r.getPropertyValue('--pnh'))||0)+10;}
+function pnGo(i){
+  const G=PN.g[i];if(!G)return;
+  if(G.w.classList.contains('fold'))pnToggle(i,false);
+  const y=G.w.getBoundingClientRect().top+window.scrollY-pnOffset();
+  PN.lock={i:i,y:Math.max(0,y)};
+  window.scrollTo({top:Math.max(0,y),behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
+  pnMark(i);
+  const h=G.head;setTimeout(()=>{try{h.focus({preventScroll:true});}catch(e){}},350);
+}
+function pnToggle(i,fold){
+  const G=PN.g[i];if(!G)return;
+  const f=fold===undefined?!G.w.classList.contains('fold'):fold,o=pnFolds();
+  G.w.classList.toggle('fold',f);G.head.setAttribute('aria-expanded',String(!f));
+  G.head.setAttribute('aria-label',G.title+(f?', collapsed. Press to expand':', press to collapse'));
+  if(f)o[G.key]=1;else delete o[G.key];pnSaveFolds(o);
+  const a=document.querySelector('.pnl a[data-pn="'+i+'"]');if(a)a.classList.toggle('f',f);
+  pnAllBtn();
+}
+function pnAllBtn(){const b=document.querySelector('.pnb');if(!b)return;const any=PN.g.some(G=>!G.w.classList.contains('fold'));
+  b.dataset.pnall=any?'fold':'open';b.textContent=any?'Collapse all':'Expand all';b.title=any?'Collapse every section to its heading':'Open every section';}
+function pnMark(cur){
+  document.querySelectorAll('.pnl a').forEach(a=>{const on=+a.dataset.pn===cur;
+    if(on&&a.getAttribute('aria-current')!=='true'){a.setAttribute('aria-current','true');const box=a.parentElement;
+      if(box.scrollWidth>box.clientWidth)box.scrollTo({left:a.offsetLeft-box.clientWidth/2+a.offsetWidth/2,behavior:'smooth'});}
+    else if(!on)a.removeAttribute('aria-current');});
+}
+function pnSpy(){
+  if(!PN.g.length)return;
+  const off=pnOffset()+30;let cur=-1;
+  PN.g.forEach((G,i)=>{if(G.w.getBoundingClientRect().top<=off)cur=i;});
+  if(window.innerHeight+window.scrollY>=document.documentElement.scrollHeight-4)cur=PN.g.length-1;
+  if(PN.lock){if(Math.abs(window.scrollY-PN.lock.y)<6)cur=PN.lock.i;else if(!PN.lock.t)PN.lock.t=setTimeout(()=>{PN.lock=null;},600);}
+  pnMark(cur);
+}
+/* small screens: the header slides away while you scroll down and comes back when you scroll up */
+function pnHeader(){
+  const y=window.scrollY,small=window.innerWidth<760,ae=document.activeElement;
+  if(!small||y<160||(ae&&ae.closest&&ae.closest('.top'))){document.body.classList.remove('hdr-hid');PN.lastY=y;return;}
+  if(y>PN.lastY+8){document.body.classList.add('hdr-hid');PN.lastY=y;}
+  else if(y<PN.lastY-8){document.body.classList.remove('hdr-hid');PN.lastY=y;}
+}
+window.addEventListener('scroll',()=>{pnHeader();pnSpy();},{passive:true});
+window.addEventListener('resize',pnMeasure);
+document.addEventListener('click',e=>{
+  const t=e.target;if(!t.closest)return;
+  const a=t.closest('.pnl a[data-pn]');if(a){e.preventDefault();pnGo(+a.dataset.pn);return;}
+  const all=t.closest('[data-pnall]');if(all){const f=all.dataset.pnall==='fold';PN.g.forEach((G,i)=>pnToggle(i,f));return;}
+  const h=t.closest('.pshead');if(h&&!t.closest('a,button,input,select')){const i=PN.g.findIndex(G=>G.head===h);if(i>=0)pnToggle(i);return;}
+  const x=t.closest('[data-xbtn]');if(x){const c=x.closest('.xcard');if(c){const o=!c.classList.contains('open');c.classList.toggle('open',o);x.setAttribute('aria-expanded',String(o));x.textContent=o?'Hide why ▴':'Why ▸';}return;}
+  const d=t.closest('[data-dense]');if(d){DENSE=!DENSE;try{localStorage.setItem('gs_dense',DENSE?'1':'0');}catch(err){}document.body.classList.toggle('dense',DENSE);
+    document.querySelectorAll('[data-dense]').forEach(b=>{b.setAttribute('aria-pressed',String(DENSE));b.textContent=DENSE?'Compact view: on':'Compact view: off';});}
+});
+document.addEventListener('keydown',e=>{
+  const ae=document.activeElement,typing=ae&&/INPUT|SELECT|TEXTAREA/.test(ae.tagName);
+  if((e.key==='Enter'||e.key===' ')&&ae&&ae.classList&&ae.classList.contains('pshead')){e.preventDefault();const i=PN.g.findIndex(G=>G.head===ae);if(i>=0)pnToggle(i);return;}
+  if(typing||e.metaKey||e.ctrlKey||e.altKey||!PN.g.length)return;
+  if(e.key==='j'||e.key==='k'){
+    const off=pnOffset()+30;let cur=-1;PN.g.forEach((G,i)=>{if(G.w.getBoundingClientRect().top<=off)cur=i;});
+    e.preventDefault();pnGo(Math.max(0,Math.min(PN.g.length-1,e.key==='j'?cur+1:cur-1)));
+  }
+});
+document.addEventListener('click',e=>{const k=e.target.closest&&e.target.closest('[data-skip]');if(k){e.preventDefault();app.focus();window.scrollTo(0,app.getBoundingClientRect().top+window.scrollY-pnOffset());}});
+function denseBtn(){return '<button type="button" class="btn" data-dense aria-pressed="'+DENSE+'" title="Compact view shows each pick’s numbers; open any card’s reasons with Why">'+(DENSE?'Compact view: on':'Compact view: off')+'</button>';}
+
+/* ======================================================================
    Was anything unusual about a game? Teammates out, snaps, script, QB, weather.
    ====================================================================== */
 const GN_C={};
@@ -3842,13 +3983,14 @@ function effChip(r){const d=r.e;return '<span class="eff '+(r.helps?'up':'dn')+'
 function bdCard(e,key,locked){
   const p=BY[e.pid],g=GAMES.find(x=>x.id===e.gid),inj=p&&p.inj&&g&&p.inj.wk===g.wk&&p.inj.st?' <span class="injb '+p.inj.st.toLowerCase()+'">'+esc(p.inj.st)+'</span>':'';
   const moved=isNum(e.p0)&&Math.abs(e.p-e.p0)>=.02;
-  return '<article class="bcard'+(e.status==='removed'?' rem':'')+'"><header><div><a class="bn" href="#/player/'+e.pid+'">'+esc(e.n)+'</a> <span class="mut small">'+e.pos+' · '+flag(e.t,'sm')+' '+e.t+' '+(g&&g.home===e.t?'vs':'at')+' '+flag(e.opp,'sm')+' '+e.opp+(g?' · '+shortKick(g):'')+'</span>'+inj+'</div>'+
+  return '<article class="bcard xcard'+(e.status==='removed'?' rem':'')+'"><header><div><a class="bn" href="#/player/'+e.pid+'">'+esc(e.n)+'</a> <span class="mut small">'+e.pos+' · '+flag(e.t,'sm')+' '+e.t+' '+(g&&g.home===e.t?'vs':'at')+' '+flag(e.opp,'sm')+' '+e.opp+(g?' · '+shortKick(g):'')+'</span>'+inj+'</div>'+
     '<span class="bst '+e.status+'">'+(e.status==='locked'?'Locked':e.status==='removed'?'Removed':'Active')+'</span></header>'+
     '<div class="bprop"><div class="bside '+e.side+'"><small>'+(e.side==='over'?'OVER':'UNDER')+'</small><b>'+e.line+'</b><span>'+BKL[e.k]+'</span></div>'+
     '<dl class="bnums"><div><dt>Projection</dt><dd>'+(e.k==='ptd'?e.proj.toFixed(2):e.proj.toFixed(1))+'</dd></div><div><dt>Chance</dt><dd>'+pctS(e.p)+'</dd></div><div><dt>Line alone</dt><dd title="What this side wins with no matchup factors, plus the house cut">'+pctS(e.be)+'</dd></div><div><dt>Edge</dt><dd class="'+(e.edge>=.06?'g':'')+'">+'+(e.edge*100).toFixed(1)+'%</dd></div><div><dt title="How often this side won in his games since 2024, before the matchup">Past games</dt><dd>'+(e.hits?e.hits[0]+'/'+e.hits[1]:'—')+'</dd></div></dl>'+oddsTxt(e)+'</div>'+
-    '<p class="bhead">'+esc(e.head)+'</p>'+
-    '<ul class="bwhy">'+(e.reasons||[]).map(r=>'<li>'+effChip(r)+' <b>'+esc(r.l)+'</b> <span class="small">'+(r.helps?'helps':'works against')+' the '+e.side+'.</span> <span class="small mut">'+esc(r.t)+'</span></li>').join('')+'</ul>'+
-    '<p class="small mut bmeta">'+(e.status==='removed'?'<b>Removed '+esc(bdTime(e.removed))+':</b> '+esc(e.removed_why)+'<br>':'')+'Added '+esc(bdTime(e.added))+': '+esc(e.added_why||'')+(moved?'<br>What the model learned moved this from '+pctS(e.p0)+' to '+pctS(e.p)+'.':'')+(e.upd&&e.upd!==e.added?' · refreshed '+esc(bdTime(e.upd)):'')+'</p></article>';
+    '<button type="button" class="xbtn" data-xbtn aria-expanded="false">Why ▸</button>'+
+    '<p class="bhead xmore">'+esc(e.head)+'</p>'+
+    '<ul class="bwhy xmore">'+(e.reasons||[]).map(r=>'<li>'+effChip(r)+' <b>'+esc(r.l)+'</b> <span class="small">'+(r.helps?'helps':'works against')+' the '+e.side+'.</span> <span class="small mut">'+esc(r.t)+'</span></li>').join('')+'</ul>'+
+    '<p class="small mut bmeta xmore">'+(e.status==='removed'?'<b>Removed '+esc(bdTime(e.removed))+':</b> '+esc(e.removed_why)+'<br>':'')+'Added '+esc(bdTime(e.added))+': '+esc(e.added_why||'')+(moved?'<br>What the model learned moved this from '+pctS(e.p0)+' to '+pctS(e.p)+'.':'')+(e.upd&&e.upd!==e.added?' · refreshed '+esc(bdTime(e.upd)):'')+'</p></article>';
 }
 function bdTabs(wk,tab){
   const w=bdWeek(wk),wks=Object.keys(BD.weeks||{}).map(Number).sort((a,b)=>b-a);
@@ -3875,7 +4017,7 @@ function vBoard(wkArg,tabArg){
   const ks=[...new Set(act.map(([k,e])=>e.k))];
   const gs=[...new Set(act.map(([k,e])=>e.gid))].map(id=>GAMES.find(g=>g.id===id)).filter(Boolean).sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:(a.time||'')<(b.time||'')?-1:1);
   h+='<div class="row" style="margin-top:8px;gap:10px;align-items:flex-end"><div class="chips" role="group" aria-label="Prop">'+[['','All']].concat(ks.map(k=>[k,BK[k]])).map(([k,l])=>'<button data-bdk="'+k+'" aria-pressed="'+(BV.k===k)+'">'+l+'</button>').join('')+'</div>'+
-    '<label class="fld">Game<select id="bdG" class="sel"><option value="">All games</option>'+gs.map(g=>'<option value="'+g.id+'"'+(BV.g===g.id?' selected':'')+'>'+g.away+' at '+g.home+'</option>').join('')+'</select></label></div>';
+    '<label class="fld">Game<select id="bdG" class="sel"><option value="">All games</option>'+gs.map(g=>'<option value="'+g.id+'"'+(BV.g===g.id?' selected':'')+'>'+g.away+' at '+g.home+'</option>').join('')+'</select></label>'+denseBtn()+'</div>';
   let list=act.filter(([k,e])=>(!BV.k||e.k===BV.k)&&(!BV.g||e.gid===BV.g)).sort((a,b)=>b[1].edge-a[1].edge);
   /* group by player: one card per player, his props inside */
   const by={};list.forEach(([k,e])=>{(by[e.pid]=by[e.pid]||[]).push([k,e]);});
@@ -4039,13 +4181,13 @@ function ldCard(p,g,k,pr,rows,compact){
   if(why.some(w=>w.t==='role'&&w.up))tags.push('<span class="ltag up">More volume</span>');
   if(why.some(w=>w.t==='env'&&w.up))tags.push('<span class="ltag up">Shootout</span>');
   if(why.some(w=>w.t==='risk'))tags.push('<span class="ltag rk">Risk</span>');
-  return '<article class="lcard"><header><div><a href="#/player/'+p.id+'"><b>'+esc(p.n)+'</b></a> <span class="mut small">'+p.p+' · '+flag(p.t,'sm')+' '+p.t+' '+(g.home===p.t?'vs':'at')+' '+flag(oppOf(g,p.t),'sm')+' '+oppOf(g,p.t)+' · '+esc(shortKick(g))+'</span></div><span class="ltype">'+LDN[k]+'</span></header>'+
+  return '<article class="lcard xcard"><header><div><a href="#/player/'+p.id+'"><b>'+esc(p.n)+'</b></a> <span class="mut small">'+p.p+' · '+flag(p.t,'sm')+' '+p.t+' '+(g.home===p.t?'vs':'at')+' '+flag(oppOf(g,p.t),'sm')+' '+oppOf(g,p.t)+' · '+esc(shortKick(g))+'</span></div><span class="ltype">'+LDN[k]+'</span></header>'+
     (tags.length?'<div class="ltags">'+tags.join(' ')+'</div>':'')+
     '<div class="lrungs" role="table" aria-label="Ladder rungs"><div class="lrh" role="row"><span>Rung</span><span>Chance</span><span>Fair odds</span><span>This season</span></div>'+
     rungs.map(x=>'<div class="lr'+(sc.top&&x.r===sc.top.r?' top':'')+'" role="row"><span class="lrr">'+x.r+'+</span><span class="lrp"><i style="width:'+Math.round(x.p*100)+'%"></i><b>'+Math.round(x.p*100)+'%</b></span><span class="lro">'+fairOdds(x.p)+'</span><span class="lrhh">'+(x.hn?x.h+'/'+x.hn:'—')+'</span></div>').join('')+'</div>'+
     (sc.ceil?'<p class="small" style="margin:8px 0 0">Middle outcome <b>'+fmtN(Math.round(sc.ceil.med*10)/10)+'</b> \u00b7 ceiling (his best 15% of games) <b>'+fmtN(Math.round(sc.ceil.c85*10)/10)+'</b></p>':'')+
     (sc.top?'<p class="small" style="margin:4px 0 4px"><b>Ladder top: '+sc.top.r+'+ ('+Math.round(sc.top.p*100)+'%, fair '+fairOdds(sc.top.p)+')</b>'+(isNum(sc.lift)&&sc.top.hn?' · '+(sc.lift>=1.1?'more often than his own games ('+sc.top.h+' of '+sc.top.hn+')':sc.lift<=.9?'less often than his own games ('+sc.top.h+' of '+sc.top.hn+')':'about as often as his own games'):'')+'.</p>':'')+
-    (why.length?'<ul class="lwhy">'+why.slice(0,compact?3:6).map(w=>'<li class="'+(w.up?'up':'dn')+'">'+w.s+'</li>').join('')+'</ul>':'<p class="small mut">Nothing unusual in the matchup: the rungs come from his own play and the game script.</p>')+'</article>';
+    '<button type="button" class="xbtn" data-xbtn aria-expanded="false">Why ▸</button>'+(why.length?'<ul class="lwhy xmore">'+why.slice(0,compact?3:6).map(w=>'<li class="'+(w.up?'up':'dn')+'">'+w.s+'</li>').join('')+'</ul>':'<p class="small mut xmore">Nothing unusual in the matchup: the rungs come from his own play and the game script.</p>')+'</article>';
 }
 function vLadders(){
   needScript();needBoard();
@@ -4055,7 +4197,7 @@ function vLadders(){
   const gs=GAMES.filter(g=>g.wk===wk&&!isFinal(g)).sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:(a.time||'')<(b.time||'')?-1:1);
   h+='<div class="row" style="margin-top:16px;gap:10px;align-items:flex-end"><div class="chips" role="group" aria-label="Stat">'+Object.keys(LDN).map(k=>'<button data-ldk="'+k+'" aria-pressed="'+(LDS.k===k)+'">'+LDN[k]+'</button>').join('')+'</div>'+
     '<label class="fld">Game<select id="ldG" class="sel"><option value="">All games</option>'+gs.map(g=>'<option value="'+g.id+'"'+(LDS.g===g.id?' selected':'')+'>'+g.away+' at '+g.home+'</option>').join('')+'</select></label>'+
-    '<label class="fld">Player<input id="ldQ" class="inp" placeholder="Filter by name" value="'+esc(LDS.q)+'"></label></div>';
+    '<label class="fld">Player<input id="ldQ" class="inp" placeholder="Filter by name" value="'+esc(LDS.q)+'"></label>'+denseBtn()+'</div>';
   if(!SS)return h+'<p class="empty">Loading play-by-play…</p>';
   const use=LDS.g?gs.filter(g=>g.id===LDS.g):gs,left=olWarm(use);
   if(left)return h+'<p class="empty" id="olProg">Simulating game '+(use.length-left+1)+' of '+use.length+'…</p>';
@@ -4228,6 +4370,7 @@ function render(keep){
   else{html=notFound('That page');}
   const y=window.scrollY;
   app.innerHTML=html;
+  try{pageNav(v);}catch(err){console.error(err);}
   layoutSync();
   document.title=title+' | Game Script';
   document.querySelectorAll('.nav a').forEach(a=>{if(a.dataset.nav===nav)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
@@ -4238,6 +4381,7 @@ function render(keep){
   if(v==='glossary'&&r[1]){const el=document.getElementById('g-'+r[1]),sec=el&&el.closest('.glgrp');if(sec)SPY_LOCK={i:+sec.id.replace('g-grp-',''),y:window.scrollY};}
   RESTORE=false;
   layoutSync();
+  pnSpy();
 }
 /* Sticky offsets, glossary section tracking and the back-to-top button */
 function layoutSync(){
