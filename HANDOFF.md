@@ -628,6 +628,20 @@ easy access to the data and insights.
   - Board height: 10.6 → 4.9 screens on desktop and 29.5 → 14.9 on mobile.
 - **Accessibility:** a "Skip to main content" link is the first Tab stop, with
   focus outlines on the new controls.
+- **Every page (2026-11-22):**
+  - The section bar now appears from 2 sections, so Fantasy gets it too. Headings
+    can set `data-label` for a cleaner chip.
+  - Board, Ladders and Projections have a "Best first / By game" switch (`grpBtns`,
+    localStorage `gs_grp`). By game gives one heading per game in kickoff order,
+    so the bar jumps between games.
+  - Ladders by game shows the best 6 per game, with an "All N in this game" button
+    that sets the game filter.
+  - The board's change log uses one heading per day.
+  - The Players directory shows 60 at a time ("Show 60 more" / "Show all"); it
+    was 76 screens and is now about 3.
+  - The glossary keeps its own table of contents, which now sits at the top when
+    the mobile header hides.
+  - Short pages (Teams, report card, simulator, number lookup) stay as they are.
 
 ## Post-game recaps on game pages (2026-11-20)
 

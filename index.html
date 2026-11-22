@@ -532,6 +532,9 @@ table.gpp{width:100%;border-collapse:collapse;min-width:660px;background:transpa
 .psec.psgp.fold>*:not(.pshead){display:none}.psec.psgp.fold>.pshead{margin-bottom:0;border-bottom:0}
 .psec.fold>.pshead::after{content:"Collapsed — click to open";font-size:11px;font-weight:600;color:var(--ink2,#9aa7a0);margin-left:10px;letter-spacing:0;text-transform:none}
 .gphd.pshead{display:flex;align-items:center;justify-content:flex-start}.gphd.pshead>span:nth-child(2){margin-left:auto}.gphd.pshead .pschev{margin-left:8px;flex:none}
+.gmh{display:flex;flex-wrap:wrap;align-items:center;gap:6px}.gmh .flag,.gmh img{vertical-align:middle}.gmhs{font-size:12px;font-weight:600;color:var(--ink2);letter-spacing:0;text-transform:none;margin-left:4px}
+.plmore{display:flex;gap:8px;margin-top:12px}
+@media (max-width:820px){body.hdr-hid .gltoc{top:0}}
 .xbtn{display:none;font:inherit;font-size:12px;font-weight:700;color:#3ddc84;background:transparent;border:0;padding:6px 0 0;cursor:pointer}
 body.dense .xcard .xbtn{display:inline-block}body.dense .xcard:not(.open) .xmore{display:none}
 @media (max-width:760px){.top{transition:transform .2s ease}body.hdr-hid .top{transform:translateY(-100%)}body.hdr-hid .pnav{top:0}.pnav{margin:10px -16px 4px}.pnl a{font-size:12px;padding:6px 9px}}
@@ -1273,7 +1276,7 @@ document.addEventListener('pointermove',e=>{
    State
    ====================================================================== */
 let HW=1;
-const PL={pos:'',team:'',q:'',sort:'scy',dir:-1};
+const PL={pos:'',team:'',q:'',sort:'scy',dir:-1,lim:60};
 const TSORT={k:'winp',dir:1};
 const PV={key:null,span:null,line:{}};
 const CMP={pa:null,pb:null,ta:null,tb:null,span:'season',stat:null};
@@ -1635,23 +1638,24 @@ function nextFor(p){
 }
 function plBody(){
   if(!NXT._){TL.forEach(t=>{NXT[t]=nextTxt(t);});NXT._=1;}
-  const cols=plCols(),list=plRows(),shown=list;
+  const cols=plCols(),list=plRows(),shown=list.slice(0,PL.lim);
   const body=shown.map(p=>'<tr><td>'+plink(p)+'</td><td>'+esc(posLabel(p))+'</td><td>'+tt(p.t)+'</td><td class="num">'+p.g+'</td><td class="num">'+(isNum(p.sn)?p.sn+'%':'—')+'</td>'+
     cols.map(k=>'<td class="num">'+(p.ss?fmtStat(k,p.ss[k],pk(p)):'—')+'</td>').join('')+'<td>'+nextFor(p)+'</td></tr>').join('');
-  const cnt=list.length?list.length+' player'+(list.length===1?'':'s')+'.':'No players match. Try a different name, or clear the filters.';
-  return [body,cnt];
+  const cnt=list.length?list.length+' player'+(list.length===1?'':'s')+(shown.length<list.length?', top '+shown.length+' shown by the sort you picked. Filter by position, team or name to find anyone.':'.'):'No players match. Try a different name, or clear the filters.';
+  const more=shown.length<list.length?'<button type="button" class="btn" data-plmore="60">Show 60 more</button> <button type="button" class="btn" data-plmore="all">Show all '+list.length+'</button>':'';
+  return [body,cnt,more];
 }
 function vPlayers(){
   const cols=plCols();
   const th=(k,l,num)=>{const s=PL.sort===k;return '<th'+(num?' class="num"':'')+(s?' aria-sort="'+((PL.dir>0)?'ascending':'descending')+'"':'')+'><button data-psort="'+k+'">'+l+'</button></th>';};
-  const [body,cnt]=plBody();
+  const [body,cnt,more]=plBody();
   return '<section class="hero"><div><h1>Players</h1><p class="sub">'+PLAYERS.filter(p=>p.g>0).length+' players have played this season, all listed. Stats are per game unless marked season.</p></div><a class="btn solid" href="#/compare/players">Compare two players</a></section>'+
     '<div class="row" style="margin-top:18px"><div class="chips" role="group" aria-label="Position">'+['','QB','RB','WR','TE','DL','LB','CB','S','K'].map(p=>'<button data-pos="'+p+'" aria-pressed="'+(PL.pos===p)+'">'+(p||'All')+'</button>').join('')+'</div></div>'+
     '<div class="row" style="margin-top:10px"><label class="sr" for="plQ">Filter by name</label><input id="plQ" class="inp" type="search" placeholder="Filter by name" value="'+esc(PL.q)+'" autocomplete="off" style="min-width:220px">'+
     '<label class="sr" for="plTeam">Team</label><select id="plTeam" class="sel"><option value="">All teams</option>'+TL.map(t=>'<option value="'+t+'"'+(t===PL.team?' selected':'')+'>'+esc(fullName(t))+'</option>').join('')+'</select>'+
     (PL.pos||PL.team||PL.q?'<button class="btn" id="plClear">Clear filters</button>':'')+'</div>'+
     '<p class="count" id="plCount" aria-live="polite">'+cnt+'</p>'+
-    '<div class="scroll"><table><thead><tr>'+th('n','Player')+'<th>Pos</th><th>Team</th>'+th('g','Games',1)+th('sn','Snap %',1)+cols.map(k=>th(k,sd(k,PL.pos).s,1)).join('')+'<th>Next game</th></tr></thead><tbody id="plBody">'+body+'</tbody></table></div>';
+    '<div class="scroll"><table><thead><tr>'+th('n','Player')+'<th>Pos</th><th>Team</th>'+th('g','Games',1)+th('sn','Snap %',1)+cols.map(k=>th(k,sd(k,PL.pos).s,1)).join('')+'<th>Next game</th></tr></thead><tbody id="plBody">'+body+'</tbody></table></div><p class="plmore" id="plMore">'+more+'</p>';
 }
 
 /* ---------- Player page ---------- */
@@ -2075,7 +2079,7 @@ function vOutlook(gid){
   const playing=new Set();GAMES.filter(g=>g.wk===OL.wk).forEach(g=>{playing.add(g.home);playing.add(g.away);});const bye=TL.filter(t=>!playing.has(t));
   h+='<div class="row" style="margin-top:18px;align-items:flex-end"><label class="fld">Week<select id="olWk" class="sel">'+wks.map(w=>{const d=GAMES.filter(g=>g.wk===w).map(g=>g.date).sort();return '<option value="'+w+'"'+(w===OL.wk?' selected':'')+'>Week '+w+' ('+shortDay(d[0])+(d.length>1?' to '+shortDay(d[d.length-1]):'')+')</option>';}).join('')+'</select></label>'+
     '<label class="fld">Game<select id="olG" class="sel"><option value="">All games</option>'+gs.map(g=>'<option value="'+g.id+'"'+(g.id===OL.g?' selected':'')+'>'+g.away+' at '+g.home+'</option>').join('')+'</select></label>'+
-    '<div class="chips" role="group" aria-label="Position">'+['QB','RB','WR','TE'].map(x=>'<button data-olpos="'+x+'" aria-pressed="'+(x===pos)+'">'+x+'</button>').join('')+'</div></div>';
+    '<div class="chips" role="group" aria-label="Position">'+['QB','RB','WR','TE'].map(x=>'<button data-olpos="'+x+'" aria-pressed="'+(x===pos)+'">'+x+'</button>').join('')+'</div>'+(OL.g?'':grpBtns('ol'))+'</div>';
   if(!SS)return h+'<p class="empty">Loading play-by-play…</p>';
   const use=OL.g?gs.filter(g=>g.id===OL.g):gs,left=olWarm(use);
   if(left)return h+'<p class="empty" id="olProg">Simulating game '+(use.length-left+1)+' of '+use.length+'…</p>';
@@ -2088,8 +2092,8 @@ function vOutlook(gid){
   h+='<p class="count">'+rows.length+' '+(ROLE_NAME[pos]||pos)+' with a real role'+(OL.g?' in this game':' play in week '+OL.wk)+(outs.length?'. Ruled out: '+outs.map(p=>esc(p.n)).join(', '):'')+(bye.length&&!OL.g?'. On bye: '+bye.join(', '):'')+'. “Defense” is how much this defense moves his '+(pos==='RB'?'yards per carry':pos==='QB'?'yards per throw':'yards per target')+'; the small numbers are the middle 60% of simulated games.</p>';
   const th=(k,l,num)=>'<th'+(num?' class="num"':'')+(OL.sort===k?' aria-sort="'+(OL.dir>0?'ascending':'descending')+'"':'')+'><button data-olsort="'+k+'">'+l+'</button></th>';
   const lab=k=>k==='td'?'Any TD':ST[k]?ST[k].s:SIM_L[k];
-  h+='<div class="scroll"><table class="pjt"><thead><tr>'+th('n','Player')+'<th>Opponent</th>'+th('boost','Defense',1)+cols.map(k=>th(k,lab(k),1)).join('')+'<th>Moving it</th><th>Last game</th></tr></thead><tbody>'+
-    rows.map(r=>{const o=oppOf(r.g,r.p.t),x=r.pr.mx&&r.pr.mx.p[r.p.id]||{},m=r.pr.mx||{},chips=[];
+  const tbl=rs=>'<div class="scroll"><table class="pjt"><thead><tr>'+th('n','Player')+'<th>Opponent</th>'+th('boost','Defense',1)+cols.map(k=>th(k,lab(k),1)).join('')+'<th>Moving it</th><th>Last game</th></tr></thead><tbody>'+
+    rs.map(r=>{const o=oppOf(r.g,r.p.t),x=r.pr.mx&&r.pr.mx.p[r.p.id]||{},m=r.pr.mx||{},chips=[];
       const ro=simRoster(r.p.t,r.g),outM=ro.filter(q=>q.out&&q.p.g>0&&q.p.id!==r.p.id&&((q.p.p!=='QB'&&baseShare(q.x,'t')>=.1)||baseShare(q.x,'c')>=.2));
       if(outM.length)chips.push('<span class="gtag mate" title="Out this week">'+outM.slice(0,2).map(q=>esc(lastName(q.p.n))).join(', ')+' out</span>');
       if(x.cov&&Math.abs(x.cov.f-1)>=.02)chips.push('<span class="gtag" title="Man/zone fit">Coverage '+sgnPct(x.cov.f)+'</span>');
@@ -2102,7 +2106,9 @@ function vOutlook(gid){
         cols.map(k=>{if(k==='td')return '<td class="num">'+pctTxt(r.pr.td)+'</td>';const v=r.pr.k[k];if(!v)return '<td class="num">—</td>';
           return '<td class="num">'+(k===OL.sort||k===main?'<b>'+pjFmt(k,v.m)+'</b>':pjFmt(k,v.m))+(k===main&&pjRange(k,v)?'<br><span class="small mut">'+pjRange(k,v)+'</span>':'')+'</td>';}).join('')+
         '<td>'+(chips.join(' ')||'<span class="mut small">—</span>')+'</td><td>'+(last||'<span class="mut small">Normal</span>')+'</td></tr>';}).join('')+
-    '</tbody></table></div><details class="tview" style="margin-top:8px"><summary>How the projections work</summary><p class="small mut" style="max-width:72ch;margin-top:6px">Each game is simulated 8,000 times. The point spread sets how the game goes; a real game with a similar result decides how many plays happen while each team is ahead, behind or tied, and each team passes as often as it really does in each of those situations (nudged if offenses usually throw more or less against this defense). Targets and carries go to players by their real share in that situation, tilted toward the positions this defense lets the ball go to, and handed to teammates when someone is out. Every catch and run is a real play from this season (padded from last season only when his sample is thin), scaled by: how this defense does against his position; how he does against man vs zone and how often they play man; where he gets targeted vs where they give up yards; his quarterback; and their pass rush. Touchdown chances are adjusted for their red-zone defense. Coverage charting stops at the last completed season, and weather forecasts aren’t in the free data. Estimates from public data, not betting advice.</p></details>';
+    '</tbody></table></div>';
+  h+=(grpOn('ol')&&!OL.g?[...new Set(rows.map(r=>r.g))].sort(gameSort).map(g=>{const rs=rows.filter(r=>r.g===g);return gameHead(g,rs.length,'players')+tbl(rs);}).join(''):tbl(rows))+
+    '<details class="tview" style="margin-top:8px"><summary>How the projections work</summary><p class="small mut" style="max-width:72ch;margin-top:6px">Each game is simulated 8,000 times. The point spread sets how the game goes; a real game with a similar result decides how many plays happen while each team is ahead, behind or tied, and each team passes as often as it really does in each of those situations (nudged if offenses usually throw more or less against this defense). Targets and carries go to players by their real share in that situation, tilted toward the positions this defense lets the ball go to, and handed to teammates when someone is out. Every catch and run is a real play from this season (padded from last season only when his sample is thin), scaled by: how this defense does against his position; how he does against man vs zone and how often they play man; where he gets targeted vs where they give up yards; his quarterback; and their pass rush. Touchdown chances are adjusted for their red-zone defense. Coverage charting stops at the last completed season, and weather forecasts aren’t in the free data. Estimates from public data, not betting advice.</p></details>';
   return h;
 }
 
@@ -3654,14 +3660,14 @@ function pageNav(kind){
     if(cur&&cur.h2)cur.els.push(el);
     else if(cur&&!cur.h2)cur=null;
   });
-  if(groups.length<3)return;
+  if(groups.length<2)return;
   const folds=pnFolds();
   groups.forEach((G,i)=>{
     let w=G.box;
     if(G.h2){w=document.createElement('div');w.className='psec';G.head.parentNode.insertBefore(w,G.head);G.els.forEach(e=>w.appendChild(e));}
     else w.classList.add('psec','psgp');
     w.id='sec-'+(i+1);G.w=w;
-    G.title=(G.h2?G.head.textContent:(G.head.querySelector('span')||G.head).textContent).trim();
+    G.title=(G.head.dataset.label||(G.h2?G.head.textContent:(G.head.querySelector('span')||G.head).textContent)).trim();
     G.key=pnKey(G.title);
     const h=G.head;h.classList.add('pshead');h.setAttribute('tabindex','0');h.setAttribute('role','button');
     if(!h.querySelector('.pschev'))h.insertAdjacentHTML('beforeend','<span class="pschev" aria-hidden="true"></span>');
@@ -3740,6 +3746,15 @@ document.addEventListener('keydown',e=>{
   }
 });
 document.addEventListener('click',e=>{const k=e.target.closest&&e.target.closest('[data-skip]');if(k){e.preventDefault();app.focus();window.scrollTo(0,app.getBoundingClientRect().top+window.scrollY-pnOffset());}});
+
+/* "Best first / By game" ordering for list pages; By game adds a section per game, so the section bar can jump between games */
+const GRPV=(()=>{try{return JSON.parse(localStorage.getItem('gs_grp')||'{}');}catch(e){return {};}})();
+function grpOn(k){return GRPV[k]==='game';}
+function grpBtns(k){const on=grpOn(k);return '<div class="chips" role="group" aria-label="Order"><button data-grp="'+k+'" data-grpv="edge" aria-pressed="'+(!on)+'">Best first</button><button data-grp="'+k+'" data-grpv="game" aria-pressed="'+on+'">By game</button></div>';}
+function gameSort(a,b){return a.date<b.date?-1:a.date>b.date?1:(a.time||'')<(b.time||'')?-1:(a.time||'')>(b.time||'')?1:0;}
+function gameHead(g,n,unit){return '<h2 class="gmh" data-label="'+g.away+' at '+g.home+'">'+flag(g.away,'sm')+' '+esc(g.away)+' at '+flag(g.home,'sm')+' '+esc(g.home)+' <span class="gmhs">'+esc(shortKick(g))+(n?' · '+n+' '+unit:'')+'</span></h2>';}
+document.addEventListener('click',e=>{const lg=e.target.closest&&e.target.closest('[data-ldgame]');if(lg){LDS.g=lg.dataset.ldgame;render(true);window.scrollTo(0,0);return;}});
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-grp]');if(!b)return;GRPV[b.dataset.grp]=b.dataset.grpv;try{localStorage.setItem('gs_grp',JSON.stringify(GRPV));}catch(err){}render(true);});
 function denseBtn(){return '<button type="button" class="btn" data-dense aria-pressed="'+DENSE+'" title="Compact view shows each pick’s numbers; open any card’s reasons with Why">'+(DENSE?'Compact view: on':'Compact view: off')+'</button>';}
 
 /* ======================================================================
@@ -4017,12 +4032,14 @@ function vBoard(wkArg,tabArg){
   const ks=[...new Set(act.map(([k,e])=>e.k))];
   const gs=[...new Set(act.map(([k,e])=>e.gid))].map(id=>GAMES.find(g=>g.id===id)).filter(Boolean).sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:(a.time||'')<(b.time||'')?-1:1);
   h+='<div class="row" style="margin-top:8px;gap:10px;align-items:flex-end"><div class="chips" role="group" aria-label="Prop">'+[['','All']].concat(ks.map(k=>[k,BK[k]])).map(([k,l])=>'<button data-bdk="'+k+'" aria-pressed="'+(BV.k===k)+'">'+l+'</button>').join('')+'</div>'+
-    '<label class="fld">Game<select id="bdG" class="sel"><option value="">All games</option>'+gs.map(g=>'<option value="'+g.id+'"'+(BV.g===g.id?' selected':'')+'>'+g.away+' at '+g.home+'</option>').join('')+'</select></label>'+denseBtn()+'</div>';
+    '<label class="fld">Game<select id="bdG" class="sel"><option value="">All games</option>'+gs.map(g=>'<option value="'+g.id+'"'+(BV.g===g.id?' selected':'')+'>'+g.away+' at '+g.home+'</option>').join('')+'</select></label>'+(BV.g?'':grpBtns('bd'))+denseBtn()+'</div>';
   let list=act.filter(([k,e])=>(!BV.k||e.k===BV.k)&&(!BV.g||e.gid===BV.g)).sort((a,b)=>b[1].edge-a[1].edge);
   /* group by player: one card per player, his props inside */
   const by={};list.forEach(([k,e])=>{(by[e.pid]=by[e.pid]||[]).push([k,e]);});
   const order=[...new Set(list.map(([k,e])=>e.pid))];
-  h+=order.length?'<div class="bgrid">'+order.map(pid=>by[pid].map(([k,e])=>bdCard(e,k)).join('')).join('')+'</div>':'<p class="empty">No picks match.</p>';
+  if(order.length&&grpOn('bd')&&!BV.g){const byG={};order.forEach(pid=>{const gid=by[pid][0][1].gid;(byG[gid]=byG[gid]||[]).push(pid);});
+    h+=gs.filter(g=>byG[g.id]).map(g=>gameHead(g,byG[g.id].reduce((n,pid)=>n+by[pid].length,0),'picks')+'<div class="bgrid">'+byG[g.id].map(pid=>by[pid].map(([k,e])=>bdCard(e,k)).join('')).join('')+'</div>').join('');}
+  else h+=order.length?'<div class="bgrid">'+order.map(pid=>by[pid].map(([k,e])=>bdCard(e,k)).join('')).join('')+'</div>':'<p class="empty">No picks match.</p>';
   if(rem.length)h+='<details class="tview" style="margin-top:18px"><summary>Removed during the week ('+rem.length+')</summary><div class="bgrid" style="margin-top:10px">'+rem.map(([k,e])=>bdCard(e,k)).join('')+'</div></details>';
   if(w.learned&&w.learned.length)h+='<h2>Where last week’s lessons show up</h2><p class="lede">Picks whose chance moved the most because of what the model learned from graded weeks (starting values → now).</p><ul class="blist">'+w.learned.map(x=>'<li><b>'+esc(x.n)+'</b> '+esc(sideTxt(x))+': '+pctS(x.p0)+' → <b>'+pctS(x.p)+'</b></li>').join('')+'</ul>';
   return h;
@@ -4031,7 +4048,7 @@ function bdLog(w){
   const L=(w.log||[]).slice().reverse();if(!L.length)return '<p class="empty">No changes logged yet.</p>';
   const days={};L.forEach(l=>{const d=bdDay(l.ts);(days[d]=days[d]||[]).push(l);});
   return '<p class="lede">Every change to this week’s board, newest first, with the reason. The board is rebuilt every day and after every game window; injuries, forecasts and lines are the usual reasons.</p>'+
-    Object.entries(days).map(([d,ls])=>'<h3 style="margin-top:18px">'+esc(d)+'</h3><ul class="blog">'+ls.map(l=>'<li class="'+l.kind+'"><span class="bk">'+(l.kind==='add'?'+ Added':l.kind==='remove'?'− Removed':l.kind==='update'?'↻ Updated':'Note')+'</span>'+(l.n?'<b>'+esc(l.n)+'</b> '+esc(sideTxt(l))+'. ':'')+'<span>'+esc(l.txt)+'</span> <span class="mut small">'+esc(bdTime(l.ts).split(', ').slice(-1)[0])+'</span></li>').join('')+'</ul>').join('');
+    Object.entries(days).map(([d,ls])=>'<h2 class="gmh" data-label="'+esc(d)+'">'+esc(d)+' <span class="gmhs">'+ls.length+' change'+(ls.length===1?'':'s')+'</span></h2><ul class="blog">'+ls.map(l=>'<li class="'+l.kind+'"><span class="bk">'+(l.kind==='add'?'+ Added':l.kind==='remove'?'− Removed':l.kind==='update'?'↻ Updated':'Note')+'</span>'+(l.n?'<b>'+esc(l.n)+'</b> '+esc(sideTxt(l))+'. ':'')+'<span>'+esc(l.txt)+'</span> <span class="mut small">'+esc(bdTime(l.ts).split(', ').slice(-1)[0])+'</span></li>').join('')+'</ul>').join('');
 }
 function recTxt(r){r=r||{};return (r.hit||0)+'–'+((r.miss||0)+(r.near||0))+(r.push?'–'+r.push:'');}
 function bdReport(wk,w){
@@ -4197,7 +4214,7 @@ function vLadders(){
   const gs=GAMES.filter(g=>g.wk===wk&&!isFinal(g)).sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:(a.time||'')<(b.time||'')?-1:1);
   h+='<div class="row" style="margin-top:16px;gap:10px;align-items:flex-end"><div class="chips" role="group" aria-label="Stat">'+Object.keys(LDN).map(k=>'<button data-ldk="'+k+'" aria-pressed="'+(LDS.k===k)+'">'+LDN[k]+'</button>').join('')+'</div>'+
     '<label class="fld">Game<select id="ldG" class="sel"><option value="">All games</option>'+gs.map(g=>'<option value="'+g.id+'"'+(LDS.g===g.id?' selected':'')+'>'+g.away+' at '+g.home+'</option>').join('')+'</select></label>'+
-    '<label class="fld">Player<input id="ldQ" class="inp" placeholder="Filter by name" value="'+esc(LDS.q)+'"></label>'+denseBtn()+'</div>';
+    '<label class="fld">Player<input id="ldQ" class="inp" placeholder="Filter by name" value="'+esc(LDS.q)+'"></label>'+(LDS.g?'':grpBtns('ld'))+denseBtn()+'</div>';
   if(!SS)return h+'<p class="empty">Loading play-by-play…</p>';
   const use=LDS.g?gs.filter(g=>g.id===LDS.g):gs,left=olWarm(use);
   if(left)return h+'<p class="empty" id="olProg">Simulating game '+(use.length-left+1)+' of '+use.length+'…</p>';
@@ -4213,9 +4230,11 @@ function vLadders(){
     rows.push({p:p,g:g,pr:pr,s:sc.s});
   });
   rows.sort((a,b)=>b.s-a.s);
-  const show=LDS.all||LDS.q||LDS.g?rows:rows.slice(0,24);
+  const grp=grpOn('ld')&&!LDS.g,show=grp||LDS.all||LDS.q||LDS.g?rows:rows.slice(0,24);
   h+='<p class="count">'+rows.length+' players with a '+LDN[k].toLowerCase()+' ladder in week '+wk+(show.length<rows.length?', best '+show.length+' shown':'')+'. Chance = share of simulated games at or above the rung. Fair odds have no house cut: a book price longer than fair is the value side. “This season” = how many of his games cleared it.</p>';
-  h+='<div class="lgrid">'+show.map(r=>ldCard(r.p,r.g,k,r.pr)).join('')+'</div>';
+  if(grp){const gg=[...new Set(show.map(r=>r.g))].sort(gameSort);h+=gg.map(g=>{const rs=show.filter(r=>r.g===g),top=LDS.all?rs:rs.slice(0,6);
+    return gameHead(g,rs.length,'players')+'<div class="lgrid">'+top.map(r=>ldCard(r.p,r.g,k,r.pr)).join('')+'</div>'+(top.length<rs.length?'<p style="margin-top:8px"><button type="button" class="btn" data-ldgame="'+g.id+'">All '+rs.length+' in '+esc(g.away)+' at '+esc(g.home)+'</button></p>':'');}).join('');}
+  else h+='<div class="lgrid">'+show.map(r=>ldCard(r.p,r.g,k,r.pr)).join('')+'</div>';
   if(show.length<rows.length)h+='<p style="margin-top:12px"><button class="btn" data-ldall="1">Show all '+rows.length+' players</button></p>';
   return h;
 }
@@ -4437,7 +4456,8 @@ document.addEventListener('click',e=>{
   if(t.dataset.ftpos){FT.pos=t.dataset.ftpos;render(true);return;}
   if(t.dataset.ldmode){LD.mode=t.dataset.ldmode;render(true);return;}
   if(t.dataset.ldpos!==undefined){LD.pos=t.dataset.ldpos;render(true);return;}
-  if(t.dataset.pos!==undefined){PL.pos=t.dataset.pos;if(PL.pos&&plCols().indexOf(PL.sort)<0&&['n','g','sn'].indexOf(PL.sort)<0)PL.sort=plCols()[0];if(!PL.pos&&['n','g','sn'].concat(plCols()).indexOf(PL.sort)<0)PL.sort='scy';render(true);return;}
+  if(t.dataset.plmore!==undefined){PL.lim=t.dataset.plmore==='all'?1e9:PL.lim+60;const [body,cnt,more]=plBody();document.getElementById('plBody').innerHTML=body;document.getElementById('plCount').textContent=cnt;document.getElementById('plMore').innerHTML=more;return;}
+  if(t.dataset.pos!==undefined){PL.lim=60;PL.pos=t.dataset.pos;if(PL.pos&&plCols().indexOf(PL.sort)<0&&['n','g','sn'].indexOf(PL.sort)<0)PL.sort=plCols()[0];if(!PL.pos&&['n','g','sn'].concat(plCols()).indexOf(PL.sort)<0)PL.sort='scy';render(true);return;}
   if(t.dataset.psort){const k=t.dataset.psort;if(PL.sort===k)PL.dir=-PL.dir;else{PL.sort=k;PL.dir=k==='n'?1:(ST[k]&&ST[k].lo?1:-1);}render(true);
     const b=document.querySelector('[data-psort="'+k+'"]');if(b)b.focus();return;}
   if(t.dataset.tsort){const k=t.dataset.tsort;if(TSORT.k===k)TSORT.dir=-TSORT.dir;else{TSORT.k=k;TSORT.dir=1;}render(true);
@@ -4487,7 +4507,7 @@ document.addEventListener('change',e=>{
     o.sh[pid]=o.sh[pid]||{};if(isNum(v))o.sh[pid][k]=Math.max(0,Math.min(.6,v/100));else delete o.sh[pid][k];render(true);return;}
   if(id==='simLine'){const v=parseFloat(e.target.value);if(isNum(v)){SIMV.line=v;}render(true);refocus();return;}
   if(id==='simWk'){SIMV.wk=+e.target.value;render(true);refocus();return;}
-  if(id==='plTeam'){PL.team=e.target.value;render(true);}
+  if(id==='plTeam'){PL.team=e.target.value;PL.lim=60;render(true);}
   else if(id==='pvStat'){PV.key=e.target.value;render(true);refocus();}
   else if(id==='pvSpan'){PV.span=e.target.value;render(true);refocus();}
   else if(id==='cStat'){CMP.stat=e.target.value;render(true);refocus();}
@@ -4509,7 +4529,7 @@ document.addEventListener('input',e=>{
   if(e.target.id==='glQ'){const q=e.target.value.trim().toLowerCase();
     document.querySelectorAll('.gterm').forEach(a=>{a.hidden=!!q&&a.dataset.q.indexOf(q)<0;});
     document.querySelectorAll('.glgrp').forEach(g=>{g.hidden=![...g.querySelectorAll('.gterm')].some(a=>!a.hidden);});return;}
-  if(e.target.id==='plQ'){PL.q=e.target.value;const [body,cnt]=plBody();document.getElementById('plBody').innerHTML=body;document.getElementById('plCount').textContent=cnt;}
+  if(e.target.id==='plQ'){PL.q=e.target.value;PL.lim=60;const [body,cnt,more]=plBody();document.getElementById('plBody').innerHTML=body;document.getElementById('plCount').textContent=cnt;document.getElementById('plMore').innerHTML=more;}
   else if(e.target.id==='pvLine'){
     const p=BY[location.hash.split('/')[2]];const v=parseFloat(e.target.value);if(!p||isNaN(v))return;
     PV.line[p.id+'|'+PV.key+'|'+PV.span]=v;document.getElementById('gb').innerHTML=gbHTML(p);
