@@ -673,9 +673,28 @@ def build(season):
         print(f"Fetching stats_player_week_{hs}.csv (history) ...")
         hist_stat_rows[hs] = fetch_season_stats(hs)
 
+    # Players coming back from injured reserve / PUP / NFI stay "RES" (or "INA") on the roster file
+    # until they're activated, often the day before the game. If they're on this week's injury report
+    # without an Out designation and practicing, they're designated to return: keep them (flagged)
+    # instead of dropping them from the site.
+    returning = {}
+    try:
+        inj_rows = fetch_csv(f"injuries/injuries_{season}.csv")
+        cur_w = max([int(r.get("week") or 0) for r in inj_rows if r.get("season_type") == "REG"] or [0])
+        for r in inj_rows:
+            if r.get("season_type") != "REG" or int(r.get("week") or 0) != cur_w or not r.get("gsis_id"):
+                continue
+            st, pr = r.get("report_status") or "", r.get("practice_status") or ""
+            if st != "Out" and ("Full" in pr or "Limited" in pr):
+                returning[r["gsis_id"]] = {"wk": cur_w, "st": st, "pr": pr}
+    except Exception as e:
+        print(f"  (returning-player check skipped: {e})")
     roster = {}
     for row in roster_rows:
-        if row["status"] != "ACT" or not row["gsis_id"]:
+        if not row["gsis_id"]:
+            continue
+        back = row["status"] in ("RES", "INA") and row["gsis_id"] in returning
+        if row["status"] != "ACT" and not back:
             continue
         roster[row["gsis_id"]] = {
             "id": row["gsis_id"], "n": row["full_name"], "t": row["team"],
@@ -685,6 +704,8 @@ def build(season):
             # to compare a corner against corners rather than all defensive backs
             "pp": row.get("depth_chart_position") or row["position"],
         }
+        if back:
+            roster[row["gsis_id"]]["ret"] = 1   # designated to return from reserve this week
 
     agg = defaultdict(lambda: defaultdict(float))
     games_played = defaultdict(int)
@@ -777,6 +798,9 @@ def build(season):
             entry["wk"] = []
         players.append(entry)
 
+    if returning:
+        back_n = [p["n"] for p in players if p.get("ret")]
+        print(f"  returning from reserve this week: {', '.join(back_n) if back_n else 'none'}")
     players.sort(key=lambda p: (p["t"], p["p"], -(p.get("ss") or {}).get("fp", 0) if p.get("ss") else 0))
 
     # --- Multi-season "vs this opponent" history, and real defense-allowed-by-position ---

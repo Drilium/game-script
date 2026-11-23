@@ -46,6 +46,31 @@ BOARD_SIZE, MIN_EDGE, BREAKEVEN, PER_GAME_CAP, PER_PLAYER_CAP = 30, 0.03, 0.524,
 TAU_W, TAU_B, TAU_A, A0 = 0.35, 0.08, 0.3, 0.85          # prior widths: factor weights, bias, calibration
 DECAY = 0.9                                               # older weeks count a little less
 METHOD = "recent-1"                # bump when the model's inputs change: backtests are rebuilt, the live week logs why
+
+
+def own_status(p, W, ctx):
+    """His own availability, by how he practiced. A player back from injured reserve is usually listed
+    Questionable until he's activated, so a full week of practice is not treated like a missed one."""
+    inj = p.get("inj") or {}
+    cur = inj.get("wk") == W
+    st, pr, what = (inj.get("st") or "") if cur else "", (inj.get("pr") or "") if cur else "", inj.get("i") or "injury"
+    full, lim, dnp = "Full" in pr, "Limited" in pr, "Did Not" in pr
+    wks = sorted(w["w"] for w in p.get("wk") or [])
+    last = wks[-1] if wks else None
+    missed = sum(1 for g in ctx.games if (g["home"] == p["t"] or g["away"] == p["t"]) and g.get("hs") is not None
+                 and last is not None and g["wk"] > last and g["wk"] < W) if last else 0
+    if p.get("ret"):
+        gone = f" Last played week {last} ({missed} games missed)." if last and missed else ""
+        if full:
+            return (math.log(0.97), f"Back from injured reserve ({what}). He practiced in full and is listed {st or 'without a designation'} while he’s activated.{gone} The projection uses his role from the games he played; first games back can come with a lighter load.")
+        return (math.log(0.93), f"Back from injured reserve ({what}), listed {st or 'without a designation'} after {pr.lower() or 'an unclear practice week'}.{gone} A lighter load or a late scratch is possible.")
+    if st != "Questionable":
+        return None
+    if full:
+        return (math.log(0.98), f"He’s Questionable ({what}) but practiced in full; players who practice fully usually play their normal role.")
+    if lim:
+        return (math.log(0.95), f"He’s Questionable ({what}) after limited practice. Some snap risk.")
+    return (math.log(0.92), f"He’s Questionable ({what}) and {'did not practice' if dnp else 'practice status is unknown'}. Limited snaps or a late scratch are real risks.")
 PRIOR_GAMES, DEF_PRIOR = 3, 4      # recent form: last season counts as this many games; two seasons back is out
 
 STADIUMS = {  # home team -> (lat, lon); neutral sites by stadium name
@@ -462,8 +487,10 @@ def factors(ctx, p, k, g, W, mode, avail, wx):
             if abs(m - 1) >= 0.005:
                 F["qb_change"] = (math.log(m), why)
     # his own status
-    if mode == "live" and p.get("inj") and p["inj"].get("wk") == W and p["inj"].get("st") == "Questionable":
-        F["own_status"] = (math.log(0.94), f"He’s Questionable ({p['inj'].get('i') or 'injury'}; {p['inj'].get('pr') or 'practice status unknown'}). Limited snaps are a real risk.")
+    if mode == "live":
+        own = own_status(p, W, ctx)
+        if own:
+            F["own_status"] = own
     return F
 
 

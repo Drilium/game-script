@@ -597,6 +597,40 @@ look impossible but are just what a team has to do to win.
 - Best props, Prop research and Fantasy still use the quicker
   average-based `project()`; the glossary explains both.
 
+## Players returning from injured reserve (2026-11-23)
+
+Dre noticed Jacory Croskey-Merritt (WAS) missing before Monday's CIN game,
+though he practiced in full all week. It had happened with other returns too.
+
+- **Cause:** `build_data.py` kept only `status == "ACT"` rows from
+  `roster_<season>.csv`. Players designated to return stay `RES` (or `INA`) until
+  they're activated, often the day before the game, so they vanished from the
+  site entirely. That week it was 33 players, including Brock Bowers, Michael
+  Pittman Jr. and Tyjae Spears.
+- **Fix (pipeline):** `RES`/`INA` players are now kept when they're on the latest
+  week's injury report without an Out designation and with Full or Limited
+  practice. They're flagged `ret: 1`, and the build log lists them.
+- **Board:** a new `own_status()` (live week only, so backtests are unchanged and
+  METHOD isn't bumped) scales the injury factor by practice:
+  - Questionable + full practice: ×0.98;
+  - Questionable + limited: ×0.95;
+  - Questionable + DNP or unknown: ×0.92 (it was ×0.94 for every Questionable);
+  - back from IR + full practice: ×0.97;
+  - back from IR otherwise: ×0.93.
+  The reason text names the injury, games missed and the last game played.
+- **Site:**
+  - A "Back from IR" badge (`retB`) appears on the player header, game preview
+    tables, backfield split, projections, board cards, simulator roster and best
+    props.
+  - The projection factor table gets a "Back from injured reserve" row.
+  - The backfield split shows "out" instead of 0% for a returning back's last 3.
+- **Backfield split (`bfWeights`):** when the active backs have played 2+ games
+  together, their split in those games (recency-weighted) decides the
+  re-division of carries; 3+ such games count fully, 2 count half. Teammates'
+  shares while someone was hurt overstate their healthy role. Merritt / White /
+  Ekeler came out 39 / 31 / 24% of RB carries (White was 50-88% while Merritt was
+  out).
+
 ## Easier navigation: section bar, folding, compact cards (2026-11-20)
 
 Dre found the long top-down scroll tedious and easy to get lost in. He wants
